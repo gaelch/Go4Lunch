@@ -1,3 +1,31 @@
 <resources>
     <string name="app_name">Go4Lunch</string>
+    <string name="Find_a_nice_restaurant">Find a nice restaurant and invite yours co-worker for lunch!</string>
+    <string name="sign_in_facebook">Sign in with Facebook</string>
+    <string name="sign_in_google">Sign in with Google</string>
+    <string name="logo">logo</string>
+    <string name="connection_succeed">Connection succeed!</string>
+    <string name="error_authentication_canceled">error authentication canceled</string>
+    <string name="error_no_internet">error no internet</string>
+    <string name="error_unknown_error">error unknown error</string>
+    <!-- Facebook purpose -->
+    <string name="facebook_app_id">305971943412023</string>
+    <string name="fb_login_protocol_scheme">fb305971943412023</string>
+    <!-- Used in NavigationDrawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <!--Toolbar -->
+    <string name="title_toolbar">I\'m Hungry!</string>
+    <!-- BOTTOM NAVIGATION VIEW -->
+    <string name="bottom_navigation_menu_maps_view">Maps View</string>
+    <string name="bottom_navigation_menu_list_view">List View</string>
+    <string name="bottom_navigation_menu_workmates">Workmates</string>
+    <!-- NAVIGATION VIEW MENU ITEMS -->
+    <string name="your_lunch">YOR LUNCH</string>
+    <string name="settings">SETTINGS</string>
+    <string name="logout">LOGOUT</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">MAPS</string>
+    <string name="title_activity_maps">Map</string>
 </resources>
