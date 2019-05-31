@@ -1,15 +1,23 @@
 package com.cheyrouse.gael.go4lunch.controller.activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.provider.Settings;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+
+import com.cheyrouse.gael.go4lunch.Utils.GPSTracker;
+import com.cheyrouse.gael.go4lunch.Utils.Go4LunchStream;
+import com.cheyrouse.gael.go4lunch.models.Result;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.cheyrouse.gael.go4lunch.R;
@@ -22,6 +30,8 @@ import java.util.Arrays;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.observers.DisposableObserver;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -31,6 +41,7 @@ public class MainActivity extends AppCompatActivity {
 
     private static final int RC_SIGN_IN = 42;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,6 +49,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
+
     }
 
 
@@ -74,7 +86,6 @@ public class MainActivity extends AppCompatActivity {
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
                 showSnackBar(this.coordinatorLayout, getString(R.string.connection_succeed));
-                Thread.sleep(300);
                 checkPermission();
             } else { // ERRORS
                 if (response == null) {
@@ -85,7 +96,6 @@ public class MainActivity extends AppCompatActivity {
                     showSnackBar(this.coordinatorLayout, getString(R.string.error_unknown_error));
                 }
             }
-            Thread.sleep(1000);
         }
     }
 
@@ -115,6 +125,7 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     configureAndShowHomeActivity();
                 } else {
+                    showSettingsAlert();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -124,6 +135,33 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    public void showSettingsAlert(){
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+
+        // Setting Dialog Title
+        alertDialog.setTitle("GPS is settings");
+
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog,int which) {
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+        });
+
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        // Showing Alert Message
+        alertDialog.show();
+    }
     @OnClick({R.id.button_facebook, R.id.button_google})
     public void onClick(View v) {
         switch (v.getId()){
@@ -161,6 +199,5 @@ public class MainActivity extends AppCompatActivity {
                         .build(),
                 RC_SIGN_IN);
     }
-
 
 }

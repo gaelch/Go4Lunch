@@ -19,6 +19,10 @@ public class WorkmatesFragment extends Fragment {
         // Required empty public constructor
     }
 
+    public static WorkmatesFragment newInstance() {
+        // Create new fragment
+        return new WorkmatesFragment();
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
