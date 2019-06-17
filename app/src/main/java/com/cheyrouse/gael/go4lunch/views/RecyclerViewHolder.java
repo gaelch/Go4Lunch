@@ -1,42 +1,38 @@
 package com.cheyrouse.gael.go4lunch.views;
 
+import android.content.Context;
 import android.support.constraint.ConstraintLayout;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
-import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
-import com.cheyrouse.gael.go4lunch.BuildConfig;
 import com.cheyrouse.gael.go4lunch.R;
-import com.cheyrouse.gael.go4lunch.Utils.StringHelper;
-import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
+import com.cheyrouse.gael.go4lunch.Utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.models.Result;
-
-import java.util.List;
+import com.cheyrouse.gael.go4lunch.models.User;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.BASE_URL;
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_HEIGHT;
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_WIDTH;
 import static com.cheyrouse.gael.go4lunch.Utils.Go4LunchService.API_KEY;
 
 class RecyclerViewHolder extends RecyclerView.ViewHolder  {
 
-    @BindView(R.id.list_rest_constraint) ConstraintLayout constraintLayout;
+    @BindView(R.id.card) CardView constraintLayout;
     @BindView(R.id.restaurant_name) TextView tvRestaurantName;
-    @BindView(R.id.distance) TextView tvDistance;
     @BindView(R.id.address) TextView tvAddress;
     @BindView(R.id.textViewSchedule) TextView tvSchedule;
     @BindView(R.id.imageViewRestaurant) ImageView imageViewRestaurant;
-    @BindView(R.id.textView_co_workers) TextView tvCoWorkers;
+    @BindView(R.id.textView_coWorkers) TextView tvCoWorkers;
     @BindView(R.id.imageViewStars) ImageView imageViewStars;
-
-    public static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/photo";
-    public static final int MAX_WIDTH = 75;
-    public static final int MAX_HEIGHT = 75;
-
+    @BindView(R.id.distanceToMe) TextView textViewDistance;
 
 
     RecyclerViewHolder(View itemView) {
@@ -45,7 +41,7 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
     }
 
     //Update Items
-    void updateWithResult(final Result result, RequestManager glide, final RecyclerViewAdapter.onArticleAdapterListener callback) {
+    void updateWithUssers(Context context, final Result result, RequestManager glide, final RecyclerViewAdapter.onArticleAdapterListener callback) {
         String open = "";
         tvRestaurantName.setText(result.getName());
         tvAddress.setText(result.getVicinity());
@@ -67,12 +63,18 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
         }else{
             glide.load(result.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
         }
-        this.constraintLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                callback.onArticleClicked(result);
-            }
-        });
+        double distance = GeometryUtil.calculateDistance(context, result.getGeometry().getLocation().getLng(), result.getGeometry().getLocation().getLat());
+        int distanceInMeters = (int) distance;
+        if(distanceInMeters > 999){
+            textViewDistance.setText(GeometryUtil.getString1000Less(distance));
+        }else{
+            String distanceString = distanceInMeters + " m";
+            textViewDistance.setText(distanceString);
+        }
+        tvCoWorkers.setText("0");
+
+        this.constraintLayout.setOnClickListener(v -> callback.onRestaurantClicked(result));
     }
 
-    }
+
+}

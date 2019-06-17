@@ -15,23 +15,33 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.cheyrouse.gael.go4lunch.Utils.GPSTracker;
-import com.cheyrouse.gael.go4lunch.Utils.Go4LunchStream;
-import com.cheyrouse.gael.go4lunch.models.Result;
+import com.cheyrouse.gael.go4lunch.Utils.Prefs;
+import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
+import com.cheyrouse.gael.go4lunch.models.User;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
 import com.cheyrouse.gael.go4lunch.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
+import com.firebase.ui.firestore.SnapshotParser;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.model.DocumentCollections;
 
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.observers.DisposableObserver;
+
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.RC_SIGN_IN;
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.UID_DOC_USERS;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -39,7 +49,9 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.button_google) Button buttonGoogle;
     @BindView(R.id.activity_main_coordinator_layout) CoordinatorLayout coordinatorLayout;
 
-    private static final int RC_SIGN_IN = 42;
+    private User user;
+    private FirebaseAuth firebaseAuth;
+    private List<User> userList;
 
 
     @Override
@@ -49,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
         ButterKnife.bind(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
-
+        firebaseAuth = FirebaseAuth.getInstance();
     }
 
 
@@ -59,6 +71,7 @@ public class MainActivity extends AppCompatActivity {
         // 4 - Handle SignIn Activity response on activity result
         try {
             this.handleResponseAfterSignIn(requestCode, resultCode, data);
+            getUserInfo();
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
@@ -71,7 +84,7 @@ public class MainActivity extends AppCompatActivity {
 
     // 2 - Show Snack Bar with a message
     private void showSnackBar(CoordinatorLayout coordinatorLayout, String message) throws InterruptedException {
-        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_SHORT).show();
+        Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
     // --------------------
@@ -200,4 +213,41 @@ public class MainActivity extends AppCompatActivity {
                 RC_SIGN_IN);
     }
 
+    private void getUsersFromDataBase(){
+        CollectionReference usersCollection = UserHelper.getUsersCollection();
+        DocumentReference doc = usersCollection.document(user.getUid());
+        doc.get().addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+            @Override
+            public void onSuccess(DocumentSnapshot documentSnapshot) {
+                //Log.d("testDocumentSnapshot", "DocumentSnapshot data: " + Objects.requireNonNull(documentSnapshot.getData()).get("userName"));
+                if(documentSnapshot != null){
+                    if(documentSnapshot.getData() != null){
+                        if(Objects.requireNonNull(documentSnapshot.getData()).get("userName")!= user.getUsername()){
+
+                            storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
+                        }
+                    }
+                } else {
+                    storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
+                }
+            }
+        });
+        storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
+    }
+
+    private void getUserInfo() {
+        user = new User();
+        user.setUrlPicture(Objects.requireNonNull(Objects.requireNonNull(firebaseAuth.getCurrentUser()).getPhotoUrl()).toString());
+        user.setUsername(firebaseAuth.getCurrentUser().getDisplayName());
+        user.setUid(firebaseAuth.getUid());
+        user.seteMail(firebaseAuth.getCurrentUser().getEmail());
+        user.setChoice("Auberge du Causse");
+        Prefs prefs = Prefs.get(this);
+        prefs.storeUserPrefs(user);
+        getUsersFromDataBase();
+    }
+
+    private void storeUserInDataBase(String uId, String id, String userName, String url, String choice) {
+        UserHelper.createUser(uId, id,userName, url, choice);
+    }
 }

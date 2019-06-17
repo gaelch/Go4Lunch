@@ -20,7 +20,16 @@
             android:layout_height="wrap_content"
             app:layout_constraintTop_toTopOf="parent" />
 
-        <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        <android.support.v7.widget.SearchView
+            android:id="@+id/searchView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:layout_constraintTop_toTopOf="parent"
+            android:visibility="gone"
+            android:background="@color/grey">
+        </android.support.v7.widget.SearchView>
+
+        <FrameLayout
             android:id="@+id/activity_home_frame_layout"
             android:layout_width="match_parent"
             android:layout_height="0dp"

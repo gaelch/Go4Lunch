@@ -75,8 +75,6 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         return v;
     }
 
-
-
     private void getTheBundle() {
         assert getArguments() != null;
         results = (List<Result>) getArguments().getSerializable(RESULT);
@@ -88,7 +86,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     private void configureRecyclerView() {
         resultListUpdated = new ArrayList<>();
         // Create adapter passing in the sample user data
-        this.adapter = new RecyclerViewAdapter(resultListUpdated, Glide.with(this), this);
+        this.adapter = new RecyclerViewAdapter(getActivity(), resultListUpdated, Glide.with(this), this);
         // Attach the adapter to the recyclerView to populate items
         this.recyclerView.setAdapter(this.adapter);
         // Set layout manager to position the items
@@ -96,14 +94,12 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     }
 
     @Override
-    public void onArticleClicked(Result result) {
+    public void onRestaurantClicked(Result result) {
         mListener.callbackList(result);
         Log.e("test ressult click", "result returned !");
     }
 
-    public interface ListFragmentListener {
-        void callbackList(Result result);
-    }
+
     private void updateUI(List<Result> resultList){
         if(resultListUpdated != null){
             resultListUpdated.clear();
@@ -119,5 +115,9 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
             adapter.notifyDataSetChanged();
            // swipeRefreshLayout.setRefreshing(false);
         }
+    }
+
+    public interface ListFragmentListener {
+        void callbackList(Result result);
     }
 }

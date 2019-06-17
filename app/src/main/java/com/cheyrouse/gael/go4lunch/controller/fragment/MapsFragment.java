@@ -19,6 +19,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -27,6 +28,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -34,13 +36,14 @@ import java.util.List;
 import java.util.Objects;
 import butterknife.ButterKnife;
 import static android.support.constraint.Constraints.TAG;
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.UID_DOC_RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment.RESULT;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
 /**
  * A simple {@link Fragment} subclass.
  */
-public class MapsFragment extends Fragment implements OnMapReadyCallback {
+public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
     private GoogleMap mMap;
     private Context context = getApplicationContext();
@@ -116,15 +119,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
             goToMyLocation();
 
         }
-        if(locationCt == null){
-            goToMyLocation();
-        }
         locationList = new ArrayList<>();
         for (Result r : results){
             LatLng latLng = new LatLng(r.getGeometry().getLocation().getLat(),r.getGeometry().getLocation().getLng());
             String title = r.getName();
-            mMap.addMarker(new MarkerOptions().position(latLng).title(title));
+            marker = mMap.addMarker(new MarkerOptions().position(latLng).title(title));
+            mMap.setOnMarkerClickListener(this);
+            storeInDatabase(r.getName(), r.getId(), r.getName());
         }
+    }
+
+    private void storeInDatabase(String uid, String restaurantUid, String restaurantName) {
+        RestaurantHelper.createRestaurant(uid, restaurantUid, restaurantName);
+        Log.d("testResultResto", restaurantName);
     }
 
     private void goToMyLocation() {
@@ -165,8 +172,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback {
         alertDialog.show();
     }
 
+    @Override
+    public boolean onMarkerClick(Marker marker) {
+        Log.e("testClickMarker", marker.getTitle());
+        for(Result r: results){
+            if(marker.getTitle().equals(r.getName())){
+                mListener.callbackMaps(r);
+            }
+        }
+        return false;
+    }
+
     //Callback to ArticleFragment
     public interface MapsFragmentListener{
-        void callbackArticle();
+        void callbackMaps(Result result);
     }
 }

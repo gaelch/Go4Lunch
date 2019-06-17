@@ -11,21 +11,37 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.Utils.GPSTracker;
 import com.cheyrouse.gael.go4lunch.Utils.Go4LunchStream;
+import com.cheyrouse.gael.go4lunch.Utils.Prefs;
+import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
+import com.cheyrouse.gael.go4lunch.controller.fragment.RestauDetailFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.WorkmatesFragment;
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.Result;
+import com.cheyrouse.gael.go4lunch.models.User;
 import com.firebase.ui.auth.AuthUI;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import butterknife.BindView;
@@ -33,20 +49,22 @@ import butterknife.ButterKnife;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.SIGN_OUT_TASK;
+import static com.facebook.login.widget.ProfilePictureView.TAG;
+
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         MapsFragment.MapsFragmentListener, ListFragment.ListFragmentListener {
 
     @BindView(R.id.toolbar) Toolbar toolbar;
     @BindView(R.id.activity_home_bottom_navigation) BottomNavigationView bottomNavigationView;
-
-    public static final int mainFrame = R.id.activity_home_frame_layout;
-    private static final int SIGN_OUT_TASK = 10;
+    @BindView(R.id.searchView) SearchView searchView;
 
     private DrawerLayout drawerLayout;
     private double latitude;
     private double longitude;
     private List<Result> results;
-
+    private User user;
+    private List<User> users;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,10 +72,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         setContentView(R.layout.activity_home);
         ButterKnife.bind(this);
         configureToolbar();
+        getPrefs();
         configureDrawerLayout();
         configureNavigationView();
         configureBottomView();
         gpsGetLocation();
+        getUsersInDatabase();
+    }
+
+    private void getPrefs() {
+        Prefs prefs = Prefs.get(this);
+        user = prefs.getPrefsUser();
     }
 
     private void gpsGetLocation() {
@@ -112,6 +137,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         //3 - Handle actions on menu items
         switch (item.getItemId()) {
             case R.id.menu_activity_home_search:
+                searchView.setVisibility(View.VISIBLE);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -122,6 +148,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void configureNavigationView() {
         NavigationView navigationView = (NavigationView) findViewById(R.id.activity_home_nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+        View hView =  navigationView.getHeaderView(0);
+        TextView nav_user = (TextView)hView.findViewById(R.id.text_login);
+        ImageView imageView = (ImageView)hView.findViewById(R.id.imageViewNavDraw);
+        nav_user.setText(user.getUsername() + "\n" + user.geteMail());
+        Glide.with(this)
+                .load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(imageView);
     }
 
     //Configure Drawer layout
@@ -166,7 +198,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(){
         return aVoid -> {
-            switch (HomeActivity.SIGN_OUT_TASK){
+            switch (SIGN_OUT_TASK){
                 case SIGN_OUT_TASK:
                     finish();
                     break;
@@ -179,6 +211,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     //To manage drawerLayout on back button
     @Override
     public void onBackPressed() {
+        toolbar.setVisibility(View.VISIBLE);
+        bottomNavigationView.setVisibility(View.VISIBLE);
         // 5 - Handle back click to close menu
         if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             this.drawerLayout.closeDrawer(GravityCompat.START);
@@ -189,10 +223,27 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     // 2 - Configure BottomNavigationView Listener
     private void configureBottomView(){
-        bottomNavigationView.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
+        bottomNavigationView.setOnNavigationItemSelectedListener(item -> updateMainFragment(item.getItemId()));
+    }
+
+    private void getUsersInDatabase() {
+        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
-            public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                return updateMainFragment(item.getItemId());
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    users = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String uid = document.getData().get("uid").toString();
+                        String username = document.getData().get("username").toString();
+                        String urlPicture = document.getData().get("urlPicture").toString();
+                        String choice = document.getData().get("choice").toString();
+                        User userToAdd = new User(uid, username, urlPicture, choice);
+                        users.add(userToAdd);
+                    }
+                } else {
+                    Log.d(TAG, "Error getting documents: ", task.getException());
+                }
+                Log.e("listMates", String.valueOf(users.size()));
             }
         });
     }
@@ -213,7 +264,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 newFragment = ListFragment.newInstance(results);
                 break;
             case R.id.action_workmates:
-                newFragment = WorkmatesFragment.newInstance();
+                newFragment = WorkmatesFragment.newInstance(users);
                 break;
         }
         getFragmentManagerToLaunch(newFragment);
@@ -228,19 +279,33 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         // Replace whatever is in the fragment_container view with this fragment,
         // and add the transaction to the back stack if needed
+        if(newFragment instanceof RestauDetailFragment){
+            hideToolBarAndBottomBar();
+        }
         transaction.replace(R.id.activity_home_frame_layout, newFragment);
         transaction.addToBackStack(null);
         // Commit the transaction
         transaction.commit();
     }
 
-    @Override
-    public void callbackArticle() {
-
+    private void hideToolBarAndBottomBar() {
+        toolbar.setVisibility(View.GONE);
+        bottomNavigationView.setVisibility(View.GONE);
     }
 
     @Override
     public void callbackList(Result result) {
+        showDetailRestaurantFragment(result, users);
         Log.e("test result click", "result returned on homeActivity!");
+    }
+
+    private void showDetailRestaurantFragment(Result result, List<User> users){
+        Fragment newFragment = RestauDetailFragment.newInstance(result, users);
+        getFragmentManagerToLaunch(newFragment);
+    }
+
+    @Override
+    public void callbackMaps(Result result) {
+        showDetailRestaurantFragment(result, users);
     }
 }

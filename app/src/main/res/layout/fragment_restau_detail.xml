@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".controller.fragment.RestauDetailFragment">
+
+    <ImageView
+        android:id="@+id/image_restaurant"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintHeight_percent="0.35"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <android.support.constraint.ConstraintLayout
+        android:id="@+id/constraintLayout"
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:background="@color/colorPrimary"
+        app:layout_constraintTop_toBottomOf="@+id/image_restaurant">
+
+        <TextView
+            android:id="@+id/tv_restaurant_name"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:text="Le Zinc"
+            android:textColor="@android:color/white"
+            android:paddingStart="10dp"
+            android:paddingEnd="10dp"
+            android:gravity="center"
+            android:textSize="17sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/rate_stars"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:tint="@color/quantum_yellow500"
+            android:src="@drawable/ic_star_rate_white_18dp"
+            app:layout_constraintStart_toEndOf="@+id/tv_restaurant_name"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/tv_restaurant_address"
+            android:layout_width="match_parent"
+            android:layout_height="40dp"
+            android:paddingStart="10dp"
+            android:textColor="@android:color/white"
+            android:paddingEnd="10dp"
+            android:text="French restaurant - 12 rue du faubourg Poissonière"
+            app:layout_constraintBottom_toBottomOf="parent" />
+    </android.support.constraint.ConstraintLayout>
+
+
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="20dp"
+        app:borderWidth="0dp"
+        android:background="@android:color/white"
+        android:backgroundTint="@android:color/white"
+        android:src="@drawable/ic_check_circle_black_18dp"
+        android:tint="@android:color/darker_gray"
+        app:layout_constraintBottom_toTopOf="@+id/constraintLayout"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/image_restaurant"
+        tools:targetApi="lollipop" />
+
+    <android.support.design.widget.BottomNavigationView
+        android:id="@+id/bottomNavigationDetailView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="10dp"
+        app:itemIconTint="@drawable/bottom_detail_navigation_colors"
+        app:itemTextColor="@drawable/bottom_detail_navigation_colors"
+        app:layout_constraintTop_toBottomOf="@+id/constraintLayout"
+        app:menu="@menu/bottom_navi_detail">
+
+    </android.support.design.widget.BottomNavigationView>
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_view_detail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/bottomNavigationDetailView">
+    </android.support.v7.widget.RecyclerView>
+
+</android.support.constraint.ConstraintLayout>

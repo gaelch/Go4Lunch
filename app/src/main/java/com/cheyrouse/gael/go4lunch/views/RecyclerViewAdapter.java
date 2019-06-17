@@ -23,13 +23,13 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     // FOR DATA
     private List<Result> results;
     private RequestManager glide;
-
+    private Context context;
     // CONSTRUCTOR
-    public RecyclerViewAdapter(List<Result> results, RequestManager glide, ListFragment listAdapterListener) {
+    public RecyclerViewAdapter(Context context, List<Result> results, RequestManager glide, ListFragment listAdapterListener) {
         this.mListener = listAdapterListener;
         this.results = results;
         this.glide = glide;
-
+        this.context = context;
     }
 
     @NonNull
@@ -46,7 +46,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     // UPDATE VIEW HOLDER WITH A TOPSTORIES
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder viewHolder, int position) {
-        viewHolder.updateWithResult(this.results.get(position), this.glide, mListener);
+        viewHolder.updateWithUssers(context, this.results.get(position), this.glide, mListener);
     }
 
     // RETURN THE TOTAL COUNT OF ITEMS IN THE LIST
@@ -58,7 +58,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
 
     //Callback to items position
     public interface onArticleAdapterListener {
-        void onArticleClicked(Result result);
+        void onRestaurantClicked(Result result);
     }
 }
 
