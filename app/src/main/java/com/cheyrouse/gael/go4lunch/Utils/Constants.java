@@ -9,6 +9,7 @@ public class Constants {
     public static final int mainFrame = R.id.activity_home_frame_layout;
     public static final int SIGN_OUT_TASK = 10;
     public static final String RESULT = "result";
+    public static final String RESTAURANTS = "restaurants";
     public static final String USERS = "users";
     public static final int RC_SIGN_IN = 42;
     public static final String MY_PREFS = "my_prefs";
@@ -17,4 +18,7 @@ public class Constants {
     public static final String COLLECTION_RESTAURANT_NAME = "Restaurants";
     public static final String UID_DOC_USERS = "eb5Bd9gEDQ0D2J4vYZkd";
     public static final String UID_DOC_RESTAURANTS = "xMNHmNveGLZIicMx1RSW";
+    public static final int NOTIFICATION_ID = 007;
+    public static final String NOTIFICATION_TAG = "FIREBASEOC";
+    public static final String USER = "user";
 }

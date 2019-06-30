@@ -19,8 +19,8 @@ public class UserHelper {
 
     // --- CREATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> createUser(String uid, String userUid, String username, String urlPicture, String choice) {
-        User userToCreate = new User(userUid, username, urlPicture, choice);
+    public static com.google.android.gms.tasks.Task<Void> createUser(String uid, String userUid, String username, String urlPicture) {
+        User userToCreate = new User(userUid, username, urlPicture);
         return UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
@@ -32,8 +32,8 @@ public class UserHelper {
 
     // --- UPDATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> updateUsername(String username, String uid) {
-        return UserHelper.getUsersCollection().document(uid).update("username", username);
+    public static com.google.android.gms.tasks.Task<Void> updateChoice(String choice, String uid) {
+        return UserHelper.getUsersCollection().document(uid).update("choice", choice);
     }
 
     // --- DELETE ---

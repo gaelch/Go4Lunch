@@ -5,7 +5,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/constraint_work_list"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:elevation="2dp"
+    tools:targetApi="lollipop">
 
     <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"

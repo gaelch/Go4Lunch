@@ -1,6 +1,7 @@
 package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Color;
 import android.os.Build;
@@ -10,6 +11,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -23,23 +25,39 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
+import com.cheyrouse.gael.go4lunch.Utils.starsUtils;
+import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.DetailAdapter;
+import com.facebook.login.widget.ProfilePictureView;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentReference;
+import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QueryDocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.internal.Utils;
 
 import static android.support.constraint.Constraints.TAG;
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_HEIGHT;
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_WIDTH;
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.RESULT;
+import static com.cheyrouse.gael.go4lunch.Utils.Constants.USER;
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.USERS;
 import static com.cheyrouse.gael.go4lunch.Utils.Go4LunchService.API_KEY;
 
@@ -49,26 +67,43 @@ import static com.cheyrouse.gael.go4lunch.Utils.Go4LunchService.API_KEY;
 public class RestauDetailFragment extends Fragment implements DetailAdapter.onUserAdapterListener, FloatingActionButton.OnClickListener {
 
 
-    @BindView(R.id.image_restaurant) ImageView imageViewRestaurant;
-    @BindView(R.id.fab) FloatingActionButton floatingActionButton;
-    @BindView(R.id.tv_restaurant_name) TextView tvRestauurantName;
-    @BindView(R.id.tv_restaurant_address) TextView tvRestaurantAddress;
-    @BindView(R.id.rate_stars) ImageView imageViewRate;
-    @BindView(R.id.bottomNavigationDetailView) BottomNavigationView bottomNavigationView;
-    @BindView(R.id.recycler_view_detail) RecyclerView recyclerView;
+    @BindView(R.id.image_restaurant)
+    ImageView imageViewRestaurant;
+    @BindView(R.id.fab)
+    FloatingActionButton floatingActionButton;
+    @BindView(R.id.tv_restaurant_name)
+    TextView tvRestauurantName;
+    @BindView(R.id.tv_restaurant_address)
+    TextView tvRestaurantAddress;
+    @BindView(R.id.rate_star1)
+    ImageView imageViewRate1;
+    @BindView(R.id.rate_star2)
+    ImageView imageViewRate2;
+    @BindView(R.id.rate_star3)
+    ImageView imageViewRate3;
+    @BindView(R.id.bottomNavigationDetailView)
+    BottomNavigationView bottomNavigationView;
+    @BindView(R.id.recycler_view_detail)
+    RecyclerView recyclerView;
+    @BindView(R.id.fragment_restau_swipe_container)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private Result result;
     private DetailAdapter adapter;
     private List<User> users;
     private List<User> usersAreJoining;
     private RestauDetailFragmentListener mListener;
+    private boolean var = false;
+    private User user;
+    private Restaurant restaurant;
 
-    public static RestauDetailFragment newInstance(Result result, List<User> users) {
+    public static RestauDetailFragment newInstance(Result result, List<User> users, User user) {
         // Create new fragment
         RestauDetailFragment frag = new RestauDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(RESULT, (Serializable) result);
         bundle.putSerializable(USERS, (Serializable) users);
+        bundle.putSerializable(USER, (Serializable) user);
         frag.setArguments(bundle);
         return frag;
     }
@@ -89,6 +124,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     }
 
 
+    @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
@@ -97,23 +133,56 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         View view = inflater.inflate(R.layout.fragment_restau_detail, container, false);
         ButterKnife.bind(this, view);
         getTheBundleData();
+        getRestaurentFromFirestore();
         setTransparentStatusBar();
         setImages();
         configureTextView();
         configureRecyclerView();
         configureBottomView();
+        configureFab();
         return view;
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void getRestaurentFromFirestore() {
+        RestaurantHelper.getRestaurant(result.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
+                if (task.isSuccessful()) {
+                    restaurant = new Restaurant();
+                    restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
+                    restaurant.setRate((List<String>) task.getResult().get("rate"));
+                    restaurant.setUsers((List<String>) task.getResult().get("users"));
+                    Log.e("restaurantName", restaurant.getRestaurantName());
+                    setStars();
+                }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("fail", e.getMessage());
+            }
+        });
+    }
+
+    private void configureFab() {
+        floatingActionButton.setOnClickListener(this);
+        if (result.getName().equals(user.getChoice())) {
+            floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
+        } else {
+            floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
+        }
+    }
+
     private void setImages() {
-        if (!(result.getPhotos() == null)){
-            if (!(result.getPhotos().isEmpty())){
+        if (!(result.getPhotos() == null)) {
+            if (!(result.getPhotos().isEmpty())) {
                 // Photo restaurant
                 Glide.with(this)
-                        .load(BASE_URL+"?maxwidth="+MAX_WIDTH+"&maxheight="+MAX_HEIGHT+"&photoreference="+result
-                                .getPhotos().get(0).getPhotoReference()+"&key="+ API_KEY).into(imageViewRestaurant);
+                        .load(BASE_URL + "?maxwidth=" + MAX_WIDTH + "&maxheight=" + MAX_HEIGHT + "&photoreference=" + result
+                                .getPhotos().get(0).getPhotoReference() + "&key=" + API_KEY).into(imageViewRestaurant);
             }
-        }else{
+        } else {
             Glide.with(this).load(result.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
         }
 
@@ -133,14 +202,15 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         assert getArguments() != null;
         result = (Result) getArguments().getSerializable(RESULT);
         users = (List<User>) getArguments().getSerializable(USERS);
+        user = (User) getArguments().getSerializable(USER);
         getRestaurantJoiningUsers();
     }
 
     private void getRestaurantJoiningUsers() {
         usersAreJoining = new ArrayList<>();
-        for(User user : users){
-            if (user.getChoice() != null){
-                if(user.getChoice().equals(result.getName())){
+        for (User user : users) {
+            if (user.getChoice() != null) {
+                if (user.getChoice().equals(result.getName())) {
                     usersAreJoining.add(user);
                 }
             }
@@ -162,16 +232,32 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
 
+    //Configure SwipeRefreshLayout
+    private void configureSwipeRefreshLayout() {
+        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
+            @Override
+            public void onRefresh() {
+
+            }
+        });
+    }
+
     // 2 - Configure BottomNavigationView Listener
-    private void configureBottomView(){
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void configureBottomView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> getBottomChoice(item.getItemId()));
     }
-    private Boolean getBottomChoice(Integer integer){
+
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private Boolean getBottomChoice(Integer integer) {
         switch (integer) {
             case R.id.action_phone:
                 Toast.makeText(getActivity(), "téléphone", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_like:
+                String userId = user.getUid();
+                RestaurantHelper.updateRestaurantRate(userId, result.getName());
+                getRestaurentFromFirestore();
                 Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_website:
@@ -179,6 +265,22 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                 break;
         }
         return true;
+    }
+
+    private void setStars() {
+        if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        }
+        if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        }
+        if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        }
+
     }
 
     @Override
@@ -190,11 +292,68 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     @Override
     public void onClick(View v) {
         if (v.getId() == R.id.fab) {
-            floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
+            if (!var) {
+                var = true;
+                floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
+                if(user.getChoice() != null && user.getChoice().length() != 0){
+                    deleteChoice(user.getUsername(), user.getChoice());
+                }
+                //set user table restaurant et set restaurant table users
+                user.setChoice(result.getName());
+                updateTableUsers();
+                updateTableRestaurants(user.getUsername(), result.getName());
+                getUsersInDatabase();
+            } else {
+                var = false;
+                if(user.getChoice() != null){
+                    deleteChoice(user.getUsername(), user.getChoice());
+                }
+                floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
+                user.setChoice("");
+                updateTableUsers();
+                getUsersInDatabase();
+            }
         }
     }
 
-    public interface RestauDetailFragmentListener{
+    private void getUsersInDatabase() {
+        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    users = new ArrayList<>();
+                    for (QueryDocumentSnapshot document : task.getResult()) {
+                        String uid = document.getData().get("uid").toString();
+                        String username = document.getData().get("username").toString();
+                        String urlPicture = document.getData().get("urlPicture").toString();
+                        String choice = document.getData().get("choice").toString();
+                        User userToAdd = new User(uid, username, urlPicture);
+                        userToAdd.setChoice(choice);
+                        users.add(userToAdd);
+                        getRestaurantJoiningUsers();
+                        configureRecyclerView();
+                    }
+                } else {
+                    Log.d(ProfilePictureView.TAG, "Error getting documents: ", task.getException());
+                }
+                Log.e("listMates", String.valueOf(users.size()));
+            }
+        });
+    }
+
+    private void updateTableRestaurants(String userName, String choice) {
+        RestaurantHelper.updateRestaurantChoice(userName, choice);
+    }
+
+    private void deleteChoice(String userName, String choice) {
+        RestaurantHelper.deleteUserChoice(userName, choice);
+    }
+
+    private void updateTableUsers() {
+        UserHelper.updateChoice(user.getChoice(), user.getUid());
+    }
+
+    public interface RestauDetailFragmentListener {
         void callbackRestauDetail();
     }
 

@@ -34,12 +34,27 @@
             app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
-            android:id="@+id/rate_stars"
+            android:id="@+id/rate_star1"
             android:layout_width="wrap_content"
             android:layout_height="40dp"
             android:tint="@color/quantum_yellow500"
-            android:src="@drawable/ic_star_rate_white_18dp"
             app:layout_constraintStart_toEndOf="@+id/tv_restaurant_name"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/rate_star2"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:tint="@color/quantum_yellow500"
+            app:layout_constraintStart_toEndOf="@+id/rate_star1"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/rate_star3"
+            android:layout_width="wrap_content"
+            android:layout_height="40dp"
+            android:tint="@color/quantum_yellow500"
+            app:layout_constraintStart_toEndOf="@+id/rate_star2"
             app:layout_constraintTop_toTopOf="parent" />
 
         <TextView
@@ -82,11 +97,20 @@
 
     </android.support.design.widget.BottomNavigationView>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/recycler_view_detail"
+    <android.support.v4.widget.SwipeRefreshLayout
+        android:id="@+id/fragment_restau_swipe_container"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@+id/bottomNavigationDetailView">
-    </android.support.v7.widget.RecyclerView>
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/recycler_view_detail"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+        </android.support.v7.widget.RecyclerView>
+
+
+    </android.support.v4.widget.SwipeRefreshLayout>
+
 
 </android.support.constraint.ConstraintLayout>

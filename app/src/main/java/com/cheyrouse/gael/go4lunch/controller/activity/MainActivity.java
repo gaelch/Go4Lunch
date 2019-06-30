@@ -6,6 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
+import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
@@ -16,7 +17,9 @@ import android.view.View;
 import android.widget.Button;
 
 import com.cheyrouse.gael.go4lunch.Utils.Prefs;
+import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
+import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.facebook.FacebookSdk;
 import com.facebook.appevents.AppEventsLogger;
@@ -25,13 +28,17 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
 import com.firebase.ui.firestore.SnapshotParser;
+import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.firestore.model.DocumentCollections;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -50,6 +57,7 @@ public class MainActivity extends AppCompatActivity {
     @BindView(R.id.activity_main_coordinator_layout) CoordinatorLayout coordinatorLayout;
 
     private User user;
+    private Restaurant restaurant;
     private FirebaseAuth firebaseAuth;
     private List<User> userList;
 
@@ -220,20 +228,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onSuccess(DocumentSnapshot documentSnapshot) {
                 //Log.d("testDocumentSnapshot", "DocumentSnapshot data: " + Objects.requireNonNull(documentSnapshot.getData()).get("userName"));
-                if(documentSnapshot != null){
-                    if(documentSnapshot.getData() != null){
-                        if(Objects.requireNonNull(documentSnapshot.getData()).get("userName")!= user.getUsername()){
-
-                            storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
+                if(documentSnapshot != null) {
+                    if (documentSnapshot.getData() != null) {
+                        String uid = (String) documentSnapshot.getData().get("uid");
+                        if(!uid.equals(user.getUid())) {
+                            storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture());
                         }
                     }
-                } else {
-                    storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
                 }
             }
         });
-        storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.getChoice());
     }
+
+
 
     private void getUserInfo() {
         user = new User();
@@ -241,13 +248,12 @@ public class MainActivity extends AppCompatActivity {
         user.setUsername(firebaseAuth.getCurrentUser().getDisplayName());
         user.setUid(firebaseAuth.getUid());
         user.seteMail(firebaseAuth.getCurrentUser().getEmail());
-        user.setChoice("Auberge du Causse");
         Prefs prefs = Prefs.get(this);
         prefs.storeUserPrefs(user);
         getUsersFromDataBase();
     }
 
-    private void storeUserInDataBase(String uId, String id, String userName, String url, String choice) {
-        UserHelper.createUser(uId, id,userName, url, choice);
+    private void storeUserInDataBase(String uId, String id, String userName, String url) {
+        UserHelper.createUser(uId, id,userName, url);
     }
 }

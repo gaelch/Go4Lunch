@@ -36,4 +36,8 @@
     <string name="bottom_navigation_menu_like">LIKE</string>
     <string name="bottom_navigation_menu_public">WEBSITE</string>
 
+    <!--NOTIFICATION -->
+    <string name="notification_title">Notification Go4Lunch</string>
+    <string name="default_notification_channel_id">0042</string>
+
 </resources>

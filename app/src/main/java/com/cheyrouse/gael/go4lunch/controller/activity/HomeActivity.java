@@ -26,23 +26,27 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.Utils.GPSTracker;
 import com.cheyrouse.gael.go4lunch.Utils.Go4LunchStream;
 import com.cheyrouse.gael.go4lunch.Utils.Prefs;
+import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.RestauDetailFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.WorkmatesFragment;
 import com.cheyrouse.gael.go4lunch.models.Place;
+import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -65,6 +69,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<Result> results;
     private User user;
     private List<User> users;
+    private List<Restaurant> restaurantList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +83,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         configureBottomView();
         gpsGetLocation();
         getUsersInDatabase();
+
     }
 
     private void getPrefs() {
@@ -106,6 +112,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onNext(Place result) {
                 Log.e("testResponse", String.valueOf(result.getResults().size()));
                 results = result.getResults();
+
             }
             @Override
             public void onError(Throwable e) {
@@ -113,7 +120,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             @Override
             public void onComplete() {
                 Log.e("Test", "TopStories is charged");
-                getFragmentManagerToLaunch(MapsFragment.newInstance(results));
+                getRestaurantsFromDataBase();
             }
         });
     }
@@ -237,13 +244,53 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         String username = document.getData().get("username").toString();
                         String urlPicture = document.getData().get("urlPicture").toString();
                         String choice = document.getData().get("choice").toString();
-                        User userToAdd = new User(uid, username, urlPicture, choice);
+                        User userToAdd = new User(uid, username, urlPicture);
+                        userToAdd.setChoice(choice);
                         users.add(userToAdd);
                     }
                 } else {
                     Log.d(TAG, "Error getting documents: ", task.getException());
                 }
                 Log.e("listMates", String.valueOf(users.size()));
+            }
+        });
+    }
+    private void getRestaurantsFromDataBase(){
+        restaurantList = new ArrayList<>();
+        RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+            @Override
+            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+                if (task.isSuccessful()) {
+                    List<Restaurant> restaurants = new ArrayList<>();
+                    for(DocumentSnapshot doc : Objects.requireNonNull(task.getResult())){
+                        Restaurant r = doc.toObject(Restaurant.class);
+                        Objects.requireNonNull(r).setRestaurantUid(doc.getId());
+                        r.setRestaurantName(doc.getString("restaurantName"));
+                        r.setRate((List<String>) doc.get("rate"));
+                        r.setUsers((List<String>) doc.get("users"));
+                        if(doc.getDouble("lat") != null){
+                            r.setLat(doc.getDouble("lat"));
+                        }
+                        if(doc.getDouble("lng") != null){
+                            r.setLng(doc.getDouble("lng"));
+                        }
+                        restaurants.add(r);
+                    }
+                    for(Restaurant restaurant : restaurants){
+                        for(Result r : results){
+                            if(restaurant.getRestaurantName().equals(r.getName())){
+                                restaurantList.add(restaurant);
+                            }
+                        }
+                        Log.e("restaurantsListSize", String.valueOf(restaurantList.size()));
+                    }
+
+                    //do something with list of pojos retrieved
+
+                } else {
+                    Log.e("error", "Error getting documents: ", task.getException());
+                }
+                getFragmentManagerToLaunch(MapsFragment.newInstance(results, restaurantList));
             }
         });
     }
@@ -258,7 +305,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         Fragment newFragment = new Fragment();
         switch (integer) {
             case R.id.action_maps_view:
-                newFragment = MapsFragment.newInstance(results);
+                newFragment = MapsFragment.newInstance(results, restaurantList);
                 break;
             case R.id.action_list_view:
                 newFragment = ListFragment.newInstance(results);
@@ -295,17 +342,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void callbackList(Result result) {
-        showDetailRestaurantFragment(result, users);
+        showDetailRestaurantFragment(result, users, user);
         Log.e("test result click", "result returned on homeActivity!");
     }
 
-    private void showDetailRestaurantFragment(Result result, List<User> users){
-        Fragment newFragment = RestauDetailFragment.newInstance(result, users);
+    private void showDetailRestaurantFragment(Result result, List<User> users, User user){
+        Fragment newFragment = RestauDetailFragment.newInstance(result, users, user);
         getFragmentManagerToLaunch(newFragment);
     }
 
     @Override
     public void callbackMaps(Result result) {
-        showDetailRestaurantFragment(result, users);
+        showDetailRestaurantFragment(result, users, user);
     }
 }

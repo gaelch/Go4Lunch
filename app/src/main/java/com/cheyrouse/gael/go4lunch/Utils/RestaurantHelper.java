@@ -1,9 +1,17 @@
 package com.cheyrouse.gael.go4lunch.Utils;
 
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.CollectionReference;
+import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
+import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import static com.cheyrouse.gael.go4lunch.Utils.Constants.COLLECTION_RESTAURANT_NAME;
 
@@ -17,21 +25,34 @@ public class RestaurantHelper {
 
     // --- CREATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> createRestaurant(String uid, String restaurantUid, String restaurantName) {
-        Restaurant restaurantToCreate = new Restaurant(restaurantUid, restaurantName);
+    public static com.google.android.gms.tasks.Task<Void> createRestaurant(String uid, String restaurantUid, String restaurantName, double lat, double lng) {
+        Restaurant restaurantToCreate = new Restaurant(restaurantUid, restaurantName, lat, lng);
         return RestaurantHelper.getRestaurantsCollection().document(uid).set(restaurantToCreate);
     }
 
-    // --- GET ---
+    // --- GET --
 
-    public static com.google.android.gms.tasks.Task<DocumentSnapshot> getRestaurant(String uid){
+    public static Task<DocumentSnapshot> getRestaurant(String uid){
         return RestaurantHelper.getRestaurantsCollection().document(uid).get();
     }
 
     // --- UPDATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> updateRestaurant(String restaurantName, String uid) {
-        return RestaurantHelper.getRestaurantsCollection().document(uid).update("restaurantName", restaurantName);
+    public static com.google.android.gms.tasks.Task<Void> updateRestaurantChoice(String userName, String uid) {
+        DocumentReference restaurant = RestaurantHelper.getRestaurantsCollection().document(uid);
+        return restaurant.update("users", FieldValue.arrayUnion(userName));
+    }
+
+    public static com.google.android.gms.tasks.Task<Void> updateRestaurantRate(String userId, String uid) {
+        DocumentReference restaurant = RestaurantHelper.getRestaurantsCollection().document(uid);
+        return restaurant.update("rate", FieldValue.arrayUnion(userId));
+    }
+
+    // --- DELETE ---
+
+    public static Task<Void> deleteUserChoice(String userName, String uid) {
+        DocumentReference restaurant = RestaurantHelper.getRestaurantsCollection().document(uid);
+        return restaurant.update("users", FieldValue.arrayRemove(userName));
     }
 
 }
