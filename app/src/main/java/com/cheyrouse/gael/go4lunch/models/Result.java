@@ -40,6 +40,127 @@ public class Result implements Serializable {
     @SerializedName("vicinity")
     @Expose
     private String vicinity;
+    @SerializedName("address_components")
+    @Expose
+    private List<AddressComponent> addressComponents = null;
+    @SerializedName("adr_address")
+    @Expose
+    private String adrAddress;
+    @SerializedName("formatted_address")
+    @Expose
+    private String formattedAddress;
+    @SerializedName("formatted_phone_number")
+    @Expose
+    private String formattedPhoneNumber;
+    @SerializedName("international_phone_number")
+    @Expose
+    private String internationalPhoneNumber;
+    @SerializedName("plus_code")
+    @Expose
+    private PlusCode plusCode;
+    @SerializedName("rating")
+    @Expose
+    private Double rating;
+    @SerializedName("reviews")
+    @Expose
+    private List<Review> reviews = null;
+    @SerializedName("url")
+    @Expose
+    private String url;
+    @SerializedName("user_ratings_total")
+    @Expose
+    private Integer userRatingsTotal;
+    @SerializedName("utc_offset")
+    @Expose
+    private Integer utcOffset;
+
+    public List<AddressComponent> getAddressComponents() {
+        return addressComponents;
+    }
+
+    public void setAddressComponents(List<AddressComponent> addressComponents) {
+        this.addressComponents = addressComponents;
+    }
+
+    public String getAdrAddress() {
+        return adrAddress;
+    }
+
+    public void setAdrAddress(String adrAddress) {
+        this.adrAddress = adrAddress;
+    }
+
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+
+    public String getFormattedPhoneNumber() {
+        return formattedPhoneNumber;
+    }
+
+    public void setFormattedPhoneNumber(String formattedPhoneNumber) {
+        this.formattedPhoneNumber = formattedPhoneNumber;
+    }
+
+    public String getInternationalPhoneNumber() {
+        return internationalPhoneNumber;
+    }
+
+    public void setInternationalPhoneNumber(String internationalPhoneNumber) {
+        this.internationalPhoneNumber = internationalPhoneNumber;
+    }
+
+    public PlusCode getPlusCode() {
+        return plusCode;
+    }
+
+    public void setPlusCode(PlusCode plusCode) {
+        this.plusCode = plusCode;
+    }
+
+    public Double getRating() {
+        return rating;
+    }
+
+    public void setRating(Double rating) {
+        this.rating = rating;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
+    }
+
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Integer getUserRatingsTotal() {
+        return userRatingsTotal;
+    }
+
+    public void setUserRatingsTotal(Integer userRatingsTotal) {
+        this.userRatingsTotal = userRatingsTotal;
+    }
+
+    public Integer getUtcOffset() {
+        return utcOffset;
+    }
+
+    public void setUtcOffset(Integer utcOffset) {
+        this.utcOffset = utcOffset;
+    }
 
     public Geometry getGeometry() {
         return geometry;

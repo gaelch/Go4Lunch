@@ -18,11 +18,10 @@ public class User implements Serializable {
 
 
 
-    public User(String uid, String username, String urlPicture, String choice) {
+    public User(String uid, String username, String urlPicture) {
         this.uid = uid;
         this.username = username;
         this.urlPicture = urlPicture;
-        this.choice = choice;
     }
 
 
