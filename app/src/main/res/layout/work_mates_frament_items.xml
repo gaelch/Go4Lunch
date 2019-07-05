@@ -37,6 +37,14 @@
             app:layout_constraintStart_toEndOf="@+id/imageViewWorkers"
             app:layout_constraintTop_toTopOf="@+id/imageViewWorkers" />
 
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="@android:color/darker_gray"
+            android:layout_marginStart="100dp"
+            app:layout_constraintBottom_toBottomOf="parent" >
+        </View>
+
     </android.support.constraint.ConstraintLayout>
 
 </android.support.v7.widget.CardView>

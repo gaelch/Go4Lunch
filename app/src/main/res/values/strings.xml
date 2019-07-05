@@ -40,4 +40,7 @@
     <string name="notification_title">Notification Go4Lunch</string>
     <string name="default_notification_channel_id">0042</string>
 
+    <!--SEARCH VIEW -->
+    <string name="search_view">Search Restaurant</string>
+
 </resources>

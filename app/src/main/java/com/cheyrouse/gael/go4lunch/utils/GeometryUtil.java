@@ -1,12 +1,9 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import android.content.Context;
 import android.util.Log;
 
 import com.cheyrouse.gael.go4lunch.models.Location;
-import com.cheyrouse.gael.go4lunch.models.Result;
-
-import java.text.DecimalFormat;
 
 public class GeometryUtil {
 

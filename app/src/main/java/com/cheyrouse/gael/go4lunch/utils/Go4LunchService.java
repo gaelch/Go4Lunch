@@ -1,8 +1,7 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
-import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.Place;
-import com.cheyrouse.gael.go4lunch.models.Result;
+import com.cheyrouse.gael.go4lunch.models.PlaceDetails;
 
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
@@ -19,8 +18,14 @@ public interface Go4LunchService {
     public static final String API_KEY = "AIzaSyDzaDQWlbBi78NFOUhG7mS8UIgdeyd17GY";
 
     //Requests HTTP
-    @GET("place/nearbysearch/json?radius=5500&type=restaurant&key="+ API_KEY)
-    Observable<Place> getBySection(@Query(value = "location", encoded = true) String location);
+    @GET("nearbysearch/json?radius=5500&type=restaurant&key="+ API_KEY)
+    Observable<Place> getMapPlace(@Query(value = "location", encoded = true) String location);
+
+    @GET("details/json?key="+ API_KEY)
+    Observable<PlaceDetails> getMapPlaceDetails(@Query(value = "placeid", encoded = true) String placeId);
+
+   /* @GET("autocomplete/json?strictbounds&types=establishment")
+    Observable<AutoCompleteResult> getPlaceAutoComplete(@Query("input") String query, @Query("location") String location, @Query("radius") int radius, @Query("key") String apiKey );*/
 
 
     //Request with RetroFit, RxJava and OkHttp
@@ -28,7 +33,7 @@ public interface Go4LunchService {
         @Override
         protected Retrofit initialValue() {
             return new Retrofit.Builder()
-                    .baseUrl("https://maps.googleapis.com/maps/api/")
+                    .baseUrl("https://maps.googleapis.com/maps/api/place/")
                     .addConverterFactory(GsonConverterFactory.create())
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .client(okHttpClient)

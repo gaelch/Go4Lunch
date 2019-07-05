@@ -6,19 +6,17 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 
-import com.cheyrouse.gael.go4lunch.Utils.Prefs;
-import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
-import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
+import com.cheyrouse.gael.go4lunch.utils.AlarmHelper;
+import com.cheyrouse.gael.go4lunch.utils.Prefs;
+import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.facebook.FacebookSdk;
@@ -27,18 +25,12 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.firebase.ui.firestore.SnapshotParser;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.google.firebase.firestore.model.DocumentCollections;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -47,8 +39,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.RC_SIGN_IN;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.UID_DOC_USERS;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RC_SIGN_IN;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -70,6 +61,7 @@ public class MainActivity extends AppCompatActivity {
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
+        (new AlarmHelper()).configureAlarmNotification(this);
     }
 
 

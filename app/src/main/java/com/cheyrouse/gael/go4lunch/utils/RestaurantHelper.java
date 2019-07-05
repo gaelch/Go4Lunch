@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.google.android.gms.tasks.Task;
@@ -8,12 +8,7 @@ import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FieldValue;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.COLLECTION_RESTAURANT_NAME;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.COLLECTION_RESTAURANT_NAME;
 
 public class RestaurantHelper {
 

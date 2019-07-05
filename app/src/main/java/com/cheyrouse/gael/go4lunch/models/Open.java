@@ -3,7 +3,9 @@ package com.cheyrouse.gael.go4lunch.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Open {
+import java.io.Serializable;
+
+public class Open implements Serializable {
 
     @SerializedName("day")
     @Expose

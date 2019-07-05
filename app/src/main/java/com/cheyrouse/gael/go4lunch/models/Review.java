@@ -3,7 +3,9 @@ package com.cheyrouse.gael.go4lunch.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Review {
+import java.io.Serializable;
+
+public class Review implements Serializable {
 
     @SerializedName("author_name")
     @Expose

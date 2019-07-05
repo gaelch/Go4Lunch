@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -16,8 +16,8 @@ import com.google.firebase.messaging.RemoteMessage;
 
 import java.util.Objects;
 
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.NOTIFICATION_ID;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.NOTIFICATION_TAG;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.NOTIFICATION_ID;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.NOTIFICATION_TAG;
 
 public class NotificationsService extends FirebaseMessagingService {
 

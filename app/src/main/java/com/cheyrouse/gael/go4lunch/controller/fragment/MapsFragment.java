@@ -9,7 +9,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
@@ -26,9 +25,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
-import com.bumptech.glide.request.target.BitmapImageViewTarget;
 import com.cheyrouse.gael.go4lunch.R;
-import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -40,7 +38,6 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-import com.google.common.collect.Maps;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -48,8 +45,7 @@ import java.util.List;
 import java.util.Objects;
 import butterknife.ButterKnife;
 import static android.support.constraint.Constraints.TAG;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.RESTAURANTS;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.UID_DOC_RESTAURANTS;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment.RESULT;
 import static com.facebook.FacebookSdk.getApplicationContext;
 
@@ -148,6 +144,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                 storeInDatabase(r.getName(), r.getId(), r.getName(), r.getGeometry().getLocation().getLat(),
                         r.getGeometry().getLocation().getLng());
             }
+
         }
         for (Restaurant restaurant : restaurantList){
             if(restaurant.getUsers() != null){
@@ -165,24 +162,22 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     private MarkerOptions createMarkers(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
-        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_restaurant_white_18dp);
+        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_location_red);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
         //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
                 .position(latLng)
-                .title(s)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                .title(s);
     }
 
     private MarkerOptions createMarkersGreen(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
-        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_restaurant_white_18dp);
+        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_location_green);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
         //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
                 .position(latLng)
-                .title(s)
-                .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_GREEN));
+                .title(s);
     }
 
 

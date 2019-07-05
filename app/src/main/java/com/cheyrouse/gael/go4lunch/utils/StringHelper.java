@@ -1,12 +1,9 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
-import android.text.style.URLSpan;
 import android.util.Log;
 
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import static com.firebase.ui.auth.ui.email.CheckEmailFragment.TAG;
 
 public class StringHelper {
 

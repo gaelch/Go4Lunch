@@ -3,9 +3,10 @@ package com.cheyrouse.gael.go4lunch.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class AddressComponent {
+public class AddressComponent implements Serializable {
 
     @SerializedName("long_name")
     @Expose

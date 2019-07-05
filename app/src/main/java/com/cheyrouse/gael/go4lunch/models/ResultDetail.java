@@ -1,71 +1,107 @@
 package com.cheyrouse.gael.go4lunch.models;
 
-import java.io.Serializable;
-import java.util.List;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Result implements Serializable{
+import java.io.Serializable;
+import java.util.List;
+
+public class ResultDetail implements Serializable {
+
+    @SerializedName("address_components")
+    @Expose
+    public List<AddressComponent> addressComponents = null;
+    @SerializedName("adr_address")
+    @Expose
+    public String adrAddress;
+    @SerializedName("formatted_address")
+    @Expose
+    public String formattedAddress;
+    @SerializedName("formatted_phone_number")
+    @Expose
+    public String formattedPhoneNumber;
     @SerializedName("geometry")
     @Expose
-    private Geometry geometry;
+    public Geometry geometry;
     @SerializedName("icon")
     @Expose
-    private String icon;
+    public String icon;
     @SerializedName("id")
     @Expose
-    private String id;
+    public String id;
     @SerializedName("name")
     @Expose
-    private String name;
+    public String name;
     @SerializedName("opening_hours")
     @Expose
-    private OpeningHours openingHours;
+    public OpeningHours openingHours;
     @SerializedName("photos")
     @Expose
-    private List<Photo> photos = null;
+    public List<Photo> photos = null;
     @SerializedName("place_id")
     @Expose
-    private String placeId;
+    public String placeId;
     @SerializedName("plus_code")
     @Expose
-    private PlusCode plusCode;
-    @SerializedName("price_level")
-    @Expose
-    private Integer priceLevel;
+    public PlusCode plusCode;
     @SerializedName("rating")
     @Expose
-    private Double rating;
+    public Double rating;
     @SerializedName("reference")
     @Expose
-    private String reference;
+    public String reference;
+    @SerializedName("reviews")
+    @Expose
+    public List<Review> reviews = null;
     @SerializedName("scope")
     @Expose
-    private String scope;
+    public String scope;
     @SerializedName("types")
     @Expose
-    private List<String> types = null;
+    public List<String> types = null;
+    @SerializedName("url")
+    @Expose
+    public String url;
+    @SerializedName("utc_offset")
+    @Expose
+    public Integer utcOffset;
     @SerializedName("vicinity")
     @Expose
-    private String vicinity;
+    public String vicinity;
+    @SerializedName("website")
+    @Expose
+    public String website;
 
-    private String urlPic;
+    public List<AddressComponent> getAddressComponents() {
+        return addressComponents;
+    }
 
-    public Result(Geometry geometry, String icon, String id, String name, OpeningHours openingHours, List<Photo> photos, String placeId, PlusCode plusCode, Integer priceLevel, Double rating, String reference, String scope, List<String> types, String vicinity) {
-        this.geometry = geometry;
-        this.icon = icon;
-        this.id = id;
-        this.name = name;
-        this.openingHours = openingHours;
-        this.photos = photos;
-        this.placeId = placeId;
-        this.plusCode = plusCode;
-        this.priceLevel = priceLevel;
-        this.rating = rating;
-        this.reference = reference;
-        this.scope = scope;
-        this.types = types;
-        this.vicinity = vicinity;
+    public void setAddressComponents(List<AddressComponent> addressComponents) {
+        this.addressComponents = addressComponents;
+    }
+
+    public String getAdrAddress() {
+        return adrAddress;
+    }
+
+    public void setAdrAddress(String adrAddress) {
+        this.adrAddress = adrAddress;
+    }
+
+    public String getFormattedAddress() {
+        return formattedAddress;
+    }
+
+    public void setFormattedAddress(String formattedAddress) {
+        this.formattedAddress = formattedAddress;
+    }
+
+    public String getFormattedPhoneNumber() {
+        return formattedPhoneNumber;
+    }
+
+    public void setFormattedPhoneNumber(String formattedPhoneNumber) {
+        this.formattedPhoneNumber = formattedPhoneNumber;
     }
 
     public Geometry getGeometry() {
@@ -132,14 +168,6 @@ public class Result implements Serializable{
         this.plusCode = plusCode;
     }
 
-    public Integer getPriceLevel() {
-        return priceLevel;
-    }
-
-    public void setPriceLevel(Integer priceLevel) {
-        this.priceLevel = priceLevel;
-    }
-
     public Double getRating() {
         return rating;
     }
@@ -154,6 +182,14 @@ public class Result implements Serializable{
 
     public void setReference(String reference) {
         this.reference = reference;
+    }
+
+    public List<Review> getReviews() {
+        return reviews;
+    }
+
+    public void setReviews(List<Review> reviews) {
+        this.reviews = reviews;
     }
 
     public String getScope() {
@@ -172,6 +208,22 @@ public class Result implements Serializable{
         this.types = types;
     }
 
+    public String getUrl() {
+        return url;
+    }
+
+    public void setUrl(String url) {
+        this.url = url;
+    }
+
+    public Integer getUtcOffset() {
+        return utcOffset;
+    }
+
+    public void setUtcOffset(Integer utcOffset) {
+        this.utcOffset = utcOffset;
+    }
+
     public String getVicinity() {
         return vicinity;
     }
@@ -180,11 +232,11 @@ public class Result implements Serializable{
         this.vicinity = vicinity;
     }
 
-    public String getUrlPic() {
-        return urlPic;
+    public String getWebsite() {
+        return website;
     }
 
-    public void setUrlPic(String urlPic) {
-        this.urlPic = urlPic;
+    public void setWebsite(String website) {
+        this.website = website;
     }
 }

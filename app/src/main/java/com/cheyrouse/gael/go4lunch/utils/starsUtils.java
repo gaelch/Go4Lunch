@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import android.util.Log;
 

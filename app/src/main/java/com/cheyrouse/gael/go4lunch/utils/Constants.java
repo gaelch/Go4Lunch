@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import com.cheyrouse.gael.go4lunch.R;
 
@@ -21,4 +21,5 @@ public class Constants {
     public static final int NOTIFICATION_ID = 007;
     public static final String NOTIFICATION_TAG = "FIREBASEOC";
     public static final String USER = "user";
+    public static final String RESTAURANT = "restaurant";
 }

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/card"
     android:layout_width="match_parent"
-    android:layout_height="100dp">
+    android:layout_height="110dp">
 
     <android.support.constraint.ConstraintLayout
         android:id="@+id/list_rest_constraint"
@@ -20,9 +20,9 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="50dp"
             android:text="Au deux poissons"
-            android:lines="2"
+            android:lines="1"
             android:textStyle="bold"
-            android:textSize="17sp"
+            android:textSize="16sp"
             app:layout_constraintEnd_toStartOf="@+id/distanceToMe"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -57,10 +57,11 @@
             android:layout_height="wrap_content"
             android:layout_marginStart="8dp"
             android:layout_marginEnd="8dp"
+            android:layout_marginTop="5dp"
             android:layout_marginBottom="8dp"
             android:text="open until 2:30 pm"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageViewStars"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewStars1"
             app:layout_constraintStart_toStartOf="parent" />
 
 
@@ -77,32 +78,51 @@
             android:id="@+id/imageView3"
             android:layout_width="24dp"
             android:layout_height="24dp"
-            android:layout_marginTop="8dp"
-            android:layout_marginEnd="8dp"
+            android:layout_marginTop="0dp"
+            android:layout_marginEnd="5dp"
             android:layout_marginBottom="8dp"
             android:src="@drawable/baseline_perm_identity_black_18dp"
-            app:layout_constraintBottom_toTopOf="@+id/imageViewStars"
-            app:layout_constraintEnd_toStartOf="@+id/textView_coWorkers"
+            app:layout_constraintBottom_toTopOf="@+id/imageViewStars1"
+            app:layout_constraintEnd_toStartOf="@+id/tV_coWorkers"
             app:layout_constraintTop_toBottomOf="@+id/distanceToMe" />
 
         <TextView
-            android:id="@+id/textView_coWorkers"
+            android:id="@+id/tV_coWorkers"
             android:layout_width="18dp"
             android:layout_height="18dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="3dp"
-            android:text="(2)"
             app:layout_constraintBottom_toBottomOf="@+id/imageView3"
             app:layout_constraintEnd_toStartOf="@+id/imageViewRestaurant" />
 
         <ImageView
-            android:id="@+id/imageViewStars"
-            android:layout_width="80dp"
-            android:layout_height="20dp"
+            android:id="@+id/imageViewStars3"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
             android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:tint="@color/quantum_yellow500"
+            android:layout_marginBottom="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageViewRestaurant" />
+
+        <ImageView
+            android:id="@+id/imageViewStars2"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:layout_marginBottom="15dp"
+            android:tint="@color/quantum_yellow500"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewStars3" />
+
+
+        <ImageView
+            android:id="@+id/imageViewStars1"
+            android:layout_width="wrap_content"
+            android:layout_height="25dp"
+            android:tint="@color/quantum_yellow500"
+            android:layout_marginBottom="15dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/imageViewStars2" />
 
 </android.support.constraint.ConstraintLayout>
 

@@ -3,7 +3,9 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -25,41 +27,39 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
-import com.cheyrouse.gael.go4lunch.Utils.RestaurantHelper;
-import com.cheyrouse.gael.go4lunch.Utils.UserHelper;
-import com.cheyrouse.gael.go4lunch.Utils.starsUtils;
+import com.cheyrouse.gael.go4lunch.utils.Prefs;
+import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.utils.UserHelper;
+import com.cheyrouse.gael.go4lunch.utils.starsUtils;
+import com.cheyrouse.gael.go4lunch.controller.activity.RestaurantWebSiteActivity;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
-import com.cheyrouse.gael.go4lunch.models.Result;
+import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.DetailAdapter;
 import com.facebook.login.widget.ProfilePictureView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import butterknife.internal.Utils;
 
 import static android.support.constraint.Constraints.TAG;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.BASE_URL;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_HEIGHT;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.MAX_WIDTH;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.RESULT;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.USER;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.USERS;
-import static com.cheyrouse.gael.go4lunch.Utils.Go4LunchService.API_KEY;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_WIDTH;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
+import static com.cheyrouse.gael.go4lunch.utils.Go4LunchService.API_KEY;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -67,6 +67,7 @@ import static com.cheyrouse.gael.go4lunch.Utils.Go4LunchService.API_KEY;
 public class RestauDetailFragment extends Fragment implements DetailAdapter.onUserAdapterListener, FloatingActionButton.OnClickListener {
 
 
+    public static final String WEB_SITE_EXTRA = "web_site";
     @BindView(R.id.image_restaurant)
     ImageView imageViewRestaurant;
     @BindView(R.id.fab)
@@ -88,7 +89,6 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     @BindView(R.id.fragment_restau_swipe_container)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    private Result result;
     private DetailAdapter adapter;
     private List<User> users;
     private List<User> usersAreJoining;
@@ -96,8 +96,10 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     private boolean var = false;
     private User user;
     private Restaurant restaurant;
+    private ResultDetail resultDetail;
 
-    public static RestauDetailFragment newInstance(Result result, List<User> users, User user) {
+
+    public static RestauDetailFragment newInstance(ResultDetail result, List<User> users, User user) {
         // Create new fragment
         RestauDetailFragment frag = new RestauDetailFragment();
         Bundle bundle = new Bundle();
@@ -140,12 +142,17 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         configureRecyclerView();
         configureBottomView();
         configureFab();
+        configureTextView();
         return view;
     }
 
+    private void updateUi() {
+        setImages();
+
+    }
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void getRestaurentFromFirestore() {
-        RestaurantHelper.getRestaurant(result.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
+        RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
@@ -155,6 +162,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                     restaurant.setUsers((List<String>) task.getResult().get("users"));
                     Log.e("restaurantName", restaurant.getRestaurantName());
                     setStars();
+                    //executeRequestDetail();
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -167,7 +175,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
 
     private void configureFab() {
         floatingActionButton.setOnClickListener(this);
-        if (result.getName().equals(user.getChoice())) {
+        if (resultDetail.getName().equals(user.getChoice())) {
             floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
         } else {
             floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
@@ -175,15 +183,15 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     }
 
     private void setImages() {
-        if (!(result.getPhotos() == null)) {
-            if (!(result.getPhotos().isEmpty())) {
+        if (!(resultDetail.getPhotos() == null)) {
+            if (!(resultDetail.getPhotos().isEmpty())) {
                 // Photo restaurant
                 Glide.with(this)
-                        .load(BASE_URL + "?maxwidth=" + MAX_WIDTH + "&maxheight=" + MAX_HEIGHT + "&photoreference=" + result
+                        .load(BASE_URL + "?maxwidth=" + MAX_WIDTH + "&maxheight=" + MAX_HEIGHT + "&photoreference=" + resultDetail
                                 .getPhotos().get(0).getPhotoReference() + "&key=" + API_KEY).into(imageViewRestaurant);
             }
         } else {
-            Glide.with(this).load(result.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
+            Glide.with(this).load(resultDetail.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
         }
 
 
@@ -200,7 +208,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
 
     private void getTheBundleData() {
         assert getArguments() != null;
-        result = (Result) getArguments().getSerializable(RESULT);
+        resultDetail = (ResultDetail) getArguments().getSerializable(RESULT);
         users = (List<User>) getArguments().getSerializable(USERS);
         user = (User) getArguments().getSerializable(USER);
         getRestaurantJoiningUsers();
@@ -210,7 +218,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         usersAreJoining = new ArrayList<>();
         for (User user : users) {
             if (user.getChoice() != null) {
-                if (user.getChoice().equals(result.getName())) {
+                if (user.getChoice().equals(resultDetail.getName())) {
                     usersAreJoining.add(user);
                 }
             }
@@ -218,8 +226,8 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     }
 
     private void configureTextView() {
-        tvRestauurantName.setText(result.getName());
-        tvRestaurantAddress.setText(result.getVicinity());
+        tvRestauurantName.setText(resultDetail.getName());
+        tvRestaurantAddress.setText(resultDetail.getAddressComponents().get(0).getLongName());
     }
 
     //configure recyclerView and Tabs
@@ -253,15 +261,21 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         switch (integer) {
             case R.id.action_phone:
                 Toast.makeText(getActivity(), "téléphone", Toast.LENGTH_SHORT).show();
+                Intent dialIntent = new Intent();
+                dialIntent.setAction(Intent.ACTION_DIAL);
+                dialIntent.setData(Uri.parse(resultDetail.getFormattedPhoneNumber()));
                 break;
             case R.id.action_like:
                 String userId = user.getUid();
-                RestaurantHelper.updateRestaurantRate(userId, result.getName());
+                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
                 getRestaurentFromFirestore();
                 Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_website:
                 Toast.makeText(getActivity(), "website", Toast.LENGTH_SHORT).show();
+                Intent detailActivityIntent = new Intent(getActivity(), RestaurantWebSiteActivity.class);
+                detailActivityIntent.putExtra(WEB_SITE_EXTRA, resultDetail.getWebsite());
+                startActivity(detailActivityIntent);
                 break;
         }
         return true;
@@ -291,6 +305,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View v) {
+        Prefs prefs = Prefs.get(getActivity());
         if (v.getId() == R.id.fab) {
             if (!var) {
                 var = true;
@@ -299,9 +314,11 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                     deleteChoice(user.getUsername(), user.getChoice());
                 }
                 //set user table restaurant et set restaurant table users
-                user.setChoice(result.getName());
+                user.setChoice(resultDetail.getName());
+                prefs.storeChoicePrefs(resultDetail);
+                prefs.storeUserPrefs(user);
                 updateTableUsers();
-                updateTableRestaurants(user.getUsername(), result.getName());
+                updateTableRestaurants(user.getUsername(), resultDetail.getName());
                 getUsersInDatabase();
             } else {
                 var = false;
@@ -310,6 +327,8 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                 }
                 floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
                 user.setChoice("");
+                prefs.storeChoicePrefs(null);
+                prefs.storeUserPrefs(user);
                 updateTableUsers();
                 getUsersInDatabase();
             }

@@ -14,7 +14,8 @@ import android.view.ViewGroup;
 
 import com.bumptech.glide.Glide;
 import com.cheyrouse.gael.go4lunch.R;
-import com.cheyrouse.gael.go4lunch.models.Result;
+import com.cheyrouse.gael.go4lunch.models.ResultDetail;
+import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.RecyclerViewAdapter;
 
 import java.io.Serializable;
@@ -25,6 +26,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.support.constraint.Constraints.TAG;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -37,8 +39,9 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
 
     private ListFragmentListener mListener;
     private RecyclerViewAdapter adapter;
-    private List<Result> results;
-    private List<Result> resultListUpdated;
+    private List<ResultDetail> results;
+    private List<ResultDetail> resultListUpdated;
+    private List<User> userList;
 
     public ListFragment() {
         // Required empty public constructor
@@ -55,11 +58,12 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         }
     }
 
-    public static ListFragment newInstance(List<Result> result) {
+    public static ListFragment newInstance(List<ResultDetail> results, List<User> users) {
         // Create new fragment
         ListFragment frag = new ListFragment();
         Bundle bundle = new Bundle();
-        bundle.putSerializable(RESULT, (Serializable) result);
+        bundle.putSerializable(RESULT, (Serializable) results);
+        bundle.putSerializable(USERS, (Serializable) users);
         frag.setArguments(bundle);
         return frag;
     }
@@ -77,7 +81,8 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
 
     private void getTheBundle() {
         assert getArguments() != null;
-        results = (List<Result>) getArguments().getSerializable(RESULT);
+        results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
+        userList = (List<User>) getArguments().getSerializable(USERS);
         configureRecyclerView();
         updateUI(results);
     }
@@ -86,7 +91,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     private void configureRecyclerView() {
         resultListUpdated = new ArrayList<>();
         // Create adapter passing in the sample user data
-        this.adapter = new RecyclerViewAdapter(getActivity(), resultListUpdated, Glide.with(this), this);
+        this.adapter = new RecyclerViewAdapter(getActivity(), resultListUpdated, userList, Glide.with(this), this);
         // Attach the adapter to the recyclerView to populate items
         this.recyclerView.setAdapter(this.adapter);
         // Set layout manager to position the items
@@ -94,13 +99,13 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     }
 
     @Override
-    public void onRestaurantClicked(Result result) {
+    public void onRestaurantClicked(ResultDetail result) {
         mListener.callbackList(result);
         Log.e("test ressult click", "result returned !");
     }
 
 
-    private void updateUI(List<Result> resultList){
+    private void updateUI(List<ResultDetail> resultList){
         if(resultListUpdated != null){
             resultListUpdated.clear();
         }
@@ -118,6 +123,6 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     }
 
     public interface ListFragmentListener {
-        void callbackList(Result result);
+        void callbackList(ResultDetail result);
     }
 }

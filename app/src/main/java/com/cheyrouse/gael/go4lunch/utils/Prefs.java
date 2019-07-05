@@ -1,19 +1,16 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.MY_PREFS;
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.USER_PREFS;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.MY_PREFS;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USER_PREFS;
 
 public class Prefs {
 
@@ -45,10 +42,27 @@ public class Prefs {
         //close the file
         editor.apply();
     }
+    public void storeChoicePrefs(ResultDetail restaurant) {
+        //start writing (open the file)
+        SharedPreferences.Editor editor = prefs.edit();
+        //put the data
+        Gson gson = new Gson();
+        String json = gson.toJson(restaurant);
+        editor.putString(RESTAURANTS, json);
+        //close the file
+        editor.apply();
+    }
 
     //getCategories recovers json strings and return there in ArrayList
     public User getPrefsUser() {
         Gson gson = new Gson();
         String json = prefs.getString(USER_PREFS, "");
-        return gson.fromJson(json, User.class);}
+        return gson.fromJson(json, User.class);
+    }
+
+    public ResultDetail getChoice(){
+        Gson gson = new Gson();
+        String json = prefs.getString(RESTAURANTS, "");
+        return gson.fromJson(json, ResultDetail.class);
+    }
 }

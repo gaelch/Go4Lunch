@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.Utils;
+package com.cheyrouse.gael.go4lunch.utils;
 
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.google.android.gms.tasks.Task;
@@ -6,7 +6,7 @@ import com.google.firebase.firestore.CollectionReference;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.FirebaseFirestore;
 
-import static com.cheyrouse.gael.go4lunch.Utils.Constants.COLLECTION_NAME;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.COLLECTION_NAME;
 
 public class UserHelper {
 

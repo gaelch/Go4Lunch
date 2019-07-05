@@ -3,7 +3,9 @@ package com.cheyrouse.gael.go4lunch.models;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
-public class Southwest {
+import java.io.Serializable;
+
+public class Southwest implements Serializable {
 
     @SerializedName("lat")
     @Expose
