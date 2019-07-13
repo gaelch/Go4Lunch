@@ -26,6 +26,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
@@ -43,7 +44,9 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+
 import butterknife.ButterKnife;
+
 import static android.support.constraint.Constraints.TAG;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment.RESULT;
@@ -58,9 +61,8 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private Context context = getApplicationContext();
     private MapsFragmentListener mListener;
     private Location locationCt;
-    private List<Result> results;
+    private List<ResultDetail> results;
     private List<Restaurant> restaurantList;
-    private List<com.cheyrouse.gael.go4lunch.models.Location> locationList;
     private Marker marker;
 
 
@@ -69,7 +71,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
 
-    public static MapsFragment newInstance(List<Result> results, List<Restaurant> restaurantList) {
+    public static MapsFragment newInstance(List<ResultDetail> results, List<Restaurant> restaurantList) {
         // Create new fragment
         MapsFragment frag = new MapsFragment();
         Bundle bundle = new Bundle();
@@ -83,11 +85,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
-        if(context instanceof MapsFragmentListener){
+        if (context instanceof MapsFragmentListener) {
             //Listener to pass userLogin to th activityMain
             mListener = (MapsFragmentListener) context;
-        }
-        else{
+        } else {
             Log.d(TAG, "onAttach: parent Activity must implement MainFragmentListener");
         }
     }
@@ -96,18 +97,18 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-         View v = inflater.inflate(R.layout.fragment_maps, container, false);
+        View v = inflater.inflate(R.layout.fragment_maps, container, false);
         ButterKnife.bind(this, v);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment map = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         getTheBundle();
         map.getMapAsync(this);
-         return v;
+        return v;
     }
 
     private void getTheBundle() {
         assert getArguments() != null;
-        results = (List<Result>) getArguments().getSerializable(RESULT);
+        results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
         Log.e("restoListSizeInMap", String.valueOf(restaurantList.size()));
     }
@@ -120,49 +121,45 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             showSettingsAlert();
-            return ;
+            return;
         }
         mMap.setMyLocationEnabled(true);
         LocationManager locationManagerCt = (LocationManager) Objects.requireNonNull(getActivity()).getSystemService(Context.LOCATION_SERVICE);
         assert locationManagerCt != null;
         locationCt = locationManagerCt.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
-        if(locationCt == null){
+        if (locationCt == null) {
             showSettingsAlert();
-        } else{
+        } else {
             goToMyLocation();
         }
-        locationList = new ArrayList<>();
-        for (Result r : results){
-            LatLng latLng = new LatLng(r.getGeometry().getLocation().getLat(),r.getGeometry().getLocation().getLng());
+
+        for (ResultDetail r : results) {
+            LatLng latLng = new LatLng(r.getGeometry().getLocation().getLat(), r.getGeometry().getLocation().getLng());
             String title = r.getName();
-            boolean found = false;
-            for (Restaurant restaurant : restaurantList){
-                if(restaurant.getRestaurantName().equals(r.getName())){
-                    found = true;
+            boolean match = false;
+            for (Restaurant restaurant : restaurantList) {
+                if (restaurant.getRestaurantName().equals(r.getName())) {
+                    if (restaurant.getUsers() != null && restaurant.getUsers().size() > 0) {
+                        marker = mMap.addMarker(createMarkersGreen(latLng.latitude, latLng.longitude, title));
+                    } else {
+                        marker = mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
+                    }
                 }
-            }if (!found) {
-                storeInDatabase(r.getName(), r.getId(), r.getName(), r.getGeometry().getLocation().getLat(),
-                        r.getGeometry().getLocation().getLng());
+                if(restaurant.getRestaurantName().equals(r.getName())){
+                    match = true;
+                }
+            }
+            if(!match){
+                marker = mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
             }
 
-        }
-        for (Restaurant restaurant : restaurantList){
-            if(restaurant.getUsers() != null){
-                if(restaurant.getUsers().size() > 0){
-                    marker = mMap.addMarker(createMarkersGreen(restaurant.getLat(), restaurant.getLng(), restaurant.getRestaurantName()));
-                }else{
-                    marker = mMap.addMarker(createMarkers(restaurant.getLat(), restaurant.getLng(), restaurant.getRestaurantName()));
-                }
-            }else{
-                marker = mMap.addMarker(createMarkers(restaurant.getLat(), restaurant.getLng(), restaurant.getRestaurantName()));
-            }
         }
         mMap.setOnMarkerClickListener(this);
     }
 
     private MarkerOptions createMarkers(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
-        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_location_red);
+        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_maps_red);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
         //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
@@ -172,7 +169,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     private MarkerOptions createMarkersGreen(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
-        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_location_green);
+        Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_maps_green);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
         //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
@@ -189,14 +186,9 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         paint.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_ATOP));
         canvas.setBitmap(bitmap);
         canvas.drawBitmap(bitmap, 0, 0, paint);
-        drawable.setBounds(0, 0, (int)getResources().getDimension(R.dimen._30sdp), (int)getResources().getDimension(R.dimen._30sdp));
+        drawable.setBounds(0, 0, (int) getResources().getDimension(R.dimen._30sdp), (int) getResources().getDimension(R.dimen._30sdp));
         drawable.draw(canvas);
         return BitmapDescriptorFactory.fromBitmap(bitmap);
-    }
-
-    private void storeInDatabase(String uid, String restaurantUid, String restaurantName , double lat, double lng) {
-        RestaurantHelper.createRestaurant(uid, restaurantUid, restaurantName, lat, lng);
-        Log.d("testResultResto", restaurantName);
     }
 
     private void goToMyLocation() {
@@ -206,10 +198,10 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
 
         // Zoom in the Google Map
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
     }
 
-    public void showSettingsAlert(){
+    public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
 
         // Setting Dialog Title
@@ -220,7 +212,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog,int which) {
+            public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
@@ -239,9 +231,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     @Override
     public boolean onMarkerClick(Marker marker) {
+        String restaurantName = marker.getTitle();
+        boolean val = false;
         Log.e("testClickMarker", marker.getTitle());
-        for(Result r: results){
-            if(marker.getTitle().equals(r.getName())){
+        for (ResultDetail r : results) {
+            if (restaurantName.equals(r.getName())) {
                 mListener.callbackMaps(r);
             }
         }
@@ -249,7 +243,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     //Callback to ArticleFragment
-    public interface MapsFragmentListener{
-        void callbackMaps(Result result);
+    public interface MapsFragmentListener {
+        void callbackMaps(ResultDetail result);
     }
 }

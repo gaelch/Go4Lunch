@@ -1,17 +1,23 @@
 package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 
+import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
@@ -56,6 +62,7 @@ import static android.support.constraint.Constraints.TAG;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_WIDTH;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
@@ -68,26 +75,16 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
 
 
     public static final String WEB_SITE_EXTRA = "web_site";
-    @BindView(R.id.image_restaurant)
-    ImageView imageViewRestaurant;
-    @BindView(R.id.fab)
-    FloatingActionButton floatingActionButton;
-    @BindView(R.id.tv_restaurant_name)
-    TextView tvRestauurantName;
-    @BindView(R.id.tv_restaurant_address)
-    TextView tvRestaurantAddress;
-    @BindView(R.id.rate_star1)
-    ImageView imageViewRate1;
-    @BindView(R.id.rate_star2)
-    ImageView imageViewRate2;
-    @BindView(R.id.rate_star3)
-    ImageView imageViewRate3;
-    @BindView(R.id.bottomNavigationDetailView)
-    BottomNavigationView bottomNavigationView;
-    @BindView(R.id.recycler_view_detail)
-    RecyclerView recyclerView;
-    @BindView(R.id.fragment_restau_swipe_container)
-    SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.image_restaurant) ImageView imageViewRestaurant;
+    @BindView(R.id.fab) FloatingActionButton floatingActionButton;
+    @BindView(R.id.tv_restaurant_name) TextView tvRestaurantName;
+    @BindView(R.id.tv_restaurant_address) TextView tvRestaurantAddress;
+    @BindView(R.id.rate_star1) ImageView imageViewRate1;
+    @BindView(R.id.rate_star2) ImageView imageViewRate2;
+    @BindView(R.id.rate_star3)ImageView imageViewRate3;
+    @BindView(R.id.bottomNavigationDetailView) BottomNavigationView bottomNavigationView;
+    @BindView(R.id.recycler_view_detail) RecyclerView recyclerView;
+    @BindView(R.id.fragment_restau_swipe_container) SwipeRefreshLayout swipeRefreshLayout;
 
     private DetailAdapter adapter;
     private List<User> users;
@@ -97,15 +94,17 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     private User user;
     private Restaurant restaurant;
     private ResultDetail resultDetail;
+    private List<Restaurant> restaurantList;
 
 
-    public static RestauDetailFragment newInstance(ResultDetail result, List<User> users, User user) {
+    public static RestauDetailFragment newInstance(ResultDetail result, List<User> users, User user, List<Restaurant> restaurants) {
         // Create new fragment
         RestauDetailFragment frag = new RestauDetailFragment();
         Bundle bundle = new Bundle();
         bundle.putSerializable(RESULT, (Serializable) result);
         bundle.putSerializable(USERS, (Serializable) users);
         bundle.putSerializable(USER, (Serializable) user);
+        bundle.putSerializable(RESTAURANTS, (Serializable) restaurants);
         frag.setArguments(bundle);
         return frag;
     }
@@ -135,6 +134,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         View view = inflater.inflate(R.layout.fragment_restau_detail, container, false);
         ButterKnife.bind(this, view);
         getTheBundleData();
+        getUsersInDatabase();
         getRestaurentFromFirestore();
         setTransparentStatusBar();
         setImages();
@@ -150,6 +150,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         setImages();
 
     }
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void getRestaurentFromFirestore() {
         RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
@@ -160,7 +161,6 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                     restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
                     restaurant.setRate((List<String>) task.getResult().get("rate"));
                     restaurant.setUsers((List<String>) task.getResult().get("users"));
-                    Log.e("restaurantName", restaurant.getRestaurantName());
                     setStars();
                     //executeRequestDetail();
                 }
@@ -211,6 +211,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         resultDetail = (ResultDetail) getArguments().getSerializable(RESULT);
         users = (List<User>) getArguments().getSerializable(USERS);
         user = (User) getArguments().getSerializable(USER);
+        restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
         getRestaurantJoiningUsers();
     }
 
@@ -226,8 +227,8 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     }
 
     private void configureTextView() {
-        tvRestauurantName.setText(resultDetail.getName());
-        tvRestaurantAddress.setText(resultDetail.getAddressComponents().get(0).getLongName());
+        tvRestaurantName.setText(resultDetail.getName());
+        tvRestaurantAddress.setText(resultDetail.getFormattedAddress());
     }
 
     //configure recyclerView and Tabs
@@ -254,47 +255,93 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void configureBottomView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> getBottomChoice(item.getItemId()));
+        bottomNavigationView.getMenu().getItem(0).setCheckable(false);
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private Boolean getBottomChoice(Integer integer) {
         switch (integer) {
             case R.id.action_phone:
-                Toast.makeText(getActivity(), "téléphone", Toast.LENGTH_SHORT).show();
-                Intent dialIntent = new Intent();
-                dialIntent.setAction(Intent.ACTION_DIAL);
-                dialIntent.setData(Uri.parse(resultDetail.getFormattedPhoneNumber()));
+                if (ActivityCompat.checkSelfPermission(Objects.requireNonNull(getActivity()),
+                        Manifest.permission.CALL_PHONE) == PackageManager.PERMISSION_GRANTED) {
+                    //Creating intents for making a call
+                    Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resultDetail.getFormattedPhoneNumber()));
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(getActivity(), "You don't assign permission.", Toast.LENGTH_SHORT).show();
+                    showSettingsAlert();
+                }
                 break;
             case R.id.action_like:
                 String userId = user.getUid();
-                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                getRestaurentFromFirestore();
+                updateTableRestaurants(userId, user.getUsername(), resultDetail.getName(), 1);
                 Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_website:
-                Toast.makeText(getActivity(), "website", Toast.LENGTH_SHORT).show();
-                Intent detailActivityIntent = new Intent(getActivity(), RestaurantWebSiteActivity.class);
-                detailActivityIntent.putExtra(WEB_SITE_EXTRA, resultDetail.getWebsite());
-                startActivity(detailActivityIntent);
+                // Toast.makeText(getActivity(), "website", Toast.LENGTH_SHORT).show();
+                if (resultDetail.getWebsite() != null) {
+                    Intent detailActivityIntent = new Intent(getActivity(), RestaurantWebSiteActivity.class);
+                    detailActivityIntent.putExtra(WEB_SITE_EXTRA, resultDetail.getWebsite());
+                    startActivity(detailActivityIntent);
+                } else {
+                    showBoxInfo();
+                }
                 break;
         }
         return true;
     }
 
-    private void setStars() {
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
+    private void showBoxInfo() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+        alertDialog.setTitle("No url found!");
+        alertDialog.setMessage("This restaurant does not seem to have an website");
+        alertDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+            }
+        });
+        // Showing Alert Message
+        alertDialog.show();
+    }
 
+    private void setStars() {
+        if (restaurant.getRate() != null && restaurant.getRate().size() != 0) {
+            if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
+                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            }
+            if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
+                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            }
+            if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
+                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            }
+        }
+    }
+
+    public void showSettingsAlert() {
+        AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
+        // Setting Dialog Title
+        alertDialog.setTitle("GPS is settings");
+        // Setting Dialog Message
+        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+        // On pressing Settings button
+        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                        Uri.fromParts("package", "com.cheyrouse.gael.go4lunch", null));
+                startActivity(intent);
+            }
+        });
+        // on pressing cancel button
+        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        // Showing Alert Message
+        alertDialog.show();
     }
 
     @Override
@@ -310,7 +357,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
             if (!var) {
                 var = true;
                 floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
-                if(user.getChoice() != null && user.getChoice().length() != 0){
+                if (user.getChoice() != null && user.getChoice().length() != 0) {
                     deleteChoice(user.getUsername(), user.getChoice());
                 }
                 //set user table restaurant et set restaurant table users
@@ -318,11 +365,11 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
                 prefs.storeChoicePrefs(resultDetail);
                 prefs.storeUserPrefs(user);
                 updateTableUsers();
-                updateTableRestaurants(user.getUsername(), resultDetail.getName());
+                updateTableRestaurants("", user.getUsername(), resultDetail.getName(), 0);
                 getUsersInDatabase();
             } else {
                 var = false;
-                if(user.getChoice() != null){
+                if (user.getChoice() != null) {
                     deleteChoice(user.getUsername(), user.getChoice());
                 }
                 floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
@@ -360,8 +407,38 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         });
     }
 
-    private void updateTableRestaurants(String userName, String choice) {
-        RestaurantHelper.updateRestaurantChoice(userName, choice);
+    @RequiresApi(api = Build.VERSION_CODES.N)
+    private void updateTableRestaurants(String userId, String userName, String choice, int i) {
+        boolean var = false;
+        for (Restaurant r : restaurantList) {
+            if (r.getRestaurantName().equals(restaurant.getRestaurantName())) {
+                if (i == 0) {
+                    RestaurantHelper.updateRestaurantChoice(userName, choice);
+                } else {
+                    RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+                    setStars();
+                }
+            }
+        }
+        for (Restaurant r : restaurantList) {
+            if (r.getRestaurantUid().equals(resultDetail.getName())) {
+                var = true;
+            }
+        }
+        if (!var) {
+            if(i == 0){
+                RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
+                        resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
+                RestaurantHelper.updateRestaurantChoice(userName, choice);
+            }else {
+                RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
+                        resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
+                RestaurantHelper.updateRestaurantChoice(userName, choice);
+                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+                setStars();
+            }
+        }
+        getRestaurentFromFirestore();
     }
 
     private void deleteChoice(String userName, String choice) {

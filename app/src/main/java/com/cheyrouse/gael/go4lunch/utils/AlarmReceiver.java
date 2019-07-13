@@ -32,7 +32,7 @@ public class AlarmReceiver extends BroadcastReceiver {
     }
 
     private void executeRequestToFireStoreToResetChoice(User user, ResultDetail resultDetail) {
-        UserHelper.updateChoice(user.getChoice(), user.getUid());
+        UserHelper.updateChoice(null, user.getUid());
         RestaurantHelper.deleteUserChoice(user.getUsername(), resultDetail.getName());
     }
 }

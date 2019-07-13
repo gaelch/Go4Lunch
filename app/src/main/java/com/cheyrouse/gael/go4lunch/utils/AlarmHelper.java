@@ -14,27 +14,28 @@ public class AlarmHelper {
     public void configureAlarmNotification(Context context) {
         AlarmManager alarmManager;
         PendingIntent pendingIntent;
+        Prefs prefs = Prefs.get(context);
+        boolean aSwitch = prefs.getBoolean();
         //getCalendarPresets
         Calendar calendar = DateUtils.getCalendarPresets();
 
         //call AlarmReceiver class
         alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-       // if (switchNotif) {
+        if (aSwitch) {
             Intent intent;
             intent = new Intent(context, AlarmReceiver.class);
             pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
             if (alarmManager != null) {
                 alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
-         //   }
+            }
         }
         //RTC-WAKEUP that will wake the device when it turns off.
-        if (alarmManager != null /*&& switchNotif*/) {
-           // Intent intent;
+        if (alarmManager != null && aSwitch) {
+            Intent intent;
             intent = new Intent(context, AlarmReceiver.class);
             pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
             alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
         }
-
-
     }
+
 }

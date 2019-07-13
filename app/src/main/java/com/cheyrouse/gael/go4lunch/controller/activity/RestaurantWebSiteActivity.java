@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.TextView;
 
 import com.cheyrouse.gael.go4lunch.R;
 
@@ -51,7 +52,7 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
     // --------------------
 
     //Set the toolbar
-    private void ConfigureToolbar(){
+    private void ConfigureToolbar() {
         // Set the Toolbar
         setSupportActionBar(toolbar);
         // Get a support ActionBar corresponding to this toolbar
@@ -97,7 +98,8 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
     // -------------------
 
     //Show WebView
-    protected void updateUI(String url){
+    protected void updateUI(String url) {
         webView.loadUrl(url);
+
     }
 }

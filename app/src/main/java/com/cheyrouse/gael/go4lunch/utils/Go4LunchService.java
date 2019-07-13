@@ -2,10 +2,13 @@ package com.cheyrouse.gael.go4lunch.utils;
 
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.PlaceDetails;
+import com.cheyrouse.gael.go4lunch.models.Prediction;
+import com.cheyrouse.gael.go4lunch.models.Predictions;
 
 import io.reactivex.Observable;
 import okhttp3.OkHttpClient;
 import okhttp3.logging.HttpLoggingInterceptor;
+import retrofit2.Call;
 import retrofit2.Retrofit;
 import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -24,9 +27,15 @@ public interface Go4LunchService {
     @GET("details/json?key="+ API_KEY)
     Observable<PlaceDetails> getMapPlaceDetails(@Query(value = "placeid", encoded = true) String placeId);
 
-   /* @GET("autocomplete/json?strictbounds&types=establishment")
-    Observable<AutoCompleteResult> getPlaceAutoComplete(@Query("input") String query, @Query("location") String location, @Query("radius") int radius, @Query("key") String apiKey );*/
-
+    @GET("place/autocomplete/json")
+    public Observable<Predictions> getPlacesAutoComplete(
+            @Query("input") String input,
+            @Query("types") String types,
+            @Query("location") String location,
+            @Query("radius") int radius,
+            @Query("language") String language,
+            @Query("key") String key
+    );
 
     //Request with RetroFit, RxJava and OkHttp
     ThreadLocal<Retrofit> retrofit = new ThreadLocal<Retrofit>() {
@@ -41,8 +50,20 @@ public interface Go4LunchService {
         }
     };
 
+    public static Retrofit getClient() {
+
+        HttpLoggingInterceptor interceptor = new HttpLoggingInterceptor();
+        interceptor.setLevel(HttpLoggingInterceptor.Level.BODY);
+        OkHttpClient client = new OkHttpClient.Builder().addInterceptor(interceptor).build();
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl("https://maps.googleapis.com/maps/api/")
+                .addConverterFactory(GsonConverterFactory.create())
+                .client(client)
+                .build();
+        return retrofit;
+    }
+
     OkHttpClient okHttpClient = new OkHttpClient.Builder()
             .addInterceptor(new HttpLoggingInterceptor().setLevel(HttpLoggingInterceptor.Level.BODY))
             .build();
-
 }

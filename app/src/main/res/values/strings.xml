@@ -39,8 +39,17 @@
     <!--NOTIFICATION -->
     <string name="notification_title">Notification Go4Lunch</string>
     <string name="default_notification_channel_id">0042</string>
+    <string name="no_coworker">"no colleague has chosen this restaurant yet"</string>
+    <string name="switch_notification_text">If you turn on notifications, you will receive a notification every day at noon to remind you which restaurant you have chosen, its address, and who will be with you.</string>
+    <string name="switch_notification">Enable notifications</string>
 
     <!--SEARCH VIEW -->
     <string name="search_view">Search Restaurant</string>
+
+    <string name="no_url">Sorry ! No url found !</string>
+    
+
+
+
 
 </resources>

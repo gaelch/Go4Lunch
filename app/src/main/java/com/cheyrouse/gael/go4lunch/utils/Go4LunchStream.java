@@ -2,7 +2,9 @@ package com.cheyrouse.gael.go4lunch.utils;
 
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.PlaceDetails;
+import com.cheyrouse.gael.go4lunch.models.Predictions;
 
+import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
@@ -28,4 +30,12 @@ public class Go4LunchStream {
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(100, TimeUnit.SECONDS);
     }
+    public static Observable<Predictions> getPlacesAutoComplete(String placeId, String types, String location, int radius, String language, String key){
+        Go4LunchService go4LunchService = Objects.requireNonNull(Go4LunchService.retrofit.get()).create(Go4LunchService.class);
+        return go4LunchService.getPlacesAutoComplete(placeId, types, location, radius, language, key)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .timeout(100, TimeUnit.SECONDS);
+    }
+
 }

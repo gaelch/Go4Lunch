@@ -241,6 +241,9 @@ public class MainActivity extends AppCompatActivity {
         user.setUid(firebaseAuth.getUid());
         user.seteMail(firebaseAuth.getCurrentUser().getEmail());
         Prefs prefs = Prefs.get(this);
+        User userPref = prefs.getPrefsUser();
+        String choice = userPref.getChoice();
+        user.setChoice(choice);
         prefs.storeUserPrefs(user);
         getUsersFromDataBase();
     }

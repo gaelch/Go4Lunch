@@ -61,6 +61,14 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
     @RequiresApi(api = Build.VERSION_CODES.N)
     void updateWithUssers(Context context, final ResultDetail result, List<User> users, RequestManager glide, final RecyclerViewAdapter.onArticleAdapterListener callback) {
 
+        if(result.getName() != null){
+            tvRestaurantName.setText(result.getName());
+        }else{
+            if(restaurant != null){
+                tvRestaurantName.setText(result.getAddressComponents().get(0).getLongName());
+            }
+        }
+
         if(result.getFormattedAddress() != null){
             tvAddress.setText(result.getFormattedAddress());
         }
@@ -104,15 +112,7 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
                     restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
                     restaurant.setRate((List<String>) task.getResult().get("rate"));
                     restaurant.setUsers((List<String>) task.getResult().get("users"));
-                    Log.e("restaurantName", restaurant.getRestaurantName());
                     setStars(context, users, restaurant);
-                    if(result.getName() != null){
-                        tvRestaurantName.setText(result.getName());
-                    }else{
-                        if(restaurant != null){
-                            tvRestaurantName.setText(result.getAddressComponents().get(0).getLongName());
-                        }
-                    }
                 }
             }
         }).addOnFailureListener(new OnFailureListener() {
@@ -130,18 +130,24 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
     }
 
     private void setStars(Context context, List<User> users, Restaurant restaurant) {
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
-        imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-    }
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
-            imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        if(restaurant != null){
+            if(restaurant.getRate()!= null && restaurant.getRate().size()!=0){
+                if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
+                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                }
+                if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
+                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                    imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                }
+                if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
+                    imageViewStars1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                    imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+                }
+            }
         }
-        if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
-            imageViewStars1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
+
+
     }
 
 

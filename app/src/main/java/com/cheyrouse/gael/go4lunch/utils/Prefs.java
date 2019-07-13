@@ -65,4 +65,15 @@ public class Prefs {
         String json = prefs.getString(RESTAURANTS, "");
         return gson.fromJson(json, ResultDetail.class);
     }
+
+    //store boolean to notification
+    public void storeBoolean(Boolean aSwitch){
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean("switch", aSwitch);
+        editor.apply();
+    }
+
+    public Boolean getBoolean(){
+        return prefs.getBoolean("switch", false);
+    }
 }

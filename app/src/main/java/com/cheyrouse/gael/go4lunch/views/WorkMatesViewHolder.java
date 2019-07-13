@@ -2,6 +2,7 @@ package com.cheyrouse.gael.go4lunch.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
@@ -34,10 +35,11 @@ public class WorkMatesViewHolder extends RecyclerView.ViewHolder {
     @SuppressLint("SetTextI18n")
     void updateWithUsers(final User user, RequestManager glide, final WorkMatesAdapter.onUserAdapterListener callback) {
         if(user != null){
-            if(user.getUsername() != null){
+            if(user.getUsername() != null&& user.getChoice() != null && user.getChoice().length() != 0){
                 textView.setText(user.getUsername() + isEating + user.getChoice());
             }else {
-                textView.setText("Mikasa is eating japanese (Lot'of sushis)");
+                textView.setText(user.getUsername() + " hasn't decided yet");
+                textView.setTextColor(this.itemView.getResources().getColor(R.color.grey));
             }
             if(user.getUrlPicture() != null && !user.getUrlPicture().isEmpty()){
                 glide.load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(imageView);
