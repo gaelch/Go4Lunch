@@ -2,10 +2,17 @@ package com.cheyrouse.gael.go4lunch.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
+import android.preference.PreferenceManager;
+import android.util.Base64;
 
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.google.gson.Gson;
+
+import java.io.ByteArrayOutputStream;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MY_PREFS;
@@ -66,14 +73,23 @@ public class Prefs {
         return gson.fromJson(json, ResultDetail.class);
     }
 
-    //store boolean to notification
-    public void storeBoolean(Boolean aSwitch){
+    public void clearPrefs(){
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putBoolean("switch", aSwitch);
+        editor.clear();
+    }
+
+    public void storePicture(Uri uri, String userName){
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(userName, uri.toString());
         editor.apply();
     }
 
-    public Boolean getBoolean(){
-        return prefs.getBoolean("switch", false);
+    public Uri getPicture(String userName){
+        String imageUriString = prefs.getString(userName, "");
+        if(!imageUriString.isEmpty()){
+            return Uri.parse(imageUriString);
+        }else {
+            return null;
+        }
     }
 }

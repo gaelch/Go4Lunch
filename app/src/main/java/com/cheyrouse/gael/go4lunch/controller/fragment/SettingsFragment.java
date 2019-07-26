@@ -10,7 +10,9 @@ import android.widget.CompoundButton;
 import android.widget.Switch;
 
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
+import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -47,13 +49,26 @@ public class SettingsFragment extends Fragment {
     }
 
     private void configureSwitchNotifications() {
+        User user = prefs.getPrefsUser();
+        boolean check = user.isNotification();
+        if(check){
+            aSwitch.setChecked(true);
+        }
         aSwitch.setOnCheckedChangeListener((buttonView, isChecked) -> {
             if(isChecked){
-                prefs.storeBoolean(true);
+                user.setNotification(true);
+                prefs.storeUserPrefs(user);
+                updateUserNotification(true);
             }else {
-                prefs.storeBoolean(false);
+                user.setNotification(true);
+                prefs.storeUserPrefs(user);
+                updateUserNotification(false);
             }
         });
+    }
+
+    private void updateUserNotification(boolean notification) {
+        UserHelper.updateNotification(notification, prefs.getPrefsUser().getUid());
     }
 
 

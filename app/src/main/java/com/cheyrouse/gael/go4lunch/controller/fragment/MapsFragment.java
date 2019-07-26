@@ -232,7 +232,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     @Override
     public boolean onMarkerClick(Marker marker) {
         String restaurantName = marker.getTitle();
-        boolean val = false;
         Log.e("testClickMarker", marker.getTitle());
         for (ResultDetail r : results) {
             if (restaurantName.equals(r.getName())) {

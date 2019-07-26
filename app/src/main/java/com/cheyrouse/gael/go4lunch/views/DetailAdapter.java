@@ -16,15 +16,13 @@ import java.util.List;
 
 public class DetailAdapter extends RecyclerView.Adapter<DetailViewHolder> {
 
-    private final onUserAdapterListener mListener;
 
     // FOR DATA
     private List<User> users;
     private RequestManager glide;
 
     // CONSTRUCTOR
-    public DetailAdapter(List<User> userList, RequestManager glide, RestauDetailFragment workMatesAdapterListener) {
-        this.mListener = workMatesAdapterListener;
+    public DetailAdapter(List<User> userList, RequestManager glide) {
         this.users = userList;
         this.glide = glide;
     }
@@ -42,7 +40,7 @@ public class DetailAdapter extends RecyclerView.Adapter<DetailViewHolder> {
 
     @Override
     public void onBindViewHolder(@NonNull DetailViewHolder holder, int position) {
-        holder.updateWithUsers(this.users.get(position), this.glide, mListener);
+        holder.updateWithUsers(this.users.get(position), this.glide);
     }
 
     @Override

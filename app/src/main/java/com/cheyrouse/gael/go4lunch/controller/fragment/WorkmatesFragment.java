@@ -1,11 +1,13 @@
 package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 
+import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -23,6 +25,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
+import static com.firebase.ui.auth.ui.email.CheckEmailFragment.TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -34,9 +37,22 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
     private List<User> users;
     private WorkMatesAdapter adapter;
     private FirebaseAuth firebaseAuth;
+    private WorkMateFragmentListener mListener;
 
     public WorkmatesFragment() {
         // Required empty public constructor
+    }
+
+    //Attach the callback tto activity
+    @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+        if (context instanceof WorkMateFragmentListener) {
+            //Listener to pass userLogin to th activityMain
+            mListener = (WorkMateFragmentListener) context;
+        } else {
+            Log.d(TAG, "onAttach: parent Activity must implement MainFragmentListener");
+        }
     }
 
     public static WorkmatesFragment newInstance(List<User> users) {
@@ -70,28 +86,19 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
     //configure recyclerView and Tabs
     private void configureRecyclerView() {
         // Create adapter passing in the sample user data
-        this.adapter = new WorkMatesAdapter(users, Glide.with(this), this);
+        this.adapter = new WorkMatesAdapter(getActivity(), users, Glide.with(this),this, 0);
         // Attach the adapter to the recyclerView to populate items
         this.recyclerView.setAdapter(this.adapter);
         // Set layout manager to position the items
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
-    /*@Override
-    public void onRestaurantClicked(Result result) {
-        mListener.callbackList(result);
-        Log.e("test ressult click", "result returned !");
-    }*/
-
-
-   /* private void updateUI(List<User> users){
-        if(users != null && users.size() != 0) {
-            adapter.notifyDataSetChanged();
-        }
-    }*/
-
     @Override
     public void onArticleClicked(User user) {
+        mListener.callbackMates(user);
+    }
 
+    public interface WorkMateFragmentListener{
+        void callbackMates(User user);
     }
 }

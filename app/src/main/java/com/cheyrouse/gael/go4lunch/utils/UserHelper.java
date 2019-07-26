@@ -36,6 +36,10 @@ public class UserHelper {
         return UserHelper.getUsersCollection().document(uid).update("choice", choice);
     }
 
+    public static com.google.android.gms.tasks.Task<Void> updateNotification(boolean notification, String uid) {
+        return UserHelper.getUsersCollection().document(uid).update("notification", notification);
+    }
+
     // --- DELETE ---
 
     public static Task<Void> deleteUser(String uid) {

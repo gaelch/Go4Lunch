@@ -3,6 +3,8 @@
     <string name="Find_a_nice_restaurant">Find a nice restaurant and invite yours co-worker for lunch!</string>
     <string name="sign_in_facebook">Sign in with Facebook</string>
     <string name="sign_in_google">Sign in with Google</string>
+    <string name="sign_in_twitter">Sign in with Twitter</string>
+    <string name="sign_in_by_email">Sign in by email</string>
     <string name="logo">logo</string>
     <string name="connection_succeed">Connection succeed!</string>
     <string name="error_authentication_canceled">error authentication canceled</string>
@@ -22,6 +24,7 @@
     <string name="bottom_navigation_menu_workmates">Workmates</string>
     <!-- NAVIGATION VIEW MENU ITEMS -->
     <string name="your_lunch">YOR LUNCH</string>
+    <string name="chat">CHAT</string>
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
 
@@ -40,6 +43,7 @@
     <string name="notification_title">Notification Go4Lunch</string>
     <string name="default_notification_channel_id">0042</string>
     <string name="no_coworker">"no colleague has chosen this restaurant yet"</string>
+    <string name="no_restaurant">"you did not choose a restaurant today"</string>
     <string name="switch_notification_text">If you turn on notifications, you will receive a notification every day at noon to remind you which restaurant you have chosen, its address, and who will be with you.</string>
     <string name="switch_notification">Enable notifications</string>
 
@@ -47,9 +51,26 @@
     <string name="search_view">Search Restaurant</string>
 
     <string name="no_url">Sorry ! No url found !</string>
-    
 
+    <!-- MENTOR_CHAT ACTIVITY -->
+    <string name="toolbar_title_mentor_chat_activity">Chats de discussions</string>
+    <string name="text_input_title_mentor_chat_activity">Composer votre message</string>
+    <string name="button_title_mentor_chat_activity">ENVOYER</string>
+    <string name="text_view_mentor_chat_error">Ce fil de discussion ne contient pour le moment aucun message&#8230;</string>
+    <string name="popup_title_permission_files_access">Cette application a besoin de permission pour fonctionner.</string>
+    <string name="toast_title_no_image_chosen">Aucune image choisie&#8230;</string>
 
+    <!-- EMAIL DIALOG BOX -->
+    <string name="email">Email</string>
+    <string name="password">Password</string>
+    <string name="user_name">Your Name</string>
+    <string name="ok">OK</string>
+    <string name="addAvatar">Do you want add picture ?</string>
+    <string name="yes">YES</string>
+
+    <!-- TWITTER KEYS -->
+    <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>
+    <string  name="twitter_consumer_secret" translatable = "false">T6WsvoJvFOJPVcu2Ie0zLyCWd9LkkFfdDaDz1srrvhvHSKIH7O</string>
 
 
 </resources>

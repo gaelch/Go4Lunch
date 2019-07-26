@@ -31,7 +31,7 @@ public class DetailViewHolder extends RecyclerView.ViewHolder {
 
     //Update Items
     @SuppressLint("SetTextI18n")
-    void updateWithUsers(final User user, RequestManager glide, final DetailAdapter.onUserAdapterListener callback) {
+    void updateWithUsers(final User user, RequestManager glide) {
         if(user != null){
             if(user.getUsername() != null){
                 textView.setText(user.getUsername() + isEating + user.getChoice());
@@ -45,6 +45,5 @@ public class DetailViewHolder extends RecyclerView.ViewHolder {
                 glide.load(imageView.getResources().getDrawable(R.drawable.baseline_perm_identity_black_18dp)).apply(RequestOptions.circleCropTransform()).into(imageView);
             }
         }
-        this.cardView.setOnClickListener(v -> callback.onArticleClicked(user));
     }
 }

@@ -36,6 +36,7 @@ public class NotificationsService extends FirebaseMessagingService {
     private List<User> users;
     private String message;
     private String coWorkers;
+    private String text;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -49,7 +50,12 @@ public class NotificationsService extends FirebaseMessagingService {
     private void getData() {
         Prefs prefs = Prefs.get(getApplicationContext());
         restaurant = prefs.getChoice();
-        getUsersInDatabase();
+        if(restaurant==null){
+            text = getResources().getString(R.string.no_restaurant);
+            sendVisualNotification();
+        }else{
+            getUsersInDatabase();
+        }
     }
 
     private void getUsersInDatabase() {
@@ -58,11 +64,14 @@ public class NotificationsService extends FirebaseMessagingService {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     users = new ArrayList<>();
+                    String choice = null;
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                         String uid = document.getData().get("uid").toString();
                         String username = document.getData().get("username").toString();
                         String urlPicture = document.getData().get("urlPicture").toString();
-                        String choice = document.getData().get("choice").toString();
+                        if(document.getData().get("choice")!=null){
+                            choice = document.getData().get("choice").toString();
+                        }
                         User userToAdd = new User(uid, username, urlPicture);
                         userToAdd.setChoice(choice);
                         users.add(userToAdd);
@@ -80,8 +89,10 @@ public class NotificationsService extends FirebaseMessagingService {
     private String getCoWorkers() {
         List<String> coWorks = new ArrayList<>();
         for(User user : users){
-            if(user.getChoice().equals(restaurant.name)){
-                coWorks.add(user.getUsername());
+            if(user.getChoice()!=null){
+                if(user.getChoice().equals(restaurant.name)){
+                    coWorks.add(user.getUsername());
+                }
             }
         }
         String match = String.valueOf(coWorks).replace("[", "").replace("]", "") + "will be there with you";
@@ -97,11 +108,13 @@ public class NotificationsService extends FirebaseMessagingService {
         // 1 - Create an Intent that will be shown when user will click on the Notification
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-
+        if(restaurant != null){
+            text = "This lunch, you eat at" + restaurant.name + "located at" + restaurant.getFormattedAddress() + ", " + coWorkers;
+        }
         // 2 - Create a Style for the Notification
         NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
         inboxStyle.setBigContentTitle(getString(R.string.notification_title));
-        inboxStyle.addLine(message);
+        inboxStyle.addLine(text);
 
         // 3 - Create a Channel (Android 8)
         String channelId = getString(R.string.default_notification_channel_id);
@@ -109,10 +122,9 @@ public class NotificationsService extends FirebaseMessagingService {
         // 4 - Build a Notification object
         NotificationCompat.Builder notificationBuilder =
                 new NotificationCompat.Builder(this, channelId)
-                        .setSmallIcon(R.drawable.image_home)
+                        .setSmallIcon(R.drawable.ic_go4lunch)
                         .setContentTitle(getString(R.string.notification_title))
-                        .setContentText("This lunch, you eat at" + restaurant.name + "located at" + restaurant.getFormattedAddress() + ", " +
-                                coWorkers)
+                        .setContentText(message)
                         .setAutoCancel(true)
                         .setSound(RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION))
                         .setContentIntent(pendingIntent)

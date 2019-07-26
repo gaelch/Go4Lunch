@@ -16,6 +16,8 @@
     <uses-permission android:name="com.android.alarm.permission.SET_TIME" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
         android:name="android.support.multidex.MultiDexApplication"
@@ -25,10 +27,10 @@
         android:roundIcon="@mipmap/ic_go4lunch"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".controller.activity.RestaurantWebSiteActivity"
-            android:parentActivityName=".controller.activity.HomeActivity">
 
-        </activity>
+        <activity
+            android:name=".controller.activity.RestaurantWebSiteActivity"
+            android:parentActivityName=".controller.activity.HomeActivity" />
 
         <meta-data
             android:name="com.google.android.gms.version"
@@ -42,6 +44,11 @@
             android:name=".utils.GPSTracker"
             android:enabled="true"
             tools:ignore="InnerclassSeparator" />
+
+        <meta-data
+            android:name="io.fabric.ApiKey"
+            android:value="4476c0e90883a2ef582fc037f3ff08666ee986e6"
+            />
         <!--
              The API key for Google Maps-based APIs is defined as a string resource.
              (See the file "res/values/google_maps_api.xml").
@@ -52,15 +59,14 @@
         -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="@string/google_maps_key" />
-        <!-- NOTIFICATION SERVICE -->
-        <service
-            android:name=".utils.NotificationsService">
+            android:value="@string/google_maps_key" /> <!-- NOTIFICATION SERVICE -->
+        <service android:name=".utils.NotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
-                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE"/>
+                <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />
             </intent-filter>
         </service>
+
         <receiver
             android:name=".utils.AlarmReceiver"
             android:enabled="true">
@@ -68,21 +74,16 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
-        <activity android:name=".controller.activity.HomeActivity">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN" />
 
-            <category android:name="android.intent.category.LAUNCHER" />
-        </intent-filter>
-    </activity>
+        <activity android:name=".controller.activity.HomeActivity">
+        </activity>
         <activity android:name=".controller.activity.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="android.intent.action.VIEW" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
+        </activity> <!-- MENTOR CHAT ACTIVITY -->
     </application>
 
 </manifest>

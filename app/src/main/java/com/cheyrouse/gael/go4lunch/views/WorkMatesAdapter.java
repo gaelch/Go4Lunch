@@ -20,12 +20,16 @@ public class WorkMatesAdapter extends RecyclerView.Adapter<WorkMatesViewHolder> 
     // FOR DATA
     private List<User> users;
     private RequestManager glide;
+    private Context context;
+    private int i;
 
     // CONSTRUCTOR
-    public WorkMatesAdapter(List<User> userList, RequestManager glide, WorkmatesFragment workMatesAdapterListener) {
-        this.mListener = workMatesAdapterListener;
+    public WorkMatesAdapter(Context context, List<User> userList, RequestManager glide, WorkmatesFragment workMatesAdapterListener, int i) {
         this.users = userList;
         this.glide = glide;
+        this.context = context;
+        this.i = i;
+        this.mListener = workMatesAdapterListener;
     }
 
     @NonNull
@@ -42,7 +46,7 @@ public class WorkMatesAdapter extends RecyclerView.Adapter<WorkMatesViewHolder> 
     // UPDATE VIEW HOLDER WITH A USERS
     @Override
     public void onBindViewHolder(@NonNull WorkMatesViewHolder viewHolder, int position) {
-        viewHolder.updateWithUsers(this.users.get(position), this.glide, mListener);
+        viewHolder.updateWithUsers(this.context, this.users.get(position), this.glide,this.mListener, this.i);
     }
 
     // RETURN THE TOTAL COUNT OF ITEMS IN THE LIST

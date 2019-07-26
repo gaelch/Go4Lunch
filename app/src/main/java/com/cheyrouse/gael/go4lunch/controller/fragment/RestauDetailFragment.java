@@ -42,6 +42,7 @@ import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.DetailAdapter;
+import com.cheyrouse.gael.go4lunch.views.WorkMatesAdapter;
 import com.facebook.login.widget.ProfilePictureView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -71,7 +72,7 @@ import static com.cheyrouse.gael.go4lunch.utils.Go4LunchService.API_KEY;
 /**
  * A simple {@link Fragment} subclass.
  */
-public class RestauDetailFragment extends Fragment implements DetailAdapter.onUserAdapterListener, FloatingActionButton.OnClickListener {
+public class RestauDetailFragment extends Fragment implements FloatingActionButton.OnClickListener {
 
 
     public static final String WEB_SITE_EXTRA = "web_site";
@@ -86,7 +87,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     @BindView(R.id.recycler_view_detail) RecyclerView recyclerView;
     @BindView(R.id.fragment_restau_swipe_container) SwipeRefreshLayout swipeRefreshLayout;
 
-    private DetailAdapter adapter;
+    private WorkMatesAdapter adapter;
     private List<User> users;
     private List<User> usersAreJoining;
     private RestauDetailFragmentListener mListener;
@@ -144,11 +145,6 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         configureFab();
         configureTextView();
         return view;
-    }
-
-    private void updateUi() {
-        setImages();
-
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
@@ -234,7 +230,7 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
     //configure recyclerView and Tabs
     private void configureRecyclerView() {
         // Create adapter passing in the sample user data
-        this.adapter = new DetailAdapter(usersAreJoining, Glide.with(this), this);
+        this.adapter = new WorkMatesAdapter(getActivity(), usersAreJoining, Glide.with(this),null, 1);
         // Attach the adapter to the recyclerView to populate items
         this.recyclerView.setAdapter(this.adapter);
         // Set layout manager to position the items
@@ -344,11 +340,6 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
         alertDialog.show();
     }
 
-    @Override
-    public void onArticleClicked(User user) {
-
-    }
-
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View v) {
@@ -388,11 +379,21 @@ public class RestauDetailFragment extends Fragment implements DetailAdapter.onUs
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     users = new ArrayList<>();
+                    String urlPicture = null;
+                    String choice = null;
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         String uid = document.getData().get("uid").toString();
                         String username = document.getData().get("username").toString();
-                        String urlPicture = document.getData().get("urlPicture").toString();
-                        String choice = document.getData().get("choice").toString();
+                        if(document.getData().get("urlPicture")!=null){
+                            urlPicture = document.getData().get("urlPicture").toString();
+                        }else{
+                            urlPicture = null;
+                        }
+                        if(document.getData().get("choice")!=null){
+                            choice = document.getData().get("choice").toString();
+                        }else{
+                            choice = null;
+                        }
                         User userToAdd = new User(uid, username, urlPicture);
                         userToAdd.setChoice(choice);
                         users.add(userToAdd);
