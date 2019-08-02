@@ -105,10 +105,12 @@ public class PlacesAutoCompleteAdapter extends ArrayAdapter<Prediction> {
                     filterResults.values = new ArrayList<Prediction>();
                     filterResults.count = 0;
                 } else {
-                    GoogleMapAPI googleMapAPI = APIClient.getClient().create(GoogleMapAPI.class);
-                    Predictions predictions = googleMapAPI.getPlacesAutoComplete(charSequence.toString(), location, 5500, context.getString(R.string.google_maps_key)).execute().body();
-                    filterResults.values = predictions.getPredictions();
-                    filterResults.count = predictions.getPredictions().size();
+                    if(charSequence.length() > 1){
+                        GoogleMapAPI googleMapAPI = APIClient.getClient().create(GoogleMapAPI.class);
+                        Predictions predictions = googleMapAPI.getPlacesAutoComplete(charSequence.toString(), location, 5500, context.getString(R.string.google_maps_key)).execute().body();
+                        filterResults.values = predictions.getPredictions();
+                        filterResults.count = predictions.getPredictions().size();
+                    }
                 }
                 return filterResults;
             } catch (Exception e) {

@@ -10,9 +10,12 @@ import android.util.Base64;
 
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
+import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 
 import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Type;
+import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MY_PREFS;
@@ -91,5 +94,20 @@ public class Prefs {
         }else {
             return null;
         }
+    }
+
+    public void storeListResults(List<ResultDetail> resultDetailList){
+        SharedPreferences.Editor editor = prefs.edit();
+        Gson gson = new Gson();
+        String json = gson.toJson(resultDetailList);
+        editor.putString("results", json);
+        editor.apply();
+    }
+
+    public List<ResultDetail> getlistResultDetail(){
+        Gson gson = new Gson();
+        String json = prefs.getString("results", "");
+        Type type = new TypeToken<List<ResultDetail>>() {}.getType();
+        return gson.fromJson(json, type);
     }
 }

@@ -479,7 +479,6 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-
     private void getUserInfo(FirebaseUser currentUser) {
         user = new User();
         if (currentUser != null) { //---- Email connection ---- //

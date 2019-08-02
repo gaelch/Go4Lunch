@@ -30,9 +30,9 @@ public class Go4LunchStream {
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(100, TimeUnit.SECONDS);
     }
-    public static Observable<Predictions> getPlacesAutoComplete(String placeId, String types, String location, int radius, String language, String key){
+    public static Observable<Predictions> getPlacesAutoComplete(String search,  String location, int radius, String key){
         Go4LunchService go4LunchService = Objects.requireNonNull(Go4LunchService.retrofit.get()).create(Go4LunchService.class);
-        return go4LunchService.getPlacesAutoComplete(placeId, types, location, radius, language, key)
+        return go4LunchService.getPlacesAutoComplete(search, location, radius, key)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
                 .timeout(100, TimeUnit.SECONDS);

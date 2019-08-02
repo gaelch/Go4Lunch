@@ -18,6 +18,7 @@
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
     <application
         android:name="android.support.multidex.MultiDexApplication"
@@ -76,6 +77,12 @@
         </receiver>
 
         <activity android:name=".controller.activity.HomeActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.SEARCH"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.app.searchable"
+                android:resource="@xml/searchable" />
         </activity>
         <activity android:name=".controller.activity.MainActivity">
             <intent-filter>
@@ -83,7 +90,7 @@
                 <action android:name="android.intent.action.VIEW" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity> <!-- MENTOR CHAT ACTIVITY -->
+        </activity>
     </application>
 
 </manifest>

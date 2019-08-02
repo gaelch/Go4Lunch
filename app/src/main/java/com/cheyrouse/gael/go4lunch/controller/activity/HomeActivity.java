@@ -1,13 +1,12 @@
 package com.cheyrouse.gael.go4lunch.controller.activity;
 
 import android.app.Activity;
+import android.app.SearchManager;
+import android.content.Context;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -18,14 +17,17 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AutoCompleteTextView;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -55,13 +57,14 @@ import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
+import com.google.common.reflect.TypeToken;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
+import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
-import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -74,6 +77,7 @@ import io.reactivex.observers.DisposableObserver;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
 
+
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         MapsFragment.MapsFragmentListener, ListFragment.ListFragmentListener,
         PlacesAutoCompleteAdapter.onTextViewAdapterListener, WorkmatesFragment.WorkMateFragmentListener {
@@ -82,8 +86,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     Toolbar toolbar;
     @BindView(R.id.activity_home_bottom_navigation)
     BottomNavigationView bottomNavigationView;
-    @BindView(R.id.searchView)
-    AutoCompleteTextView searchView;
+    //    @BindView(R.id.lvResultSearchView) ListView listViewResult;
+    @BindView(R.id.search_view)
+    android.support.v7.widget.SearchView searchView;
+
 
     private DrawerLayout drawerLayout;
     private String choice = null;
@@ -97,8 +103,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<ResultDetail> resultDetails;
     private ResultDetail resultDetail;
     private ResultDetail restaurantChoice;
-    private Predictions predictionList;
     private String location;
+    private List<Prediction> resultsPredictions = null;
+    private Prefs prefs;
+//    private ArrayAdapter<Prediction> predictionArrayAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -112,10 +120,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         configureNavigationView();
         configureBottomView();
         gpsGetLocation();
+        handleIntent(getIntent());
     }
 
     private void getPrefs() {
-        Prefs prefs = Prefs.get(this);
+        prefs = Prefs.get(this);
         user = prefs.getPrefsUser();
         restaurantChoice = prefs.getChoice();
     }
@@ -191,7 +200,120 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
+        MenuItem item = menu.findItem(R.id.menu_activity_home_search);
+        SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
+        searchView = new android.support.v7.widget.SearchView(this.getSupportActionBar().getThemedContext());
+        item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW | MenuItem.SHOW_AS_ACTION_IF_ROOM);
+        item.setActionView(searchView);
+        searchView.setQueryHint(getResources().getString(R.string.search_view));
+        searchView.setSearchableInfo(Objects.requireNonNull(searchManager).getSearchableInfo(this.getComponentName()));
+//        searchView.setIconifiedByDefault(true);
+        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                searchQuery(newText);
+                return false;
+            }
+        });
+//        listViewResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+//            @Override
+//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
+//                Log.e("test", "test");
+//                Prediction prediction = predictionArrayAdapter.getItem(position);
+//                for(ResultDetail r : resultDetailList){
+//                    if(r.getId().equals(Objects.requireNonNull(prediction).getId())){
+//                        listViewResult.setVisibility(View.GONE);
+//                        showDetailRestaurantFragment(r, users, user);
+//                    }
+//                }
+//            }
+//        });
+        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
+            @Override
+            public boolean onClose() {
+                Log.e("test close searchView", "close");
+//                listViewResult.setVisibility(View.GONE);
+                hideSoftKeyboard(HomeActivity.this);
+                return true;
+            }
+        });
         return true;
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        handleIntent(intent);
+    }
+
+    private void handleIntent(Intent intent) {
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            searchQuery(query);
+        }
+    }
+
+    private void searchQuery(String query) {
+        if (query.length() > 2) {
+//            listViewResult.setVisibility(View.VISIBLE);
+            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, getString(R.string.google_maps_key)).subscribeWith(new DisposableObserver<Predictions>() {
+                @Override
+                public void onNext(Predictions predictions) {
+                    resultsPredictions = predictions.getPredictions();
+                    Log.e("test result search", String.valueOf(resultsPredictions.size()));
+//                    predictionArrayAdapter = new ArrayAdapter<Prediction>(HomeActivity.this, android.R.layout.simple_list_item_1,
+//                            android.R.id.text1, resultsPredictions);
+//                    listViewResult.setAdapter(predictionArrayAdapter);
+                }
+
+                @Override
+                public void onError(Throwable e) {
+                    e.getMessage();
+                }
+
+                @Override
+                public void onComplete() {
+                    updateUI();
+                }
+            });
+        }
+    }
+
+    private void updateUI() {
+        if(prefs.getlistResultDetail() != null){
+            resultDetailList = prefs.getlistResultDetail();
+        }
+        List<ResultDetail> newResults = new ArrayList<>();
+        if (resultDetailList.size() > 0) {
+            if (resultsPredictions != null && resultsPredictions.size() > 0) {
+                for (ResultDetail resultDetail : resultDetailList) {
+                    for (Prediction prediction : resultsPredictions) {
+                        if (resultDetail.getId().equals(prediction.getId())) {
+                            newResults.add(resultDetail);
+                        }
+                    }
+                }
+            }
+        }
+        if (newResults.size() > 0) {
+            Fragment newFragment = new Fragment();
+            List fragments = getSupportFragmentManager().getFragments();
+            newFragment = (Fragment) fragments.get(fragments.size() - 1);
+            if(newFragment instanceof MapsFragment){
+                newFragment = MapsFragment.newInstance(newResults, restaurantList);
+                getFragmentManagerToLaunch(newFragment);
+            }
+            if(newFragment instanceof ListFragment){
+                newFragment = ListFragment.newInstance(newResults, users);
+                getFragmentManagerToLaunch(newFragment);
+            }
+
+        }
     }
 
     // To search
@@ -201,21 +323,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         switch (item.getItemId()) {
             case R.id.menu_activity_home_search:
                 searchView.setVisibility(View.VISIBLE);
-                loadData();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
         }
     }
-
-    private void loadData() {
-        List<Prediction> predictions = new ArrayList<>();
-        PlacesAutoCompleteAdapter placesAutoCompleteAdapter = new PlacesAutoCompleteAdapter(this, predictions, location, this);
-        searchView.setThreshold(1);
-        searchView.setAdapter(placesAutoCompleteAdapter);
-        searchView.setHint(R.string.search_view);
-    }
-
 
     //Configuration NavigationView of Drawer Menu
     private void configureNavigationView() {
@@ -315,17 +427,17 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         toolbar.setVisibility(View.VISIBLE);
         bottomNavigationView.setVisibility(View.VISIBLE);
-        searchView.setVisibility(View.GONE);
+        //searchView.setVisibility(View.GONE);
         // 5 - Handle back click to close menu
-        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-            getSupportFragmentManager().popBackStack();
-        else
-            finish();    // Finish the activity
+//        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
+//            getSupportFragmentManager().popBackStack();
+//        else
+//            finish();    // Finish the activity
         if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             this.drawerLayout.closeDrawer(GravityCompat.START);
         } else {
             super.onBackPressed();
-            // this.recreate();
+
         }
     }
 
@@ -416,7 +528,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                     } else {
                         showDetailRestaurantFragment(resultDetail, users, user);
                         hideSoftKeyboard(HomeActivity.this);
-                        hideAutoCompleteTextView();
                     }
                     //do something with list of pojos retrieved
 
@@ -463,7 +574,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         if (newFragment instanceof RestauDetailFragment) {
             hideToolBarAndBottomBar();
         }
-        transaction.replace(R.id.activity_home_frame_layout, newFragment);
+        transaction.add(R.id.activity_home_frame_layout, newFragment, String.valueOf(newFragment));
         transaction.addToBackStack(String.valueOf(newFragment));
         transaction.commit();
     }
@@ -491,7 +602,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @Override
     public void onRestaurantClicked(Prediction prediction) {
-        searchView.setText(prediction.getDescription());
         Log.e("prediction in home", prediction.getDescription());
         getPredictionsAndPassDataToDetailFragment(prediction);
     }
@@ -526,19 +636,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Objects.requireNonNull(activity.getCurrentFocus()).getWindowToken(), 0);
     }
 
-    public void hideAutoCompleteTextView() {
-        searchView.setText("");
-        searchView.setVisibility(View.GONE);
-    }
-
     @Override
     public void callbackMates(User user) {
         getRestaurantInListResultDetails(user);
     }
 
     private void getRestaurantInListResultDetails(User user) {
-        for (ResultDetail r : resultDetailList){
-            if(r.getName().equals(user.getChoice())){
+        for (ResultDetail r : resultDetailList) {
+            if (r.getName().equals(user.getChoice())) {
                 showDetailRestaurantFragment(r, users, user);
             }
         }

@@ -49,7 +49,7 @@
 
     <!--SEARCH VIEW -->
     <string name="search_view">Search Restaurant</string>
-
+    <string name="speak_voice">Speak to search</string>
     <string name="no_url">Sorry ! No url found !</string>
 
     <!-- MENTOR_CHAT ACTIVITY -->

@@ -15,6 +15,7 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.sip.SipSession;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -27,9 +28,12 @@ import android.view.ViewGroup;
 
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
+import com.cheyrouse.gael.go4lunch.utils.GPSTracker;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
+import com.facebook.places.internal.LocationPackageManager;
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -115,6 +119,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
 
     @Override
+    public void onResume() {
+        super.onResume();
+    }
+
+    @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         // Add a marker in Sydney and move the camera
@@ -125,12 +134,11 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         }
         mMap.setMyLocationEnabled(true);
         LocationManager locationManagerCt = (LocationManager) Objects.requireNonNull(getActivity()).getSystemService(Context.LOCATION_SERVICE);
-        assert locationManagerCt != null;
-        locationCt = locationManagerCt.getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
+        locationCt = Objects.requireNonNull(locationManagerCt).getLastKnownLocation(LocationManager.NETWORK_PROVIDER);
         if (locationCt == null) {
-            showSettingsAlert();
+            gpsGetLocation();
         } else {
-            goToMyLocation();
+            goToMyLocation(null);
         }
 
         for (ResultDetail r : results) {
@@ -191,12 +199,21 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
-    private void goToMyLocation() {
-        assert locationCt != null;
-        LatLng latLng = new LatLng(locationCt.getLatitude(),
-                locationCt.getLongitude());
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
+    private void gpsGetLocation() {
+        GPSTracker gps = new GPSTracker(getApplicationContext());
+        if (gps.canGetLocation()) {
+            Log.e("testGpsTrue", "true");
+            LatLng latLng = new LatLng(gps.getLatitude(), gps.getLongitude());
+            goToMyLocation(latLng);
+        }
+    }
 
+    private void goToMyLocation(LatLng latLng) {
+        if(latLng == null){
+             latLng = new LatLng(locationCt.getLatitude(),
+                    locationCt.getLongitude());
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         // Zoom in the Google Map
         mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
     }

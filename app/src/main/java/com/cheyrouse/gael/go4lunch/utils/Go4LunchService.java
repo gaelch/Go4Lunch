@@ -27,13 +27,11 @@ public interface Go4LunchService {
     @GET("details/json?key="+ API_KEY)
     Observable<PlaceDetails> getMapPlaceDetails(@Query(value = "placeid", encoded = true) String placeId);
 
-    @GET("place/autocomplete/json")
+    @GET("autocomplete/json?strictbounds&types=establishment")
     public Observable<Predictions> getPlacesAutoComplete(
             @Query("input") String input,
-            @Query("types") String types,
             @Query("location") String location,
             @Query("radius") int radius,
-            @Query("language") String language,
             @Query("key") String key
     );
 
