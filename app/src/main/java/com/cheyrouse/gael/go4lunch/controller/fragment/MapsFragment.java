@@ -68,6 +68,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private List<ResultDetail> results;
     private List<Restaurant> restaurantList;
     private Marker marker;
+    private boolean isDuringVoiceSearch;
 
 
     public MapsFragment() {
@@ -114,13 +115,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         assert getArguments() != null;
         results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
-        Log.e("restoListSizeInMap", String.valueOf(restaurantList.size()));
     }
 
+    public void setDuringVoiceSearch(boolean duringVoiceSearch) {
+        isDuringVoiceSearch = duringVoiceSearch;
+    }
 
     @Override
     public void onResume() {
-        super.onResume();
+        if(!isDuringVoiceSearch){
+            super.onResume();
+        }else{
+
+        }
     }
 
     @Override

@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Environment;
@@ -20,6 +21,7 @@ import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -70,6 +72,7 @@ import com.twitter.sdk.android.core.Callback;
 import com.twitter.sdk.android.core.DefaultLogger;
 import com.twitter.sdk.android.core.Result;
 import com.twitter.sdk.android.core.Twitter;
+import com.twitter.sdk.android.core.TwitterApiClient;
 import com.twitter.sdk.android.core.TwitterAuthConfig;
 import com.twitter.sdk.android.core.TwitterConfig;
 import com.twitter.sdk.android.core.TwitterException;
@@ -96,15 +99,15 @@ public class MainActivity extends AppCompatActivity {
     Button buttonFaceBook;
     @BindView(R.id.button_google)
     Button buttonGoogle;
-    @BindView(R.id.button_twitter)
-    Button buttonTwitter;
     @BindView(R.id.button_email)
     Button buttonEmail;
     @BindView(R.id.activity_main_coordinator_layout)
     CoordinatorLayout coordinatorLayout;
+    @BindView(R.id.button_twitter) Button twitterLoginButton;
 
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
+    private static int RESULT_TWITTER = 2;
 
     private User user;
     private Restaurant restaurant;
@@ -119,16 +122,77 @@ public class MainActivity extends AppCompatActivity {
     private View dialogView;
 
 
+    @RequiresApi(api = Build.VERSION_CODES.M)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        CheckSelfPermissions();
+        checkIfGpsIsEnable();
         prefs = Prefs.get(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
         (new AlarmHelper()).configureAlarmToResetChoice(this);
+    }
+
+    private void configTwitterAuth() {
+        OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
+        firebaseAuth
+                .startActivityForSignInWithProvider(/* activity= */ this, provider.build())
+                .addOnSuccessListener(
+                        new OnSuccessListener<AuthResult>() {
+                            @Override
+                            public void onSuccess(AuthResult authResult) {
+                                FirebaseUser user = firebaseAuth.getCurrentUser();
+                                getUserInfo(user);
+                            }
+                        })
+                .addOnFailureListener(
+                        new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                // Handle failure.
+                            }
+                        });
+    }
+
+    // Check permissions to activate them
+    private void CheckSelfPermissions() {
+        List<String> permissions = new ArrayList<String>();
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.WAKE_LOCK);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.INTERNET);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.READ_PHONE_STATE);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.VIBRATE);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
+        } //if
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.CALL_PHONE);
+        } //if
+        if (!permissions.isEmpty()) {
+            String[] ListedemandeDroit = {};
+            ListedemandeDroit = permissions.toArray(ListedemandeDroit);
+            ActivityCompat.requestPermissions(this, permissions.toArray(ListedemandeDroit), 1);
+        } //if
     }
 
     @Override
@@ -147,11 +211,10 @@ public class MainActivity extends AppCompatActivity {
                 getUserInfo(null);
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                e.getMessage();
             }
         }
     }
-
-
     // --------------------
     // UI
     // --------------------
@@ -188,43 +251,18 @@ public class MainActivity extends AppCompatActivity {
     private void checkPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-            showAlertDialog();
         } else {
             configureAndShowHomeActivity();
         }
     }
 
-    private void configureAndShowHomeActivity() {
-        Intent homeActivityIntent = new Intent(MainActivity.this, HomeActivity.class);
-        startActivity(homeActivityIntent);
-    }
+    private void checkIfGpsIsEnable() {
+        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
 
-    private void showAlertDialog() {
-        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, 1);
-    }
-
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    configureAndShowHomeActivity();
-                } else {
-                    showSettingsAlert();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
-            }
-            break;
-            case 2: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    showAlertDialog();
-                }
-            }
-
+        assert manager != null;
+        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+            showSettingsAlert();
         }
-        return;
     }
 
     public void showSettingsAlert() {
@@ -250,7 +288,36 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
-    @OnClick({R.id.button_facebook, R.id.button_google, R.id.button_twitter, R.id.button_email})
+    private void configureAndShowHomeActivity() {
+        Intent homeActivityIntent = new Intent(MainActivity.this, HomeActivity.class);
+        startActivity(homeActivityIntent);
+    }
+
+    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case 1: {
+                // If request is cancelled, the result arrays are empty.
+                if (grantResults.length > 0
+                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    configureAndShowHomeActivity();
+                } else {
+                   // showSettingsAlert();
+                    // permission denied, boo! Disable the
+                    // functionality that depends on this permission.
+                }
+            }
+            break;
+            case 2: {
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    //showAlertDialog();
+                }
+            }
+
+        }
+        return;
+    }
+
+    @OnClick({R.id.button_facebook, R.id.button_google,  R.id.button_twitter, R.id.button_email})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_facebook:
@@ -260,7 +327,8 @@ public class MainActivity extends AppCompatActivity {
                 startConnexionWhitGoogle();
                 break;
             case R.id.button_twitter:
-                startConnexionWhitTwitter();
+                //startConnexionWhitTwitter();
+                configTwitterAuth();
                 break;
             case R.id.button_email:
                 startConnexionByEmail();
@@ -367,8 +435,10 @@ public class MainActivity extends AppCompatActivity {
                 if (!RegexUtil.isValidEmail(email)) {
                     Toast.makeText(getApplicationContext(), "Sorry but is not a valid email", Toast.LENGTH_LONG).show();
                 }
-                if (RegexUtil.isValidEmail(email) && password.length() > 1) {
+                if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
                     launchConnection(email, password);
+                }else{
+                    Toast.makeText(getApplicationContext(), "enter your password please", Toast.LENGTH_LONG).show();
                 }
             }
         });
@@ -420,19 +490,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    private void startConnexionWhitTwitter() {
-        startActivityForResult(
-                AuthUI.getInstance()
-                        .createSignInIntentBuilder()
-                        .setTheme(R.style.LoginTheme)
-                        .setAvailableProviders(
-                                Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.TWITTER_PROVIDER).build())) // SUPPORT TWITTER
-                        .setIsSmartLockEnabled(false, true)
-                        .setLogo(R.drawable.ic_twitter_squared_48)
-                        .build(),
-                RC_SIGN_IN);
-    }
-
     private void startConnexionWhitGoogle() {
         startActivityForResult(
                 AuthUI.getInstance()
@@ -465,7 +522,7 @@ public class MainActivity extends AppCompatActivity {
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                        if (user.getUid().equals(document.getData().get("uid").toString())) {
+                        if (user.getUid().equals(document.getData().get("uid").toString())) { ////////// voir pour éviter la création de plusieur compte avec les même id
                             var = true;
                         }
                     }
@@ -486,8 +543,16 @@ public class MainActivity extends AppCompatActivity {
                 // UID specific to the provider
                 user.setUid(profile.getUid());
                 // Name, email address, and profile photo Url
-                user.setUsername(userName);
-                user.seteMail(profile.getUid());
+                if(userName!=null){
+                    user.setUsername(userName);
+                }else{
+                    user.setUsername(profile.getDisplayName());
+                }
+                if(profile.getEmail()!=null){
+                    user.seteMail(profile.getEmail());
+                }else{
+                    user.seteMail(profile.getUid());
+                }
                 if (profile.getPhotoUrl() != null) {
                     user.setUrlPicture(Objects.requireNonNull(profile.getPhotoUrl()).toString());
                 }
@@ -510,6 +575,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void storeUserInPrefs() {
         prefs = Prefs.get(this);
+        prefs.storeListResults(null);
         User userPref = prefs.getPrefsUser();
         if (userPref != null && userPref.getUid().equals(user.getUid())) {
             String choice = userPref.getChoice();

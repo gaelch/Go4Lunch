@@ -76,7 +76,7 @@
             </intent-filter>
         </receiver>
 
-        <activity android:name=".controller.activity.HomeActivity">
+        <activity android:name=".controller.activity.HomeActivity" android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.SEARCH"/>
             </intent-filter>

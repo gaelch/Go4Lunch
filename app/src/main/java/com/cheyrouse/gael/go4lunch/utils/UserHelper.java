@@ -26,7 +26,12 @@ public class UserHelper {
 
     // --- GET ---
 
-    public static com.google.android.gms.tasks.Task<DocumentSnapshot> getUser(String uid){
+//    public static com.google.android.gms.tasks.Task<DocumentSnapshot> getUser(String uid){
+//        return UserHelper.getUsersCollection().document(uid).get();
+//    }
+    // --- GET ---
+
+    public static Task<DocumentSnapshot> getUser(String uid){
         return UserHelper.getUsersCollection().document(uid).get();
     }
 

@@ -9,6 +9,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -46,6 +47,7 @@ import com.cheyrouse.gael.go4lunch.views.WorkMatesAdapter;
 import com.facebook.login.widget.ProfilePictureView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -93,6 +95,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     private RestauDetailFragmentListener mListener;
     private boolean var = false;
     private User user;
+    //private User userDatabase;
+    private String choice;
     private Restaurant restaurant;
     private ResultDetail resultDetail;
     private List<Restaurant> restaurantList;
@@ -142,8 +146,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         configureTextView();
         configureRecyclerView();
         configureBottomView();
-        configureFab();
         configureTextView();
+        configureSwipeRefreshLayout();
         return view;
     }
 
@@ -171,7 +175,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
 
     private void configureFab() {
         floatingActionButton.setOnClickListener(this);
-        if (resultDetail.getName().equals(user.getChoice())) {
+        if (resultDetail.getName().equals(choice)) {
             floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
         } else {
             floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
@@ -208,9 +212,26 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         users = (List<User>) getArguments().getSerializable(USERS);
         user = (User) getArguments().getSerializable(USER);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
+       // getCurrentUserInDatabase();
         getRestaurantJoiningUsers();
     }
 
+//    private void getCurrentUserInDatabase() {
+//        userDatabase = new User();
+//        UserHelper.getUser(user.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
+//            @Override
+//            public void onSuccess(DocumentSnapshot documentSnapshot) {
+//                userDatabase.setUsername((String) Objects.requireNonNull(documentSnapshot.get("username")));
+//                userDatabase.setChoice((String) documentSnapshot.get("choice"));
+//            }
+//        }).addOnFailureListener(new OnFailureListener() {
+//            @Override
+//            public void onFailure(@NonNull Exception e) {
+//                Log.e("fail", e.getMessage());
+//            }
+//        });
+//        Log.e("test userdatabase", userDatabase.getUsername());
+//    }
     private void getRestaurantJoiningUsers() {
         usersAreJoining = new ArrayList<>();
         for (User user : users) {
@@ -218,6 +239,9 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                 if (user.getChoice().equals(resultDetail.getName())) {
                     usersAreJoining.add(user);
                 }
+            }
+            if (user.getUid().equals(this.user.getUid())) {
+                choice = user.getChoice();
             }
         }
     }
@@ -242,7 +266,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-
+                getUsersInDatabase();
+                configureRecyclerView();
             }
         });
     }
@@ -348,8 +373,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             if (!var) {
                 var = true;
                 floatingActionButton.setColorFilter(getResources().getColor(R.color.green));
-                if (user.getChoice() != null && user.getChoice().length() != 0) {
-                    deleteChoice(user.getUsername(), user.getChoice());
+                if (choice != null && choice.length() != 0) {
+                    deleteChoice(user.getUsername(), choice);
                 }
                 //set user table restaurant et set restaurant table users
                 user.setChoice(resultDetail.getName());
@@ -360,8 +385,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                 getUsersInDatabase();
             } else {
                 var = false;
-                if (user.getChoice() != null) {
-                    deleteChoice(user.getUsername(), user.getChoice());
+                if (choice != null) {
+                    deleteChoice(user.getUsername(), choice);
                 }
                 floatingActionButton.setColorFilter(getResources().getColor(R.color.grey));
                 user.setChoice("");
@@ -399,6 +424,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                         users.add(userToAdd);
                         getRestaurantJoiningUsers();
                         configureRecyclerView();
+                        configureFab();
                     }
                 } else {
                     Log.d(ProfilePictureView.TAG, "Error getting documents: ", task.getException());

@@ -11,8 +11,8 @@ public class DateUtils {
         Calendar now = Calendar.getInstance(Locale.FRANCE);
         Calendar calendar = Calendar.getInstance(Locale.FRANCE);
         calendar.setTimeInMillis(System.currentTimeMillis());
-        calendar.set(Calendar.HOUR_OF_DAY, 11);
-        calendar.set(Calendar.MINUTE,5);
+        calendar.set(Calendar.HOUR_OF_DAY, 13);
+        calendar.set(Calendar.MINUTE,40);
         if(calendar.before(now)){
             calendar.add(Calendar.DATE,1);
         }
