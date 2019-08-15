@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.utils;
+package com.cheyrouse.gael.go4lunch.service;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -186,6 +186,8 @@ public class GPSTracker extends Service implements LocationListener {
         // Showing Alert Message
         alertDialog.show();
     }
+
+
 
     @Override
     public void onLocationChanged(Location location) {

@@ -9,7 +9,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
-import android.location.Location;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -37,17 +36,15 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
-import com.cheyrouse.gael.go4lunch.utils.starsUtils;
+import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.controller.activity.RestaurantWebSiteActivity;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
-import com.cheyrouse.gael.go4lunch.views.DetailAdapter;
 import com.cheyrouse.gael.go4lunch.views.WorkMatesAdapter;
 import com.facebook.login.widget.ProfilePictureView;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
@@ -69,7 +66,7 @@ import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
-import static com.cheyrouse.gael.go4lunch.utils.Go4LunchService.API_KEY;
+import static com.cheyrouse.gael.go4lunch.service.Go4LunchService.API_KEY;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -78,16 +75,26 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
 
 
     public static final String WEB_SITE_EXTRA = "web_site";
-    @BindView(R.id.image_restaurant) ImageView imageViewRestaurant;
-    @BindView(R.id.fab) FloatingActionButton floatingActionButton;
-    @BindView(R.id.tv_restaurant_name) TextView tvRestaurantName;
-    @BindView(R.id.tv_restaurant_address) TextView tvRestaurantAddress;
-    @BindView(R.id.rate_star1) ImageView imageViewRate1;
-    @BindView(R.id.rate_star2) ImageView imageViewRate2;
-    @BindView(R.id.rate_star3)ImageView imageViewRate3;
-    @BindView(R.id.bottomNavigationDetailView) BottomNavigationView bottomNavigationView;
-    @BindView(R.id.recycler_view_detail) RecyclerView recyclerView;
-    @BindView(R.id.fragment_restau_swipe_container) SwipeRefreshLayout swipeRefreshLayout;
+    @BindView(R.id.image_restaurant)
+    ImageView imageViewRestaurant;
+    @BindView(R.id.fab)
+    FloatingActionButton floatingActionButton;
+    @BindView(R.id.tv_restaurant_name)
+    TextView tvRestaurantName;
+    @BindView(R.id.tv_restaurant_address)
+    TextView tvRestaurantAddress;
+    @BindView(R.id.rate_star1)
+    ImageView imageViewRate1;
+    @BindView(R.id.rate_star2)
+    ImageView imageViewRate2;
+    @BindView(R.id.rate_star3)
+    ImageView imageViewRate3;
+    @BindView(R.id.bottomNavigationDetailView)
+    BottomNavigationView bottomNavigationView;
+    @BindView(R.id.recycler_view_detail)
+    RecyclerView recyclerView;
+    @BindView(R.id.fragment_restau_swipe_container)
+    SwipeRefreshLayout swipeRefreshLayout;
 
     private WorkMatesAdapter adapter;
     private List<User> users;
@@ -212,11 +219,11 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         users = (List<User>) getArguments().getSerializable(USERS);
         user = (User) getArguments().getSerializable(USER);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
-       // getCurrentUserInDatabase();
+        // getCurrentUserInDatabase();
         getRestaurantJoiningUsers();
     }
 
-//    private void getCurrentUserInDatabase() {
+    //    private void getCurrentUserInDatabase() {
 //        userDatabase = new User();
 //        UserHelper.getUser(user.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
 //            @Override
@@ -254,7 +261,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     //configure recyclerView and Tabs
     private void configureRecyclerView() {
         // Create adapter passing in the sample user data
-        this.adapter = new WorkMatesAdapter(getActivity(), usersAreJoining, Glide.with(this),null, 1);
+        this.adapter = new WorkMatesAdapter(getActivity(), usersAreJoining, Glide.with(this), null, 1);
         // Attach the adapter to the recyclerView to populate items
         this.recyclerView.setAdapter(this.adapter);
         // Set layout manager to position the items
@@ -296,7 +303,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             case R.id.action_like:
                 String userId = user.getUid();
                 updateTableRestaurants(userId, user.getUsername(), resultDetail.getName(), 1);
-                Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
                 break;
             case R.id.action_website:
                 // Toast.makeText(getActivity(), "website", Toast.LENGTH_SHORT).show();
@@ -325,19 +331,20 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     private void setStars() {
-        if (restaurant.getRate() != null && restaurant.getRate().size() != 0) {
-            if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
-                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            }
-            if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
-                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            }
-            if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
-                imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            }
+        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 0) {
+            imageViewRate1.setImageDrawable(null);
+        }
+        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 1) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        }
+        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 2) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+        }
+        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 3) {
+            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
+            imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
         }
     }
 
@@ -409,14 +416,14 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                     for (QueryDocumentSnapshot document : task.getResult()) {
                         String uid = document.getData().get("uid").toString();
                         String username = document.getData().get("username").toString();
-                        if(document.getData().get("urlPicture")!=null){
+                        if (document.getData().get("urlPicture") != null) {
                             urlPicture = document.getData().get("urlPicture").toString();
-                        }else{
+                        } else {
                             urlPicture = null;
                         }
-                        if(document.getData().get("choice")!=null){
+                        if (document.getData().get("choice") != null) {
                             choice = document.getData().get("choice").toString();
-                        }else{
+                        } else {
                             choice = null;
                         }
                         User userToAdd = new User(uid, username, urlPicture);
@@ -439,11 +446,28 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         boolean var = false;
         for (Restaurant r : restaurantList) {
             if (r.getRestaurantName().equals(restaurant.getRestaurantName())) {
-                if (i == 0) {
-                    RestaurantHelper.updateRestaurantChoice(userName, choice);
+                List<String> rateList = restaurant.getRate();
+                if (rateList.size() != 0) {
+                    for (String rate : rateList) {
+                        if (rate.equals(userId)) {
+                            RestaurantHelper.deleteRestaurantRate(userId, r.getRestaurantUid());
+                            Toast.makeText(getActivity(), "Unliked !", Toast.LENGTH_SHORT).show();
+                        } else {
+                            if (i == 0) {
+                                RestaurantHelper.updateRestaurantChoice(userName, choice);
+                            } else {
+                                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+                                Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
+                            }
+                        }
+                    }
                 } else {
-                    RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                    setStars();
+                    if (i == 0) {
+                        RestaurantHelper.updateRestaurantChoice(userName, choice);
+                    } else {
+                        RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+                        Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         }
@@ -453,16 +477,16 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             }
         }
         if (!var) {
-            if(i == 0){
+            if (i == 0) {
                 RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
                         resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
                 RestaurantHelper.updateRestaurantChoice(userName, choice);
-            }else {
+            } else {
                 RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
                         resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
                 RestaurantHelper.updateRestaurantChoice(userName, choice);
                 RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                setStars();
+                Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
             }
         }
         getRestaurentFromFirestore();

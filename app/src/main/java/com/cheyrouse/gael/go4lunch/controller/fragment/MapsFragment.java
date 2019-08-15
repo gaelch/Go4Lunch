@@ -15,7 +15,6 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
-import android.net.sip.SipSession;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
@@ -28,12 +27,8 @@ import android.view.ViewGroup;
 
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
-import com.cheyrouse.gael.go4lunch.utils.GPSTracker;
-import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.service.GPSTracker;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
-import com.cheyrouse.gael.go4lunch.models.Result;
-import com.facebook.places.internal.LocationPackageManager;
-import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -45,7 +40,6 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.io.Serializable;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 

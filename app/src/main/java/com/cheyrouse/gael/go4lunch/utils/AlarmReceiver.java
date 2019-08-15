@@ -37,7 +37,9 @@ public class AlarmReceiver extends BroadcastReceiver {
         //request sharedPreferences to reset restaurant
         Prefs prefs = new Prefs(context);
         User user = prefs.getPrefsUser();
-        user.setChoice(null);
+        if(user != null){
+            user.setChoice(null);
+        }
         prefs.storeChoicePrefs(null);
         prefs.storeUserPrefs(user);
         mContext = context;

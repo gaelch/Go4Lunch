@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.utils;
+package com.cheyrouse.gael.go4lunch.service;
 
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.PlaceDetails;

@@ -48,6 +48,11 @@ public class RestaurantHelper {
         return restaurant.update("rate", FieldValue.arrayUnion(userId));
     }
 
+    public static com.google.android.gms.tasks.Task<Void> deleteRestaurantRate(String userId, String uid) {
+        DocumentReference restaurant = RestaurantHelper.getRestaurantsCollection().document(uid);
+        return restaurant.update("rate", FieldValue.arrayRemove(userId));
+    }
+
     // --- DELETE ---
 
     public static Task<Void> deleteUserChoice(String userName, String uid) {

@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.BottomNavigationView;
 import android.support.design.widget.NavigationView;
@@ -26,10 +25,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -39,10 +35,12 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.fragment.SettingsFragment;
 import com.cheyrouse.gael.go4lunch.models.Prediction;
 import com.cheyrouse.gael.go4lunch.models.Predictions;
-import com.cheyrouse.gael.go4lunch.utils.GPSTracker;
+import com.cheyrouse.gael.go4lunch.service.GPSTracker;
 import com.cheyrouse.gael.go4lunch.utils.Go4LunchStream;
+import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.utils.StringHelper;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
@@ -54,20 +52,15 @@ import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
-import com.cheyrouse.gael.go4lunch.views.PlacesAutoCompleteAdapter;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
-import com.google.common.reflect.TypeToken;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
-import java.io.Serializable;
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -78,12 +71,13 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
 import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
+import static com.cheyrouse.gael.go4lunch.utils.StringHelper.convertInString;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
-        MapsFragment.MapsFragmentListener, ListFragment.ListFragmentListener,
-        PlacesAutoCompleteAdapter.onTextViewAdapterListener, WorkmatesFragment.WorkMateFragmentListener {
+        MapsFragment.MapsFragmentListener, ListFragment.ListFragmentListener, WorkmatesFragment.WorkMateFragmentListener {
 
     private static final String NEWRESULTS = "new_results";
     @BindView(R.id.toolbar)
@@ -111,7 +105,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<Prediction> resultsPredictions = null;
     private Prefs prefs;
     private MapsFragment mapsFragment;
-//    private ArrayAdapter<Prediction> predictionArrayAdapter;
+    String choiceUser = null;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -132,7 +126,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void getPrefs() {
         prefs = Prefs.get(this);
         user = prefs.getPrefsUser();
-        //restaurantChoice = prefs.getChoice();
     }
 
     private void gpsGetLocation() {
@@ -141,13 +134,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             Log.e("testGpsTrue", "true");
             latitude = gps.getLatitude(); // returns latitude
             longitude = gps.getLongitude(); // returns longitude
-            convertInString(latitude, longitude);
+            executeRequestToPlaceApi(StringHelper.convertInString(latitude, longitude));
         }
-    }
-
-    private void convertInString(double latitude, double longitude) {
-        location = latitude + "," + longitude;
-        executeRequestToPlaceApi(location);
     }
 
     private void executeRequestToPlaceApi(String location) {
@@ -227,19 +215,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 return false;
             }
         });
-//        listViewResult.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-//            @Override
-//            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l) {
-//                Log.e("test", "test");
-//                Prediction prediction = predictionArrayAdapter.getItem(position);
-//                for(ResultDetail r : resultDetailList){
-//                    if(r.getId().equals(Objects.requireNonNull(prediction).getId())){
-//                        listViewResult.setVisibility(View.GONE);
-//                        showDetailRestaurantFragment(r, users, user);
-//                    }
-//                }
-//            }
-//        });
         searchView.setOnCloseListener(new SearchView.OnCloseListener() {
             @Override
             public boolean onClose() {
@@ -278,7 +253,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 //                            android.R.id.text1, resultsPredictions);
 //                    listViewResult.setAdapter(predictionArrayAdapter);
                 }
-
                 @Override
                 public void onError(Throwable e) {
                     e.getMessage();
@@ -295,21 +269,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void updateUI() {
-//        if (prefs.getlistResultDetail() != null) { ///////////----> ici list resultDetail null voir pourquoi
-//            resultDetailList = prefs.getlistResultDetail();
-//        }
-        List<ResultDetail> newResults = new ArrayList<>();
-        if (resultDetailList.size() > 0) {
-            if (resultsPredictions != null && resultsPredictions.size() > 0) {
-                for (ResultDetail resultDetail : resultDetailList) {
-                    for (Prediction prediction : resultsPredictions) {
-                        if (resultDetail.getId().equals(prediction.getId())) {
-                            newResults.add(resultDetail);
-                        }
-                    }
-                }
-            }
-        }
+        List<ResultDetail> newResults = ListUtils.transforPredictionToResultDetail(resultDetailList, resultsPredictions);
         if (newResults.size() > 0) {
 
             FragmentManager fm = getSupportFragmentManager();
@@ -475,6 +435,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         User userToAdd = new User(uid, username, urlPicture);
                         userToAdd.setChoice(choice);
                         users.add(userToAdd);
+                        if(userToAdd.getUsername().equals(user.getUsername())){
+                            choiceUser = userToAdd.getChoice();
+                        }
                     }
                     if (i == 1) {
                         getFragmentManagerToLaunch(ListFragment.newInstance(resultDetailList, users));
@@ -483,9 +446,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         getFragmentManagerToLaunch(WorkmatesFragment.newInstance(users));
                     }
                     if (i == 3) {
-                        if (user.getChoice() != null) {
-                            getResultDetail(user);
-
+                        if (choiceUser != null) {
+                            getResultDetail(choiceUser);
                         } else {
                             Toast.makeText(HomeActivity.this, "sorry but you did not choose a restaurant today", Toast.LENGTH_LONG).show();
                         }
@@ -498,10 +460,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void getResultDetail(User user) {
+    private void getResultDetail(String choice) {
         ResultDetail resultDet = new ResultDetail();
         for (ResultDetail resultDetail : resultDetailList) {
-            if (resultDetail.getName().equals(user.getChoice())) {
+            if (resultDetail.getName().equals(choice)) {
                 resultDet = resultDetail;
             }
         }
@@ -630,12 +592,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public void callbackMaps(ResultDetail result) {
         showDetailRestaurantFragment(result, users, user);
-    }
-
-    @Override
-    public void onRestaurantClicked(Prediction prediction) {
-        Log.e("prediction in home", prediction.getDescription());
-        getPredictionsAndPassDataToDetailFragment(prediction);
     }
 
     private void getPredictionsAndPassDataToDetailFragment(Prediction prediction) {

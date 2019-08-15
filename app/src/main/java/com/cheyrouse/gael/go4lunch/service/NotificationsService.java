@@ -1,5 +1,6 @@
-package com.cheyrouse.gael.go4lunch.utils;
+package com.cheyrouse.gael.go4lunch.service;
 
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -15,8 +16,14 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
+import com.cheyrouse.gael.go4lunch.utils.Prefs;
+import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
+import com.cheyrouse.gael.go4lunch.utils.StringHelper;
+import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessagingService;
@@ -33,10 +40,10 @@ import static com.facebook.login.widget.ProfilePictureView.TAG;
 public class NotificationsService extends FirebaseMessagingService {
 
     private ResultDetail restaurant;
-    private List<User> users;
     private String message;
     private String coWorkers;
     private String text;
+    private User user;
 
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
@@ -49,58 +56,32 @@ public class NotificationsService extends FirebaseMessagingService {
 
     private void getData() {
         Prefs prefs = Prefs.get(getApplicationContext());
+        user = prefs.getPrefsUser();
         restaurant = prefs.getChoice();
-        if(restaurant==null){
+        if (restaurant == null) {
             text = getResources().getString(R.string.no_restaurant);
             sendVisualNotification();
-        }else{
-            getUsersInDatabase();
+        } else {
+            getRestaurantFromDataBase();
         }
     }
 
-    private void getUsersInDatabase() {
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
+    private void getRestaurantFromDataBase() {
+        RestaurantHelper.getRestaurant(restaurant.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
+            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    users = new ArrayList<>();
-                    String choice = null;
-                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                        String uid = document.getData().get("uid").toString();
-                        String username = document.getData().get("username").toString();
-                        String urlPicture = document.getData().get("urlPicture").toString();
-                        if(document.getData().get("choice")!=null){
-                            choice = document.getData().get("choice").toString();
-                        }
-                        User userToAdd = new User(uid, username, urlPicture);
-                        userToAdd.setChoice(choice);
-                        users.add(userToAdd);
-                        coWorkers = getCoWorkers();
-                        Log.e("test notification", "in getUserInDataBase");
-                        sendVisualNotification();
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
+                    List<String> userList = ((List<String>) task.getResult().get("users"));
+                    coWorkers = StringHelper.getCoWorkers(userList, user, getApplicationContext()) /*getCoWorkers(userList)*/;
+                    sendVisualNotification();
                 }
+            }
+        }).addOnFailureListener(new OnFailureListener() {
+            @Override
+            public void onFailure(@NonNull Exception e) {
+                Log.e("fail", e.getMessage());
             }
         });
-    }
-
-    private String getCoWorkers() {
-        List<String> coWorks = new ArrayList<>();
-        for(User user : users){
-            if(user.getChoice()!=null){
-                if(user.getChoice().equals(restaurant.name)){
-                    coWorks.add(user.getUsername());
-                }
-            }
-        }
-        String match = String.valueOf(coWorks).replace("[", "").replace("]", "") + "will be there with you";
-        if(Objects.requireNonNull(coWorks).size() != 0){
-            return match;
-        }else{
-            return getResources().getString(R.string.no_coworker);
-        }
     }
 
     private void sendVisualNotification() {
@@ -108,13 +89,13 @@ public class NotificationsService extends FirebaseMessagingService {
         // 1 - Create an Intent that will be shown when user will click on the Notification
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
-        if(restaurant != null){
-            text = "This lunch, you eat at" + restaurant.name + "located at" + restaurant.getFormattedAddress() + ", " + coWorkers;
+        if (restaurant != null) {
+            text = "This lunch, you eat at " + restaurant.getName() + " located at " + restaurant.getFormattedAddress() + ", " + coWorkers;
         }
         // 2 - Create a Style for the Notification
-        NotificationCompat.InboxStyle inboxStyle = new NotificationCompat.InboxStyle();
+        NotificationCompat.BigTextStyle inboxStyle = new NotificationCompat.BigTextStyle();
         inboxStyle.setBigContentTitle(getString(R.string.notification_title));
-        inboxStyle.addLine(text);
+        inboxStyle.bigText(text);
 
         // 3 - Create a Channel (Android 8)
         String channelId = getString(R.string.default_notification_channel_id);

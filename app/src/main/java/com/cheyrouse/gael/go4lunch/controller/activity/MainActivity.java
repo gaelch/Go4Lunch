@@ -3,6 +3,8 @@ package com.cheyrouse.gael.go4lunch.controller.activity;
 import android.Manifest;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -17,14 +19,17 @@ import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.app.NotificationManagerCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -91,6 +96,7 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RC_SIGN_IN;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 public class MainActivity extends AppCompatActivity {
@@ -103,11 +109,12 @@ public class MainActivity extends AppCompatActivity {
     Button buttonEmail;
     @BindView(R.id.activity_main_coordinator_layout)
     CoordinatorLayout coordinatorLayout;
-    @BindView(R.id.button_twitter) Button twitterLoginButton;
+    @BindView(R.id.button_twitter)
+    Button twitterLoginButton;
 
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
-    private static int RESULT_TWITTER = 2;
+    private static String channelId = "channelId";
 
     private User user;
     private Restaurant restaurant;
@@ -129,6 +136,7 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         CheckSelfPermissions();
+        checkNotificationIsEnable();
         checkIfGpsIsEnable();
         prefs = Prefs.get(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
@@ -136,6 +144,39 @@ public class MainActivity extends AppCompatActivity {
         firebaseAuth = FirebaseAuth.getInstance();
         (new AlarmHelper()).configureAlarmToResetChoice(this);
     }
+
+    private void checkNotificationIsEnable() {
+        if (isNotificationEnabled(this)) {
+        } else {
+            //Enable to notification access service.
+            AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
+            alertDialog.setTitle("Notifications enable");
+            alertDialog.setMessage("Notification is not enabled. Do you want to go to settings menu?");
+            alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    Intent intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
+                    //for Android 5-7
+                    intent.putExtra("app_package", getPackageName());
+                    intent.putExtra("app_uid", getApplicationInfo().uid);
+                    // for Android 8 and above
+                    intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+                    startActivity(intent);
+                }
+            });
+            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.cancel();
+                }
+            });
+            alertDialog.show();
+        }
+    }
+
+    public static boolean isNotificationEnabled(Context context) {
+        return NotificationManagerCompat.from(context.getApplicationContext())
+                .areNotificationsEnabled();
+    }
+
 
     private void configTwitterAuth() {
         OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
@@ -159,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Check permissions to activate them
+    @RequiresApi(api = Build.VERSION_CODES.M)
     private void CheckSelfPermissions() {
         List<String> permissions = new ArrayList<String>();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
@@ -187,6 +229,18 @@ public class MainActivity extends AppCompatActivity {
         } //if
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CALL_PHONE);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.RECORD_AUDIO);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_ALARM) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.SET_ALARM);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_TIME) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.SET_TIME);
+        }
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
+            permissions.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
         } //if
         if (!permissions.isEmpty()) {
             String[] ListedemandeDroit = {};
@@ -257,10 +311,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void checkIfGpsIsEnable() {
-        final LocationManager manager = (LocationManager) getSystemService( Context.LOCATION_SERVICE );
+        final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
 
         assert manager != null;
-        if ( !manager.isProviderEnabled( LocationManager.GPS_PROVIDER ) ) {
+        if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             showSettingsAlert();
         }
     }
@@ -301,7 +355,7 @@ public class MainActivity extends AppCompatActivity {
                         && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     configureAndShowHomeActivity();
                 } else {
-                   // showSettingsAlert();
+                    // showSettingsAlert();
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
                 }
@@ -317,7 +371,7 @@ public class MainActivity extends AppCompatActivity {
         return;
     }
 
-    @OnClick({R.id.button_facebook, R.id.button_google,  R.id.button_twitter, R.id.button_email})
+    @OnClick({R.id.button_facebook, R.id.button_google, R.id.button_twitter, R.id.button_email})
     public void onClick(View v) {
         switch (v.getId()) {
             case R.id.button_facebook:
@@ -437,7 +491,7 @@ public class MainActivity extends AppCompatActivity {
                 }
                 if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
                     launchConnection(email, password);
-                }else{
+                } else {
                     Toast.makeText(getApplicationContext(), "enter your password please", Toast.LENGTH_LONG).show();
                 }
             }
@@ -543,14 +597,14 @@ public class MainActivity extends AppCompatActivity {
                 // UID specific to the provider
                 user.setUid(profile.getUid());
                 // Name, email address, and profile photo Url
-                if(userName!=null){
+                if (userName != null) {
                     user.setUsername(userName);
-                }else{
+                } else {
                     user.setUsername(profile.getDisplayName());
                 }
-                if(profile.getEmail()!=null){
+                if (profile.getEmail() != null) {
                     user.seteMail(profile.getEmail());
-                }else{
+                } else {
                     user.seteMail(profile.getUid());
                 }
                 if (profile.getPhotoUrl() != null) {

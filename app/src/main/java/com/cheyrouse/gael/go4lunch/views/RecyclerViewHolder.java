@@ -16,7 +16,7 @@ import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
-import com.cheyrouse.gael.go4lunch.utils.starsUtils;
+import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
@@ -35,7 +35,7 @@ import butterknife.ButterKnife;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_WIDTH;
-import static com.cheyrouse.gael.go4lunch.utils.Go4LunchService.API_KEY;
+import static com.cheyrouse.gael.go4lunch.service.Go4LunchService.API_KEY;
 
 class RecyclerViewHolder extends RecyclerView.ViewHolder  {
 
@@ -132,14 +132,14 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
     private void setStars(Context context, List<User> users, Restaurant restaurant) {
         if(restaurant != null){
             if(restaurant.getRate()!= null && restaurant.getRate().size()!=0){
-                if (starsUtils.getRate(restaurant.getRate().size(), users) == 1) {
+                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 1) {
                     imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
                 }
-                if (starsUtils.getRate(restaurant.getRate().size(), users) == 2) {
+                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 2) {
                     imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
                     imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
                 }
-                if (starsUtils.getRate(restaurant.getRate().size(), users) == 3) {
+                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 3) {
                     imageViewStars1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
                     imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
                     imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));

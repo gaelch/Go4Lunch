@@ -4,6 +4,7 @@ import android.content.Context;
 import android.util.Log;
 
 import com.cheyrouse.gael.go4lunch.models.Location;
+import com.cheyrouse.gael.go4lunch.service.GPSTracker;
 
 public class GeometryUtil {
 

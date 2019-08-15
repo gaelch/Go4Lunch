@@ -3,8 +3,8 @@ package com.cheyrouse.gael.go4lunch.utils;
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.PlaceDetails;
 import com.cheyrouse.gael.go4lunch.models.Predictions;
+import com.cheyrouse.gael.go4lunch.service.Go4LunchService;
 
-import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 
