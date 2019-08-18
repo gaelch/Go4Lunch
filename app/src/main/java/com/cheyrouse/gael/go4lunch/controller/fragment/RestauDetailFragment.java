@@ -33,6 +33,7 @@ import android.widget.Toast;
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
@@ -59,6 +60,7 @@ import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.support.constraint.Constraints.TAG;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_WIDTH;
@@ -66,7 +68,6 @@ import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
-import static com.cheyrouse.gael.go4lunch.service.Go4LunchService.API_KEY;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -107,6 +108,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     private Restaurant restaurant;
     private ResultDetail resultDetail;
     private List<Restaurant> restaurantList;
+    private boolean found = false;
+    private boolean isFound = false;
 
 
     public static RestauDetailFragment newInstance(ResultDetail result, List<User> users, User user, List<Restaurant> restaurants) {
@@ -147,7 +150,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         ButterKnife.bind(this, view);
         getTheBundleData();
         getUsersInDatabase();
-        getRestaurentFromFirestore();
+        getRestaurantFromFirestore();
         setTransparentStatusBar();
         setImages();
         configureTextView();
@@ -159,25 +162,16 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
-    private void getRestaurentFromFirestore() {
-        RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    restaurant = new Restaurant();
-                    restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
-                    restaurant.setRate((List<String>) task.getResult().get("rate"));
-                    restaurant.setUsers((List<String>) task.getResult().get("users"));
-                    setStars();
-                    //executeRequestDetail();
-                }
+    private void getRestaurantFromFirestore() {
+        RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                restaurant = new Restaurant();
+                restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
+                restaurant.setRate((List<String>) task.getResult().get("rate"));
+                restaurant.setUsers((List<String>) task.getResult().get("users"));
+                setStars();
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e("fail", e.getMessage());
-            }
-        });
+        }).addOnFailureListener(e -> Log.e("fail", e.getMessage()));
     }
 
     private void configureFab() {
@@ -219,26 +213,9 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         users = (List<User>) getArguments().getSerializable(USERS);
         user = (User) getArguments().getSerializable(USER);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
-        // getCurrentUserInDatabase();
         getRestaurantJoiningUsers();
     }
 
-    //    private void getCurrentUserInDatabase() {
-//        userDatabase = new User();
-//        UserHelper.getUser(user.getUid()).addOnSuccessListener(new OnSuccessListener<DocumentSnapshot>() {
-//            @Override
-//            public void onSuccess(DocumentSnapshot documentSnapshot) {
-//                userDatabase.setUsername((String) Objects.requireNonNull(documentSnapshot.get("username")));
-//                userDatabase.setChoice((String) documentSnapshot.get("choice"));
-//            }
-//        }).addOnFailureListener(new OnFailureListener() {
-//            @Override
-//            public void onFailure(@NonNull Exception e) {
-//                Log.e("fail", e.getMessage());
-//            }
-//        });
-//        Log.e("test userdatabase", userDatabase.getUsername());
-//    }
     private void getRestaurantJoiningUsers() {
         usersAreJoining = new ArrayList<>();
         for (User user : users) {
@@ -270,12 +247,9 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
 
     //Configure SwipeRefreshLayout
     private void configureSwipeRefreshLayout() {
-        swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
-            @Override
-            public void onRefresh() {
-                getUsersInDatabase();
-                configureRecyclerView();
-            }
+        swipeRefreshLayout.setOnRefreshListener(() -> {
+            getUsersInDatabase();
+            configureRecyclerView();
         });
     }
 
@@ -305,7 +279,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                 updateTableRestaurants(userId, user.getUsername(), resultDetail.getName(), 1);
                 break;
             case R.id.action_website:
-                // Toast.makeText(getActivity(), "website", Toast.LENGTH_SHORT).show();
                 if (resultDetail.getWebsite() != null) {
                     Intent detailActivityIntent = new Intent(getActivity(), RestaurantWebSiteActivity.class);
                     detailActivityIntent.putExtra(WEB_SITE_EXTRA, resultDetail.getWebsite());
@@ -322,30 +295,14 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         alertDialog.setTitle("No url found!");
         alertDialog.setMessage("This restaurant does not seem to have an website");
-        alertDialog.setPositiveButton("ok", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-            }
+        alertDialog.setPositiveButton("ok", (dialog, which) -> {
         });
         // Showing Alert Message
         alertDialog.show();
     }
 
     private void setStars() {
-        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 0) {
-            imageViewRate1.setImageDrawable(null);
-        }
-        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 1) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
-        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 2) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
-        if (StarsUtils.getRate(restaurant.getRate().size(), users) == 3) {
-            imageViewRate1.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate2.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-            imageViewRate3.setImageDrawable(getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-        }
+        StarsUtils.setStars(getActivity(), imageViewRate1, imageViewRate2, imageViewRate3, users, restaurant);
     }
 
     public void showSettingsAlert() {
@@ -355,19 +312,13 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         // Setting Dialog Message
         alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
         // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                        Uri.fromParts("package", "com.cheyrouse.gael.go4lunch", null));
-                startActivity(intent);
-            }
+        alertDialog.setPositiveButton("Settings", (dialog, which) -> {
+            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                    Uri.fromParts("package", "com.cheyrouse.gael.go4lunch", null));
+            startActivity(intent);
         });
         // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        alertDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
         // Showing Alert Message
         alertDialog.show();
     }
@@ -406,90 +357,116 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     private void getUsersInDatabase() {
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    users = new ArrayList<>();
-                    String urlPicture = null;
-                    String choice = null;
-                    for (QueryDocumentSnapshot document : task.getResult()) {
-                        String uid = document.getData().get("uid").toString();
-                        String username = document.getData().get("username").toString();
-                        if (document.getData().get("urlPicture") != null) {
-                            urlPicture = document.getData().get("urlPicture").toString();
-                        } else {
-                            urlPicture = null;
-                        }
-                        if (document.getData().get("choice") != null) {
-                            choice = document.getData().get("choice").toString();
-                        } else {
-                            choice = null;
-                        }
-                        User userToAdd = new User(uid, username, urlPicture);
-                        userToAdd.setChoice(choice);
-                        users.add(userToAdd);
-                        getRestaurantJoiningUsers();
-                        configureRecyclerView();
-                        configureFab();
+        UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                users = new ArrayList<>();
+                String urlPicture = null;
+                String choice = null;
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    String uid = document.getData().get("uid").toString();
+                    String username = document.getData().get("username").toString();
+                    if (document.getData().get("urlPicture") != null) {
+                        urlPicture = document.getData().get("urlPicture").toString();
+                    } else {
+                        urlPicture = null;
                     }
-                } else {
-                    Log.d(ProfilePictureView.TAG, "Error getting documents: ", task.getException());
+                    if (document.getData().get("choice") != null) {
+                        choice = document.getData().get("choice").toString();
+                    } else {
+                        choice = null;
+                    }
+                    User userToAdd = new User(uid, username, urlPicture);
+                    userToAdd.setChoice(choice);
+                    users.add(userToAdd);
+                    getRestaurantJoiningUsers();
+                    configureRecyclerView();
+                    configureFab();
                 }
-                Log.e("listMates", String.valueOf(users.size()));
+            } else {
+                Log.d(ProfilePictureView.TAG, "Error getting documents: ", task.getException());
             }
+            Log.e("listMates", String.valueOf(users.size()));
         });
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateTableRestaurants(String userId, String userName, String choice, int i) {
-        boolean var = false;
         for (Restaurant r : restaurantList) {
             if (r.getRestaurantName().equals(restaurant.getRestaurantName())) {
+                isFound = true;
                 List<String> rateList = restaurant.getRate();
                 if (rateList.size() != 0) {
-                    for (String rate : rateList) {
-                        if (rate.equals(userId)) {
-                            RestaurantHelper.deleteRestaurantRate(userId, r.getRestaurantUid());
-                            Toast.makeText(getActivity(), "Unliked !", Toast.LENGTH_SHORT).show();
-                        } else {
-                            if (i == 0) {
-                                RestaurantHelper.updateRestaurantChoice(userName, choice);
-                            } else {
-                                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                                Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
-                            }
-                        }
+                    found = ListUtils.findUserInRateList(userId, rateList);
+                    if (found) {
+                        deleteLike(userId, r.getRestaurantUid());
+                    } else {
+                        updateChoiceOrLike(i, userName, choice, userId);
                     }
                 } else {
-                    if (i == 0) {
-                        RestaurantHelper.updateRestaurantChoice(userName, choice);
-                    } else {
-                        RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                        Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
-                    }
+                    updateChoiceOrLike(i, userName, choice, userId);
                 }
             }
         }
-        for (Restaurant r : restaurantList) {
-            if (r.getRestaurantUid().equals(resultDetail.getName())) {
-                var = true;
-            }
+        if (!isFound) {
+            createRestaurantAndUpdateIt(i, userName, userId);
         }
-        if (!var) {
-            if (i == 0) {
-                RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
-                        resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
-                RestaurantHelper.updateRestaurantChoice(userName, choice);
+        getRestaurantFromFirestore();
+        refreshRestaurantList();
+    }
+
+    private void refreshRestaurantList() {
+        restaurantList = new ArrayList<>();
+        RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (DocumentSnapshot doc : Objects.requireNonNull(task.getResult())) {
+                    Restaurant r = doc.toObject(Restaurant.class);
+                    Objects.requireNonNull(r).setRestaurantUid(doc.getId());
+                    r.setRestaurantName(doc.getString("restaurantName"));
+                    r.setRate((List<String>) doc.get("rate"));
+                    r.setUsers((List<String>) doc.get("users"));
+                    if (doc.getDouble("lat") != null) {
+                        r.setLat(doc.getDouble("lat"));
+                    } else {
+                        r.setLat(0);
+                    }
+                    if (doc.getDouble("lng") != null) {
+                        r.setLng(doc.getDouble("lng"));
+                    } else {
+                        r.setLng(0);
+                    }
+                    restaurantList.add(r);
+                }
             } else {
-                RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
-                        resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
-                RestaurantHelper.updateRestaurantChoice(userName, choice);
-                RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-                Toast.makeText(getActivity(), "like !", Toast.LENGTH_SHORT).show();
+                Log.e("error", "Error getting documents: ", task.getException());
             }
+        });
+    }
+
+    private void createRestaurantAndUpdateIt(int i, String userName, String userId) {
+        if (i == 0) {
+            RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
+                    resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
+            RestaurantHelper.updateRestaurantChoice(userName, choice);
+        } else {
+            RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
+                    resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
+            RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+            Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
         }
-        getRestaurentFromFirestore();
+    }
+
+    private void updateChoiceOrLike(int i, String userName, String choice, String userId) {
+        if (i == 0) {
+            RestaurantHelper.updateRestaurantChoice(userName, choice);
+        } else {
+            RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
+            Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void deleteLike(String userId, String restaurantUid) {
+        RestaurantHelper.deleteRestaurantRate(userId, restaurantUid);
+        Toast.makeText(getActivity(), "Unliked !", Toast.LENGTH_SHORT).show();
     }
 
     private void deleteChoice(String userName, String choice) {
