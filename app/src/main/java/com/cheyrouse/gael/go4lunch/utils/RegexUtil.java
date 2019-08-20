@@ -5,6 +5,8 @@ import java.util.regex.Pattern;
 
 public class RegexUtil {
 
+
+    // Regex to valid email
     public static boolean isValidEmail(String email){
         Pattern pattern;
         Matcher matcher;

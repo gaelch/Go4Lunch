@@ -1,6 +1,5 @@
-package com.cheyrouse.gael.go4lunch.service;
+package com.cheyrouse.gael.go4lunch.services;
 
-import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -11,7 +10,6 @@ import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
-
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
@@ -19,23 +17,17 @@ import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
-import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
-import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import static com.cheyrouse.gael.go4lunch.utils.Constants.NOTIFICATION_ID;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.NOTIFICATION_TAG;
-import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 public class NotificationsService extends FirebaseMessagingService {
 
@@ -45,6 +37,7 @@ public class NotificationsService extends FirebaseMessagingService {
     private String text;
     private User user;
 
+    // On receive
     @Override
     public void onMessageReceived(RemoteMessage remoteMessage) {
         if (remoteMessage.getNotification() != null) {
@@ -54,6 +47,7 @@ public class NotificationsService extends FirebaseMessagingService {
         }
     }
 
+    // Get data to send notification
     private void getData() {
         Prefs prefs = Prefs.get(getApplicationContext());
         user = prefs.getPrefsUser();
@@ -66,13 +60,14 @@ public class NotificationsService extends FirebaseMessagingService {
         }
     }
 
+    // get restaurant from database to get users in restaurant table
     private void getRestaurantFromDataBase() {
         RestaurantHelper.getRestaurant(restaurant.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
                     List<String> userList = ((List<String>) task.getResult().get("users"));
-                    coWorkers = StringHelper.getCoWorkers(userList, user, getApplicationContext()) /*getCoWorkers(userList)*/;
+                    coWorkers = StringHelper.getCoWorkers(Objects.requireNonNull(userList), user, getApplicationContext());
                     sendVisualNotification();
                 }
             }
@@ -84,8 +79,8 @@ public class NotificationsService extends FirebaseMessagingService {
         });
     }
 
+    // Send Notification
     private void sendVisualNotification() {
-
         // 1 - Create an Intent that will be shown when user will click on the Notification
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
@@ -116,7 +111,7 @@ public class NotificationsService extends FirebaseMessagingService {
 
         // 6 - Support Version >= Android 8
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            CharSequence channelName = "Message provenant de Firebase";
+            CharSequence channelName = "Firebase Message";
             int importance = NotificationManager.IMPORTANCE_HIGH;
             NotificationChannel mChannel = new NotificationChannel(channelId, channelName, importance);
             Objects.requireNonNull(notificationManager).createNotificationChannel(mChannel);

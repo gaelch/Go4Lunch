@@ -76,11 +76,6 @@ public class Prefs {
         return gson.fromJson(json, ResultDetail.class);
     }
 
-    public void clearPrefs(){
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-    }
-
     public void storePicture(Uri uri, String userName){
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(userName, uri.toString());
@@ -102,12 +97,5 @@ public class Prefs {
         String json = gson.toJson(resultDetailList);
         editor.putString("results", json);
         editor.apply();
-    }
-
-    public List<ResultDetail> getlistResultDetail(){
-        Gson gson = new Gson();
-        String json = prefs.getString("results", "");
-        Type type = new TypeToken<List<ResultDetail>>() {}.getType();
-        return gson.fromJson(json, type);
     }
 }

@@ -11,7 +11,7 @@ import java.util.Calendar;
 
 public class AlarmHelper {
 
-    //Configuration of Alarm Helper too reset restaurant choice
+    //Configuration of Alarm Helper to reset restaurant choice
    @RequiresApi(api = Build.VERSION_CODES.M)
    public void configureAlarmToResetChoice(Context context) {
         AlarmManager alarmManager;

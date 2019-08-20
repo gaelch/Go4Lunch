@@ -18,6 +18,7 @@ import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.util.Log;
@@ -27,7 +28,7 @@ import android.view.ViewGroup;
 
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
-import com.cheyrouse.gael.go4lunch.service.GPSTracker;
+import com.cheyrouse.gael.go4lunch.services.GPSTracker;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -43,6 +44,7 @@ import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
 
+import butterknife.BindView;
 import butterknife.ButterKnife;
 
 import static android.support.constraint.Constraints.TAG;
@@ -55,6 +57,9 @@ import static com.facebook.FacebookSdk.getApplicationContext;
  */
 public class MapsFragment extends Fragment implements OnMapReadyCallback, GoogleMap.OnMarkerClickListener {
 
+    @BindView(R.id.my_location)
+    FloatingActionButton buttonMyLocation;
+
     private GoogleMap mMap;
     private Context context = getApplicationContext();
     private MapsFragmentListener mListener;
@@ -62,14 +67,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private List<ResultDetail> results;
     private List<Restaurant> restaurantList;
     private Marker marker;
-    private boolean isDuringVoiceSearch;
 
 
     public MapsFragment() {
         // Required empty public constructor
     }
 
-
+    //New instance and Bundle
     public static MapsFragment newInstance(List<ResultDetail> results, List<Restaurant> restaurantList) {
         // Create new fragment
         MapsFragment frag = new MapsFragment();
@@ -80,7 +84,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return frag;
     }
 
-    //Attach the callback tto activity
+    //Attach the listener to activity
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -102,32 +106,26 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         SupportMapFragment map = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         getTheBundle();
         map.getMapAsync(this);
+        configureButtonLocation();
         return v;
     }
 
+    private void configureButtonLocation() {
+        buttonMyLocation.setOnClickListener(v -> gpsGetLocation());
+    }
+
+    // Get data in bundle
     private void getTheBundle() {
         assert getArguments() != null;
         results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
     }
 
-    public void setDuringVoiceSearch(boolean duringVoiceSearch) {
-        isDuringVoiceSearch = duringVoiceSearch;
-    }
 
-    @Override
-    public void onResume() {
-        if(!isDuringVoiceSearch){
-            super.onResume();
-        }else{
-
-        }
-    }
-
+    // Handle Map
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        // Add a marker in Sydney and move the camera
         if (ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
                 && ActivityCompat.checkSelfPermission(context, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             showSettingsAlert();
@@ -166,27 +164,27 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.setOnMarkerClickListener(this);
     }
 
+    // Create Marker red
     private MarkerOptions createMarkers(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
         Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_maps_red);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
-        //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
                 .position(latLng)
                 .title(s);
     }
 
+    // Create Marker green
     private MarkerOptions createMarkersGreen(double lat, double lng, String s) {
         LatLng latLng = new LatLng(lat, lng);
         Drawable circleDrawable = getResources().getDrawable(R.drawable.ic_maps_green);
         BitmapDescriptor icon = getMarkerIconFromDrawable(circleDrawable);
-        //icon = BitmapDescriptorFactory.fromResource(R.drawable.ic_restaurant_white_18dp);
         return new MarkerOptions().icon(icon)
                 .position(latLng)
                 .title(s);
     }
 
-
+    // BitmapDescriptor to build icon
     private BitmapDescriptor getMarkerIconFromDrawable(Drawable drawable) {
         Canvas canvas = new Canvas();
         int color = getResources().getColor(R.color.green);
@@ -200,6 +198,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return BitmapDescriptorFactory.fromBitmap(bitmap);
     }
 
+    // Get location from GPS service
     private void gpsGetLocation() {
         GPSTracker gps = new GPSTracker(getApplicationContext());
         if (gps.canGetLocation()) {
@@ -209,6 +208,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         }
     }
 
+    // Move camera on my location
     private void goToMyLocation(LatLng latLng) {
         if(latLng == null){
              latLng = new LatLng(locationCt.getLatitude(),
@@ -219,15 +219,13 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
     }
 
+    // show dialog if GPS is not enable
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-
         // Setting Dialog Title
         alertDialog.setTitle("GPS is settings");
-
         // Setting Dialog Message
         alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
-
         // On pressing Settings button
         alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
@@ -235,18 +233,17 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                 startActivity(intent);
             }
         });
-
         // on pressing cancel button
         alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
         });
-
         // Showing Alert Message
         alertDialog.show();
     }
 
+    // Callback
     @Override
     public boolean onMarkerClick(Marker marker) {
         String restaurantName = marker.getTitle();
@@ -259,7 +256,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         return false;
     }
 
-    //Callback to ArticleFragment
+    // Interface implemented by Home Activity
     public interface MapsFragmentListener {
         void callbackMaps(ResultDetail result);
     }

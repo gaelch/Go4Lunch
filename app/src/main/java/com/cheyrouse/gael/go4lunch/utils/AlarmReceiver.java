@@ -26,11 +26,9 @@ import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
-    static final String CHANEL_ID = "chanel_id";
-    static final int NOTIFICATION_ID = 0;
     private Context mContext;
 
-    //Receive notification and execute request to search user articles
+    //Receive Alarm and execute request to reset choice
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
     public void onReceive(Context context, Intent intent) {
@@ -46,6 +44,7 @@ public class AlarmReceiver extends BroadcastReceiver {
         executeRequestToFireStoreToResetChoice();
     }
 
+    // Get users in database to delete choice in restaurant table
     private void executeRequestToFireStoreToResetChoice() {
         getUsersAndRestaurantsFromDataBase();
     }
@@ -67,6 +66,7 @@ public class AlarmReceiver extends BroadcastReceiver {
 
             }
         });
+        // Reset choice in users table
         UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {

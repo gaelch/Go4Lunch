@@ -1,5 +1,6 @@
 package com.cheyrouse.gael.go4lunch.controller.activity;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.SearchManager;
 import android.content.Context;
@@ -18,7 +19,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.SearchView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
@@ -35,7 +35,7 @@ import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.fragment.SettingsFragment;
 import com.cheyrouse.gael.go4lunch.models.Prediction;
 import com.cheyrouse.gael.go4lunch.models.Predictions;
-import com.cheyrouse.gael.go4lunch.service.GPSTracker;
+import com.cheyrouse.gael.go4lunch.services.GPSTracker;
 import com.cheyrouse.gael.go4lunch.utils.Go4LunchStream;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
@@ -70,29 +70,24 @@ import butterknife.ButterKnife;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
+import static com.cheyrouse.gael.go4lunch.utils.Constants.LINE_BREAK;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
-import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
-import static com.cheyrouse.gael.go4lunch.utils.StringHelper.convertInString;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 
 public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener,
         MapsFragment.MapsFragmentListener, ListFragment.ListFragmentListener, WorkmatesFragment.WorkMateFragmentListener {
 
-    private static final String NEWRESULTS = "new_results";
     @BindView(R.id.toolbar)
     Toolbar toolbar;
     @BindView(R.id.activity_home_bottom_navigation)
     BottomNavigationView bottomNavigationView;
-    //    @BindView(R.id.lvResultSearchView) ListView listViewResult;
     @BindView(R.id.search_view)
     android.support.v7.widget.SearchView searchView;
 
 
     private DrawerLayout drawerLayout;
     private String choice = null;
-    private double latitude;
-    private double longitude;
     private List<Result> results;
     private User user;
     private List<User> users;
@@ -100,7 +95,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<ResultDetail> resultDetailList;
     private List<ResultDetail> resultDetails;
     private ResultDetail resultDetail;
-    private ResultDetail restaurantChoice;
     private String location;
     private List<Prediction> resultsPredictions = null;
     private Prefs prefs;
@@ -122,22 +116,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         handleIntent(getIntent());
     }
 
-
+    // Get user in prefs
     private void getPrefs() {
         prefs = Prefs.get(this);
         user = prefs.getPrefsUser();
+
     }
 
+    // Get current user location
     private void gpsGetLocation() {
         GPSTracker gps = new GPSTracker(this);
         if (gps.canGetLocation()) {
             Log.e("testGpsTrue", "true");
-            latitude = gps.getLatitude(); // returns latitude
-            longitude = gps.getLongitude(); // returns longitude
-            executeRequestToPlaceApi(StringHelper.convertInString(latitude, longitude));
+            double latitude = gps.getLatitude(); // returns latitude
+            double longitude = gps.getLongitude(); // returns longitude
+            location = StringHelper.convertInString(latitude, longitude);
+            executeRequestToPlaceApi(location);
         }
     }
 
+    // Request to Place API to find restaurant list
     private void executeRequestToPlaceApi(String location) {
         Disposable disposable = Go4LunchStream.streamFetchRestaurants(location).subscribeWith(new DisposableObserver<Place>() {
             @Override
@@ -154,11 +152,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             public void onComplete() {
                 Log.e("Test", "TopStories is charged");
                 buildListPlaceDetail();
-                getRestaurantsFromDataBase(results, null);
+                getRestaurantsFromDataBase(results);
             }
         });
     }
 
+    // request to Place Detail API to build list of restaurants
     private void buildListPlaceDetail() {
         resultDetailList = new ArrayList<>();
         for (Result result : results) {
@@ -197,12 +196,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         MenuItem item = menu.findItem(R.id.menu_activity_home_search);
         SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-        searchView = new android.support.v7.widget.SearchView(this.getSupportActionBar().getThemedContext());
+        searchView = new android.support.v7.widget.SearchView(Objects.requireNonNull(this.getSupportActionBar()).getThemedContext());
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW | MenuItem.SHOW_AS_ACTION_IF_ROOM);
         item.setActionView(searchView);
         searchView.setQueryHint(getResources().getString(R.string.search_view));
         searchView.setSearchableInfo(Objects.requireNonNull(searchManager).getSearchableInfo(this.getComponentName()));
-//        searchView.setIconifiedByDefault(true);
         searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
@@ -215,44 +213,39 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 return false;
             }
         });
-        searchView.setOnCloseListener(new SearchView.OnCloseListener() {
-            @Override
-            public boolean onClose() {
-                Log.e("test close searchView", "close");
-//                listViewResult.setVisibility(View.GONE);
-                hideSoftKeyboard(HomeActivity.this);
-                return true;
-            }
+        searchView.setOnCloseListener(() -> {
+            Log.e("test close searchView", "close");
+            hideSoftKeyboard(HomeActivity.this);
+            return true;
         });
         return true;
     }
 
+    // Intent to search with voice
     @Override
     protected void onNewIntent(Intent intent) {
         setIntent(intent);
         handleIntent(intent);
     }
 
+    //handle intent to search with voice
     private void handleIntent(Intent intent) {
         if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
-            // mapsFragment.setDuringVoiceSearch(true);
             String query = intent.getStringExtra(SearchManager.QUERY);
             searchQuery(query);
         }
     }
 
+    // request results of searchView in Place Autocomplete API
     private void searchQuery(String query) {
         if (query.length() > 2) {
-//            listViewResult.setVisibility(View.VISIBLE);
             Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, getString(R.string.google_maps_key)).subscribeWith(new DisposableObserver<Predictions>() {
                 @Override
                 public void onNext(Predictions predictions) {
                     resultsPredictions = predictions.getPredictions();
                     Log.e("test result search", String.valueOf(resultsPredictions.size()));
-//                    predictionArrayAdapter = new ArrayAdapter<Prediction>(HomeActivity.this, android.R.layout.simple_list_item_1,
-//                            android.R.id.text1, resultsPredictions);
-//                    listViewResult.setAdapter(predictionArrayAdapter);
                 }
+
                 @Override
                 public void onError(Throwable e) {
                     e.getMessage();
@@ -267,16 +260,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
+    // Update view with results of Place Autocomplete
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void updateUI() {
         List<ResultDetail> newResults = ListUtils.transforPredictionToResultDetail(resultDetailList, resultsPredictions);
         if (newResults.size() > 0) {
-
             FragmentManager fm = getSupportFragmentManager();
             List<Fragment> fragments = fm.getFragments();
             Fragment newFragment = fragments.get(fragments.size() - 1);
             if (newFragment instanceof MapsFragment) {
-            newFragment = MapsFragment.newInstance(newResults, restaurantList);
+                newFragment = MapsFragment.newInstance(newResults, restaurantList);
                 mapsFragment = (MapsFragment) newFragment;
                 getFragmentManagerToLaunch(newFragment);
             }
@@ -291,34 +284,35 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         //3 - Handle actions on menu items
-        switch (item.getItemId()) {
-            case R.id.menu_activity_home_search:
-                searchView.setVisibility(View.VISIBLE);
-                return true;
-            default:
-                return super.onOptionsItemSelected(item);
+        if (item.getItemId() == R.id.menu_activity_home_search) {
+            searchView.setVisibility(View.VISIBLE);
+            return true;
         }
+        return super.onOptionsItemSelected(item);
     }
 
     //Configuration NavigationView of Drawer Menu
+    @SuppressLint("SetTextI18n")
     private void configureNavigationView() {
         NavigationView navigationView = findViewById(R.id.activity_home_nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         View hView = navigationView.getHeaderView(0);
         TextView nav_user = hView.findViewById(R.id.text_login);
         ImageView imageView = hView.findViewById(R.id.imageViewNavDraw);
-        nav_user.setText(user.getUsername() + "\n" + user.geteMail());
-        if (user.getUrlPicture() != null) {
-            Glide.with(this)
-                    .load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(imageView);
-        } else {
-            Prefs prefs = Prefs.get(this);
-            Uri selectedImage = prefs.getPicture(user.getUsername());
-            if (selectedImage != null) {
-                Picasso.get().load(selectedImage).into((ImageView) hView.findViewById(R.id.imageViewNavDraw));
+        if (user != null) {
+            nav_user.setText(user.getUsername() + LINE_BREAK + user.geteMail());
+            if (user.getUrlPicture() != null) {
+                Glide.with(this)
+                        .load(user.getUrlPicture()).apply(RequestOptions.circleCropTransform()).into(imageView);
             } else {
-                imageView.setBackgroundColor(this.getResources().getColor(R.color.green));
-                Glide.with(this).load(imageView.getResources().getDrawable(R.drawable.baseline_perm_identity_black_18dp)).apply(RequestOptions.circleCropTransform()).into(imageView);
+                Prefs prefs = Prefs.get(this);
+                Uri selectedImage = prefs.getPicture(user.getUsername());
+                if (selectedImage != null) {
+                    Picasso.get().load(selectedImage).into((ImageView) hView.findViewById(R.id.imageViewNavDraw));
+                } else {
+                    imageView.setBackgroundColor(this.getResources().getColor(R.color.green));
+                    Glide.with(this).load(imageView.getResources().getDrawable(R.drawable.baseline_perm_identity_black_18dp)).apply(RequestOptions.circleCropTransform()).into(imageView);
+                }
             }
         }
     }
@@ -362,11 +356,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         return true;
     }
 
+    // Launch Notification Fragment
     private void showNotificationsSettings() {
         Fragment newFragment = SettingsFragment.newInstance();
         getFragmentManagerToLaunch(newFragment);
     }
 
+    // SignOut from Firebase
     private void signOutUserFromFirebase() {
         AuthUI.getInstance()
                 .signOut(this)
@@ -374,6 +370,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     }
 
+    // SignOut from Firebase
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted() {
         return aVoid -> {
             switch (SIGN_OUT_TASK) {
@@ -393,12 +390,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     public void onBackPressed() {
         toolbar.setVisibility(View.VISIBLE);
         bottomNavigationView.setVisibility(View.VISIBLE);
-        //searchView.setVisibility(View.GONE);
-        // 5 - Handle back click to close menu
-//        if (getSupportFragmentManager().getBackStackEntryCount() > 0)
-//            getSupportFragmentManager().popBackStack();
-//        else
-//            finish();    // Finish the activity
+        FragmentManager fm = getSupportFragmentManager();
+        List<Fragment> fragments = fm.getFragments();
+        Fragment newFragment = fragments.get(fragments.size() - 1);
+        if (newFragment instanceof MapsFragment) {
+            finish();
+        }
+        getBackStackToRefreshData(newFragment, fragments);
         if (this.drawerLayout.isDrawerOpen(GravityCompat.START)) {
             this.drawerLayout.closeDrawer(GravityCompat.START);
         } else {
@@ -407,11 +405,26 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         }
     }
 
-    // 2 - Configure BottomNavigationView Listener
+    // Get FragmentManager to refresh data in fragments
+    private void getBackStackToRefreshData(Fragment newFragment, List<Fragment> fragments) {
+        int frag = ListUtils.getBackStackToRefreshData(newFragment, fragments);
+        if (frag == 1) {
+            getRestaurantsFromDataBase(results);
+        }
+        if (frag == 2) {
+            getUsersInDatabase(1);
+        }
+        if (frag == 3) {
+            getUsersInDatabase(2);
+        }
+    }
+
+    // Configure BottomNavigationView Listener
     private void configureBottomView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> updateMainFragment(item.getItemId()));
     }
 
+    // Get users in database to make list or refresh list
     private void getUsersInDatabase(int i) {
         UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -435,8 +448,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         User userToAdd = new User(uid, username, urlPicture);
                         userToAdd.setChoice(choice);
                         users.add(userToAdd);
-                        if(userToAdd.getUsername().equals(user.getUsername())){
-                            choiceUser = userToAdd.getChoice();
+                        if(user != null && user.getUsername() != null) {
+                            if (userToAdd.getUsername().equals(user.getUsername())) {
+                                choiceUser = userToAdd.getChoice();
+                            }
                         }
                     }
                     if (i == 1) {
@@ -446,8 +461,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         getFragmentManagerToLaunch(WorkmatesFragment.newInstance(users));
                     }
                     if (i == 3) {
-                        if (choiceUser != null) {
-                            getResultDetail(choiceUser);
+                        if (choiceUser != null && !choiceUser.isEmpty()) {
+                            getRestaurantIfExist(choiceUser);
                         } else {
                             Toast.makeText(HomeActivity.this, "sorry but you did not choose a restaurant today", Toast.LENGTH_LONG).show();
                         }
@@ -460,17 +475,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         });
     }
 
-    private void getResultDetail(String choice) {
+    // Get restaurant choice if exist
+    private void getRestaurantIfExist(String choice) {
         ResultDetail resultDet = new ResultDetail();
-        for (ResultDetail resultDetail : resultDetailList) {
-            if (resultDetail.getName().equals(choice)) {
-                resultDet = resultDetail;
-            }
-        }
-        showDetailRestaurantFragment(resultDet, users, user); /////////// ---> faire requête restau database
+        resultDet = ListUtils.getRestaurantToDisplayYourChoiceIfExist(resultDetailList, choice);
+        showDetailRestaurantFragment(resultDet, users, user);
     }
 
-    private void getRestaurantsFromDataBase(List<Result> results, List<ResultDetail> resultDetails) {
+    // Get restaurants from database to make list
+    private void getRestaurantsFromDataBase(List<Result> results) {
         restaurantList = new ArrayList<>();
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
@@ -496,23 +509,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         restaurants.add(r);
                     }
                     if (results != null) {
-                        for (Restaurant restaurant : restaurants) {
-                            for (Result r : results) {
-                                if (restaurant.getRestaurantName().equals(r.getName())) {
-                                    restaurantList.add(restaurant);
-                                }
-                            }
-                            Log.e("restaurantsListSize", String.valueOf(restaurantList.size()));
-                        }
+                        restaurantList = ListUtils.makeListResultRestaurantWithResultList(results, restaurants);
                     } else {
-                        for (Restaurant restaurant : restaurants) {
-                            for (ResultDetail r : resultDetails) {
-                                if (restaurant.getRestaurantName().equals(r.getName())) {
-                                    restaurantList.add(restaurant);
-                                }
-                            }
-                            Log.e("restaurantsListSize", String.valueOf(restaurantList.size()));
-                        }
+                        restaurantList = ListUtils.makeListResultRestaurantWithResultDetailList(resultDetailList, restaurants);
                     }
 
                     if (results != null) {
@@ -536,12 +535,11 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // UI
     // -------------------
 
-    // 3 - Update Main Fragment design
-
+    // Update Fragments
     private Boolean updateMainFragment(Integer integer) {
         switch (integer) {
             case R.id.action_maps_view:
-                getRestaurantsFromDataBase(results, null);
+                getRestaurantsFromDataBase(results);
                 break;
             case R.id.action_list_view:
                 getUsersInDatabase(1);
@@ -563,6 +561,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // CONFIGURATION FRAGMENTS AND CALLBACKS
     //---------------------------------------
 
+    //Get fragment Manager to launch and add fragments to backStack
     private void getFragmentManagerToLaunch(Fragment newFragment) {
         FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
         if (newFragment instanceof RestauDetailFragment) {
@@ -573,49 +572,32 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         transaction.commit();
     }
 
+    // Hide toolbar
     private void hideToolBarAndBottomBar() {
         toolbar.setVisibility(View.GONE);
         bottomNavigationView.setVisibility(View.GONE);
     }
 
+    // Callback of ListFragment if restaurant is clicked
     @Override
     public void callbackList(ResultDetail result) {
         showDetailRestaurantFragment(result, users, user);
         Log.e("test result click", "result returned on homeActivity!");
     }
 
+    // Show RestaurantDetailFragment
     private void showDetailRestaurantFragment(ResultDetail result, List<User> users, User user) {
         Fragment newFragment = RestauDetailFragment.newInstance(result, users, user, restaurantList);
         getFragmentManagerToLaunch(newFragment);
     }
 
+    // Callback to MapsFragment if marker is clicked
     @Override
     public void callbackMaps(ResultDetail result) {
         showDetailRestaurantFragment(result, users, user);
     }
 
-    private void getPredictionsAndPassDataToDetailFragment(Prediction prediction) {
-        List<ResultDetail> resultDetails = new ArrayList<>();
-        Disposable disposable = Go4LunchStream.streamFetchRestaurantsDetails(prediction.getPlaceId()).subscribeWith(new DisposableObserver<PlaceDetails>() {
-            @Override
-            public void onNext(PlaceDetails detailsResults) {
-                resultDetail = detailsResults.getResult();
-                Log.e("testResponseDetail", String.valueOf(detailsResults));
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e("errorRequestPlaceDetail", e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-                resultDetails.add(resultDetail);
-                getRestaurantsFromDataBase(null, resultDetails);
-            }
-        });
-    }
-
+    // Hide keyboard
     public static void hideSoftKeyboard(Activity activity) {
         InputMethodManager inputMethodManager =
                 (InputMethodManager) activity.getSystemService(
@@ -624,11 +606,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Objects.requireNonNull(activity.getCurrentFocus()).getWindowToken(), 0);
     }
 
+    // Callback of MatesFragment if workMate is clicked
     @Override
     public void callbackMates(User user) {
         getRestaurantInListResultDetails(user);
     }
 
+    // To find restaurant in the list
     private void getRestaurantInListResultDetails(User user) {
         for (ResultDetail r : resultDetailList) {
             if (r.getName().equals(user.getChoice())) {

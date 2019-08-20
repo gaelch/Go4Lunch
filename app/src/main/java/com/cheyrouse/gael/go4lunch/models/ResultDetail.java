@@ -10,19 +10,19 @@ public class ResultDetail implements Serializable {
 
     @SerializedName("address_components")
     @Expose
-    public List<AddressComponent> addressComponents = null;
+    private List<AddressComponent> addressComponents = null;
     @SerializedName("adr_address")
     @Expose
-    public String adrAddress;
+    private String adrAddress;
     @SerializedName("formatted_address")
     @Expose
-    public String formattedAddress;
+    private String formattedAddress;
     @SerializedName("formatted_phone_number")
     @Expose
-    public String formattedPhoneNumber;
+    private String formattedPhoneNumber;
     @SerializedName("geometry")
     @Expose
-    public Geometry geometry;
+    private Geometry geometry;
     @SerializedName("icon")
     @Expose
     public String icon;
@@ -34,43 +34,43 @@ public class ResultDetail implements Serializable {
     public String name;
     @SerializedName("opening_hours")
     @Expose
-    public OpeningHours openingHours;
+    private OpeningHours openingHours;
     @SerializedName("photos")
     @Expose
-    public List<Photo> photos = null;
+    private List<Photo> photos = null;
     @SerializedName("place_id")
     @Expose
-    public String placeId;
+    private String placeId;
     @SerializedName("plus_code")
     @Expose
-    public PlusCode plusCode;
+    private PlusCode plusCode;
     @SerializedName("rating")
     @Expose
-    public Double rating;
+    private Double rating;
     @SerializedName("reference")
     @Expose
-    public String reference;
+    private String reference;
     @SerializedName("reviews")
     @Expose
-    public List<Review> reviews = null;
+    private List<Review> reviews = null;
     @SerializedName("scope")
     @Expose
-    public String scope;
+    private String scope;
     @SerializedName("types")
     @Expose
-    public List<String> types = null;
+    private List<String> types = null;
     @SerializedName("url")
     @Expose
-    public String url;
+    private String url;
     @SerializedName("utc_offset")
     @Expose
-    public Integer utcOffset;
+    private Integer utcOffset;
     @SerializedName("vicinity")
     @Expose
-    public String vicinity;
+    private String vicinity;
     @SerializedName("website")
     @Expose
-    public String website;
+    private String website;
 
     public List<AddressComponent> getAddressComponents() {
         return addressComponents;

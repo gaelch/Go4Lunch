@@ -45,6 +45,7 @@ dependencies {
     androidTestImplementation 'org.mockito:mockito-android:2.7.22'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
+    androidTestImplementation 'androidx.test.espresso:espresso-core:3.2.0'
     implementation 'com.jakewharton:butterknife:8.8.1'
     annotationProcessor 'com.jakewharton:butterknife-compiler:8.8.1'
     implementation 'com.google.android.gms:play-services-auth:16.0.1'
@@ -79,6 +80,7 @@ dependencies {
     implementation 'com.squareup.picasso:picasso:2.71828'
     implementation 'com.miguelcatalan:materialsearchview:1.4.0'
     implementation 'com.quinny898.library.persistentsearch:library:1.1.0-SNAPSHOT'
+    androidTestImplementation 'com.android.support.test:rules:1.0.2'
 }
 apply plugin: 'com.google.gms.google-services'
 

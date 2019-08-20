@@ -88,6 +88,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -114,12 +115,9 @@ public class MainActivity extends AppCompatActivity {
 
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
-    private static String channelId = "channelId";
 
     private User user;
-    private Restaurant restaurant;
     private FirebaseAuth firebaseAuth;
-    private List<User> userList;
     private String email;
     private String password;
     private String userName;
@@ -145,9 +143,9 @@ public class MainActivity extends AppCompatActivity {
         (new AlarmHelper()).configureAlarmToResetChoice(this);
     }
 
+    // Verify if Notifications are enable
     private void checkNotificationIsEnable() {
-        if (isNotificationEnabled(this)) {
-        } else {
+        if (!isNotificationEnabled(this)) {
             //Enable to notification access service.
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle("Notifications enable");
@@ -177,25 +175,18 @@ public class MainActivity extends AppCompatActivity {
                 .areNotificationsEnabled();
     }
 
-
+    // Twitter Auth configuration
     private void configTwitterAuth() {
         OAuthProvider.Builder provider = OAuthProvider.newBuilder("twitter.com");
         firebaseAuth
                 .startActivityForSignInWithProvider(/* activity= */ this, provider.build())
                 .addOnSuccessListener(
-                        new OnSuccessListener<AuthResult>() {
-                            @Override
-                            public void onSuccess(AuthResult authResult) {
-                                FirebaseUser user = firebaseAuth.getCurrentUser();
-                                getUserInfo(user);
-                            }
+                        authResult -> {
+                            FirebaseUser user = firebaseAuth.getCurrentUser();
+                            getUserInfo(user);
                         })
                 .addOnFailureListener(
-                        new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                // Handle failure.
-                            }
+                        e -> {
                         });
     }
 
@@ -249,6 +240,7 @@ public class MainActivity extends AppCompatActivity {
         } //if
     }
 
+    // result for image
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -273,7 +265,7 @@ public class MainActivity extends AppCompatActivity {
     // UI
     // --------------------
 
-    // 2 - Show Snack Bar with a message
+    // Show Snack Bar with a message
     private void showSnackBar(CoordinatorLayout coordinatorLayout, String message) throws InterruptedException {
         Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
@@ -282,14 +274,14 @@ public class MainActivity extends AppCompatActivity {
     // UTILS
     // --------------------
 
-    // 3 - Method that handles response after SignIn Activity close
+    // Method that handles response after SignIn Activity close
     private void handleResponseAfterSignIn(int requestCode, int resultCode, Intent data) throws InterruptedException {
         IdpResponse response = IdpResponse.fromResultIntent(data);
 
         if (requestCode == RC_SIGN_IN) {
             if (resultCode == RESULT_OK) { // SUCCESS
                 showSnackBar(this.coordinatorLayout, getString(R.string.connection_succeed));
-                checkPermission();
+                configureAndShowHomeActivity();
             } else { // ERRORS
                 if (response == null) {
                     showSnackBar(this.coordinatorLayout, getString(R.string.error_authentication_canceled));
@@ -302,23 +294,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void checkPermission() {
-        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
-        } else {
-            configureAndShowHomeActivity();
-        }
-    }
-
+    // Verify if GPS is enable
     private void checkIfGpsIsEnable() {
         final LocationManager manager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-
         assert manager != null;
         if (!manager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             showSettingsAlert();
         }
     }
 
+    // Show dialog if GPS is disable
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         // Setting Dialog Title
@@ -342,35 +327,24 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    // Launch HomeActivity
     private void configureAndShowHomeActivity() {
         Intent homeActivityIntent = new Intent(MainActivity.this, HomeActivity.class);
         startActivity(homeActivityIntent);
     }
 
-    public void onRequestPermissionsResult(int requestCode, String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case 1: {
-                // If request is cancelled, the result arrays are empty.
-                if (grantResults.length > 0
-                        && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    configureAndShowHomeActivity();
-                } else {
-                    // showSettingsAlert();
-                    // permission denied, boo! Disable the
-                    // functionality that depends on this permission.
-                }
+    // If permission is granted launch HomeActivity
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        // If request is cancelled, the result arrays are empty.
+        if (requestCode == 1) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                configureAndShowHomeActivity();
             }
-            break;
-            case 2: {
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    //showAlertDialog();
-                }
-            }
-
         }
-        return;
     }
 
+    // Buttons for connexion modes
     @OnClick({R.id.button_facebook, R.id.button_google, R.id.button_twitter, R.id.button_email})
     public void onClick(View v) {
         switch (v.getId()) {
@@ -381,7 +355,6 @@ public class MainActivity extends AppCompatActivity {
                 startConnexionWhitGoogle();
                 break;
             case R.id.button_twitter:
-                //startConnexionWhitTwitter();
                 configTwitterAuth();
                 break;
             case R.id.button_email:
@@ -390,6 +363,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // To start connexion by email
     private void startConnexionByEmail() {
         if (Build.VERSION.SDK_INT >= 23) {
             String[] PERMISSIONS = {android.Manifest.permission.WRITE_EXTERNAL_STORAGE, android.Manifest.permission.READ_EXTERNAL_STORAGE};
@@ -401,6 +375,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Check if permission is granted to email connexion
     private static boolean hasPermissions(Context context, String... permissions) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M && context != null && permissions != null) {
             for (String permission : permissions) {
@@ -412,14 +387,15 @@ public class MainActivity extends AppCompatActivity {
         return true;
     }
 
+    // Custom dialog to connexion by email
     private void showCustomDialog() {
         //before inflating the custom alert dialog layout, we will get the current activity viewgroup
         ViewGroup viewGroup = findViewById(android.R.id.content);
         //then we will inflate the custom alert dialog xml that we created
         dialogView = LayoutInflater.from(this).inflate(R.layout.email_dialog, viewGroup, false);
-        EditText editTextMail = (EditText) dialogView.findViewById(R.id.edit_mail);
-        EditText editTextPassword = (EditText) dialogView.findViewById(R.id.edit_password);
-        EditText editTextUserName = (EditText) dialogView.findViewById(R.id.edit_user_name);
+        EditText editTextMail = dialogView.findViewById(R.id.edit_mail);
+        EditText editTextPassword = dialogView.findViewById(R.id.edit_password);
+        EditText editTextUserName = dialogView.findViewById(R.id.edit_user_name);
 
         user = prefs.getPrefsUser();
         if (user != null) {
@@ -474,26 +450,20 @@ public class MainActivity extends AppCompatActivity {
                 userName = editTextUserName.getText().toString();
             }
         });
-        dialogView.findViewById(R.id.yesButton).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent i = new Intent(
-                        Intent.ACTION_PICK,
-                        android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(i, RESULT_LOAD_IMAGE);
-            }
+        dialogView.findViewById(R.id.yesButton).setOnClickListener(v -> {
+            Intent i = new Intent(
+                    Intent.ACTION_PICK,
+                    MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+            startActivityForResult(i, RESULT_LOAD_IMAGE);
         });
-        dialogView.findViewById(R.id.button_ok).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (!RegexUtil.isValidEmail(email)) {
-                    Toast.makeText(getApplicationContext(), "Sorry but is not a valid email", Toast.LENGTH_LONG).show();
-                }
-                if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
-                    launchConnection(email, password);
-                } else {
-                    Toast.makeText(getApplicationContext(), "enter your password please", Toast.LENGTH_LONG).show();
-                }
+        dialogView.findViewById(R.id.button_ok).setOnClickListener(v -> {
+            if (!RegexUtil.isValidEmail(email)) {
+                Toast.makeText(getApplicationContext(), "Sorry but is not a valid email", Toast.LENGTH_LONG).show();
+            }
+            if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
+                launchConnection(email, password);
+            } else {
+                Toast.makeText(getApplicationContext(), "enter your password please", Toast.LENGTH_LONG).show();
             }
         });
         //Now we need an AlertDialog.Builder object
@@ -505,91 +475,89 @@ public class MainActivity extends AppCompatActivity {
         alertDialog.show();
     }
 
+    // Launch connexion by email
     private void launchConnection(String email, String password) {
         firebaseAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "createUserWithEmail:success");
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            getUserInfo(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            signIn();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "createUserWithEmail:success");
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        getUserInfo(user);
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "createUserWithEmail:failure", task.getException());
+                        signIn();
                     }
                 });
     }
 
+    // SignIn by email
     private void signIn() {
         firebaseAuth.signInWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in user's information
-                            Log.d(TAG, "signInWithEmail:success");
-                            FirebaseUser user = firebaseAuth.getCurrentUser();
-                            getUserInfo(user);
-                        } else {
-                            // If sign in fails, display a message to the user.
-                            Log.w(TAG, "signInWithEmail:failure", task.getException());
-                            Toast.makeText(MainActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
+                .addOnCompleteListener(this, task -> {
+                    if (task.isSuccessful()) {
+                        // Sign in success, update UI with the signed-in user's information
+                        Log.d(TAG, "signInWithEmail:success");
+                        FirebaseUser user = firebaseAuth.getCurrentUser();
+                        getUserInfo(user);
+                    } else {
+                        // If sign in fails, display a message to the user.
+                        Log.w(TAG, "signInWithEmail:failure", task.getException());
+                        Toast.makeText(MainActivity.this, "Authentication failed.",
+                                Toast.LENGTH_SHORT).show();
                     }
                 });
     }
 
+
+    // SignIn by Google
     private void startConnexionWhitGoogle() {
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setTheme(R.style.LoginTheme)
                         .setAvailableProviders(
-                                Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build())) // SUPPORT GOOGLE
+                                Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.GOOGLE_PROVIDER).build())) // SUPPORT GOOGLE
                         .setIsSmartLockEnabled(false, true)
                         .setLogo(R.drawable.ic_google_48)
                         .build(),
                 RC_SIGN_IN);
     }
 
+    // SignIn by Facebook
     private void startConnexionWhitFacebook() {
         startActivityForResult(
                 AuthUI.getInstance()
                         .createSignInIntentBuilder()
                         .setTheme(R.style.LoginTheme)
                         .setAvailableProviders(
-                                Arrays.asList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build())) // FACEBOOK
+                                Collections.singletonList(new AuthUI.IdpConfig.Builder(AuthUI.FACEBOOK_PROVIDER).build())) // FACEBOOK
                         .setIsSmartLockEnabled(false, true)
                         .setLogo(R.drawable.ic_facebook_48)
                         .build(),
                 RC_SIGN_IN);
     }
 
+    // To get list of users in database
     private void getUsersFromDataBase() {
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                        if (user.getUid().equals(document.getData().get("uid").toString())) { ////////// voir pour éviter la création de plusieur compte avec les même id
-                            var = true;
-                        }
+        UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    if (user.getUid().equals(document.getData().get("uid").toString())) {
+                        var = true;
                     }
-                    if (!var) {
-                        storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture());
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
                 }
+                if (!var) {
+                    storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture());
+                }
+            } else {
+                Log.d(TAG, "Error getting documents: ", task.getException());
             }
         });
     }
 
+    // Get info to store current user
     private void getUserInfo(FirebaseUser currentUser) {
         user = new User();
         if (currentUser != null) { //---- Email connection ---- //
@@ -627,6 +595,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Store user in preferences to retrieve him after
     private void storeUserInPrefs() {
         prefs = Prefs.get(this);
         prefs.storeListResults(null);
@@ -641,6 +610,7 @@ public class MainActivity extends AppCompatActivity {
         getUsersFromDataBase();
     }
 
+    // Store user in Firebase database
     private void storeUserInDataBase(String uId, String id, String userName, String url) {
         UserHelper.createUser(uId, id, userName, url);
     }

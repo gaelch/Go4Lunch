@@ -22,6 +22,7 @@ import com.cheyrouse.gael.go4lunch.views.RecyclerViewAdapter;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -40,7 +41,6 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
 
     private ListFragmentListener mListener;
     private RecyclerViewAdapter adapter;
-    private List<ResultDetail> results;
     private List<ResultDetail> resultListUpdated;
     private List<User> userList;
 
@@ -48,6 +48,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         // Required empty public constructor
     }
 
+    //To attach fragment to Activity
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -59,6 +60,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         }
     }
 
+    // New instance and Bundle
     public static ListFragment newInstance(List<ResultDetail> results, List<User> users) {
         // Create new fragment
         ListFragment frag = new ListFragment();
@@ -80,9 +82,10 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         return v;
     }
 
+    // get the data Bundle
     private void getTheBundle() {
         assert getArguments() != null;
-        results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
+        List<ResultDetail> results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
         userList = (List<User>) getArguments().getSerializable(USERS);
         configureRecyclerView();
         updateUI(results);
@@ -99,6 +102,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
+    // Callback
     @Override
     public void onRestaurantClicked(ResultDetail result) {
         mListener.callbackList(result);
@@ -106,23 +110,22 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     }
 
 
+    // Update the recyclerView adapter
     private void updateUI(List<ResultDetail> resultList){
         if(resultListUpdated != null){
             resultListUpdated.clear();
         }
         if(resultList != null) {
-            resultListUpdated.addAll(resultList);
-            //textView.setVisibility(View.GONE);
+            Objects.requireNonNull(resultListUpdated).addAll(resultList);
             if(resultListUpdated.size() == 0){
                 resultListUpdated.clear();
-                //textView.setVisibility(View.VISIBLE);
-               // textView.setText(R.string.list_empty);
             }
             adapter.notifyDataSetChanged();
-           // swipeRefreshLayout.setRefreshing(false);
         }
     }
 
+
+    // Interface implemented in activity home
     public interface ListFragmentListener {
         void callbackList(ResultDetail result);
     }

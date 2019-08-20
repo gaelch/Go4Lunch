@@ -100,7 +100,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     private WorkMatesAdapter adapter;
     private List<User> users;
     private List<User> usersAreJoining;
-    private RestauDetailFragmentListener mListener;
     private boolean var = false;
     private User user;
     //private User userDatabase;
@@ -128,17 +127,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         // Required empty public constructor
     }
 
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof RestauDetailFragmentListener) {
-            //Listener to pass userLogin to th activityMain
-            mListener = (RestauDetailFragmentListener) context;
-        } else {
-            Log.d(TAG, "onAttach: parent Activity must implement MainFragmentListener");
-        }
-    }
-
 
     @TargetApi(Build.VERSION_CODES.N)
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -161,6 +149,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         return view;
     }
 
+    // Get restaurant from Firebase database
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void getRestaurantFromFirestore() {
         RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(task -> {
@@ -174,6 +163,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }).addOnFailureListener(e -> Log.e("fail", e.getMessage()));
     }
 
+    // FAB configuration
     private void configureFab() {
         floatingActionButton.setOnClickListener(this);
         if (resultDetail.getName().equals(choice)) {
@@ -183,6 +173,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }
     }
 
+    // Display image
     private void setImages() {
         if (!(resultDetail.getPhotos() == null)) {
             if (!(resultDetail.getPhotos().isEmpty())) {
@@ -194,10 +185,9 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         } else {
             Glide.with(this).load(resultDetail.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
         }
-
-
-        // Rate stars
     }
+
+    // transparent status bar
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setTransparentStatusBar() {
@@ -207,6 +197,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         getActivity().getWindow().setStatusBarColor(Color.TRANSPARENT);
     }
 
+    // Get data in bundle
     private void getTheBundleData() {
         assert getArguments() != null;
         resultDetail = (ResultDetail) getArguments().getSerializable(RESULT);
@@ -216,6 +207,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         getRestaurantJoiningUsers();
     }
 
+    // find users are joining
     private void getRestaurantJoiningUsers() {
         usersAreJoining = new ArrayList<>();
         for (User user : users) {
@@ -230,6 +222,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }
     }
 
+    // textView configuration
     private void configureTextView() {
         tvRestaurantName.setText(resultDetail.getName());
         tvRestaurantAddress.setText(resultDetail.getFormattedAddress());
@@ -253,13 +246,14 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         });
     }
 
-    // 2 - Configure BottomNavigationView Listener
+    // Configure BottomNavigationView Listener
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void configureBottomView() {
         bottomNavigationView.setOnNavigationItemSelectedListener(item -> getBottomChoice(item.getItemId()));
         bottomNavigationView.getMenu().getItem(0).setCheckable(false);
     }
 
+    // Bottom bar Buttons
     @RequiresApi(api = Build.VERSION_CODES.N)
     private Boolean getBottomChoice(Integer integer) {
         switch (integer) {
@@ -291,6 +285,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         return true;
     }
 
+    // Display dialog if restaurant doesn't have url
     private void showBoxInfo() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         alertDialog.setTitle("No url found!");
@@ -301,10 +296,12 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         alertDialog.show();
     }
 
+    // To display stars
     private void setStars() {
         StarsUtils.setStars(getActivity(), imageViewRate1, imageViewRate2, imageViewRate3, users, restaurant);
     }
 
+    // If GPS is disable
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         // Setting Dialog Title
@@ -323,6 +320,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         alertDialog.show();
     }
 
+    // FAB onCLick
     @RequiresApi(api = Build.VERSION_CODES.O)
     @Override
     public void onClick(View v) {
@@ -356,6 +354,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }
     }
 
+    // Get users in Firebase database
     private void getUsersInDatabase() {
         UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -389,6 +388,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         });
     }
 
+    // Refresh restaurant table in Firebase
     @RequiresApi(api = Build.VERSION_CODES.N)
     private void updateTableRestaurants(String userId, String userName, String choice, int i) {
         for (Restaurant r : restaurantList) {
@@ -414,6 +414,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         refreshRestaurantList();
     }
 
+    // Refresh UI
     private void refreshRestaurantList() {
         restaurantList = new ArrayList<>();
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(task -> {
@@ -442,6 +443,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         });
     }
 
+    // Store restaurant in database if not exist
     private void createRestaurantAndUpdateIt(int i, String userName, String userId) {
         if (i == 0) {
             RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
@@ -455,6 +457,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }
     }
 
+    // Update database
     private void updateChoiceOrLike(int i, String userName, String choice, String userId) {
         if (i == 0) {
             RestaurantHelper.updateRestaurantChoice(userName, choice);
@@ -464,21 +467,21 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         }
     }
 
+    // delete like in database
     private void deleteLike(String userId, String restaurantUid) {
         RestaurantHelper.deleteRestaurantRate(userId, restaurantUid);
         Toast.makeText(getActivity(), "Unliked !", Toast.LENGTH_SHORT).show();
     }
 
+
+    // delete user restaurant choice
     private void deleteChoice(String userName, String choice) {
         RestaurantHelper.deleteUserChoice(userName, choice);
     }
 
+    // update user restaurant choice
     private void updateTableUsers() {
         UserHelper.updateChoice(user.getChoice(), user.getUid());
-    }
-
-    public interface RestauDetailFragmentListener {
-        void callbackRestauDetail();
     }
 
 }

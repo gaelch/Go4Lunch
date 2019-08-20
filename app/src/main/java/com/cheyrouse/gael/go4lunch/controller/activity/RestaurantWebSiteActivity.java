@@ -100,6 +100,5 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
     //Show WebView
     protected void updateUI(String url) {
         webView.loadUrl(url);
-
     }
 }

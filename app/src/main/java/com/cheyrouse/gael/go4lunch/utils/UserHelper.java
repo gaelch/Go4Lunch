@@ -19,16 +19,11 @@ public class UserHelper {
 
     // --- CREATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> createUser(String uid, String userUid, String username, String urlPicture) {
+    public static void createUser(String uid, String userUid, String username, String urlPicture) {
         User userToCreate = new User(userUid, username, urlPicture);
-        return UserHelper.getUsersCollection().document(uid).set(userToCreate);
+        UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 
-    // --- GET ---
-
-//    public static com.google.android.gms.tasks.Task<DocumentSnapshot> getUser(String uid){
-//        return UserHelper.getUsersCollection().document(uid).get();
-//    }
     // --- GET ---
 
     public static Task<DocumentSnapshot> getUser(String uid){
@@ -37,18 +32,11 @@ public class UserHelper {
 
     // --- UPDATE ---
 
-    public static com.google.android.gms.tasks.Task<Void> updateChoice(String choice, String uid) {
-        return UserHelper.getUsersCollection().document(uid).update("choice", choice);
+    public static void updateChoice(String choice, String uid) {
+        UserHelper.getUsersCollection().document(uid).update("choice", choice);
     }
 
-    public static com.google.android.gms.tasks.Task<Void> updateNotification(boolean notification, String uid) {
-        return UserHelper.getUsersCollection().document(uid).update("notification", notification);
+    public static void updateNotification(boolean notification, String uid) {
+        UserHelper.getUsersCollection().document(uid).update("notification", notification);
     }
-
-    // --- DELETE ---
-
-    public static Task<Void> deleteUser(String uid) {
-        return UserHelper.getUsersCollection().document(uid).delete();
-    }
-
 }

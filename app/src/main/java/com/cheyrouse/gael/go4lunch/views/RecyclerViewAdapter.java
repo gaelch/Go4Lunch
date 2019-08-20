@@ -14,7 +14,6 @@ import com.bumptech.glide.RequestManager;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
-import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 
@@ -56,7 +55,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder viewHolder, int position) {
-        viewHolder.updateWithUssers(context, this.results.get(position), this.userList, this.glide, mListener);
+        viewHolder.updateWithRestaurants(context, this.results.get(position), this.userList, this.glide, mListener);
     }
 
     // RETURN THE TOTAL COUNT OF ITEMS IN THE LIST

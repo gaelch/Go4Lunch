@@ -43,7 +43,7 @@
             tools:replace="android:value" />
 
         <service
-            android:name=".service.GPSTracker"
+            android:name=".services.GPSTracker"
             android:enabled="true"
             tools:ignore="InnerclassSeparator" />
 
@@ -62,7 +62,7 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" /> <!-- NOTIFICATION SERVICE -->
-        <service android:name=".service.NotificationsService">
+        <service android:name=".services.NotificationsService">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
                 <action android:name="android.intent.action.RESPOND_VIA_MESSAGE" />

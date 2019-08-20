@@ -15,32 +15,12 @@ import java.util.regex.Pattern;
 
 public class StringHelper {
 
-    public static String extractValueFromHtml(String s) {
-        String urlStr ="";
-        String regex = "\\(?\\b(https?://|www[.]|ftp://)[-A-Za-z0-9+&@#/%?=~_()|!:,.;]*[-A-Za-z0-9+&@#/%=~_()|]";
-
-        Pattern p = Pattern.compile(regex);
-        Matcher m = p.matcher(s);
-
-        while(m.find())
-        {
-            urlStr = m.group();
-
-            if (urlStr.startsWith("(") && urlStr.endsWith(")"))
-            {
-                urlStr = urlStr.substring(1, urlStr.length() - 1);
-            }
-        }
-        Log.e("url ", urlStr);
-
-        return urlStr;
-    }
-
+    // To convert double in string
     public static String convertInString(double latitude, double longitude) {
         return latitude + "," + longitude;
     }
 
-
+    // Get joining CoWorkers
     public static String getCoWorkers(List<String> users, User user, Context context) {
         List<String> userList = new ArrayList<>();
         for(String u : users){
@@ -54,6 +34,16 @@ public class StringHelper {
         } else {
             return context.getResources().getString(R.string.no_coworker);
         }
+    }
+
+    // Get number of CoWorkers
+    public static String getNumberOfCoworkers(List<User> usersAreJoining){
+        if(usersAreJoining.size() != 0){
+            return String.valueOf("(" + usersAreJoining.size() + ")");
+        }else {
+            return "(0)";
+        }
+
     }
 
 }

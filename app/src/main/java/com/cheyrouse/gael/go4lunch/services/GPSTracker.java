@@ -1,4 +1,4 @@
-package com.cheyrouse.gael.go4lunch.service;
+package com.cheyrouse.gael.go4lunch.services;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -16,6 +16,9 @@ import android.provider.Settings;
 import android.support.v4.app.ActivityCompat;
 import android.util.Log;
 
+import java.util.Objects;
+
+// Service GPSTracker to find current location
 public class GPSTracker extends Service implements LocationListener {
 
     private final Context mContext;
@@ -37,7 +40,7 @@ public class GPSTracker extends Service implements LocationListener {
     private static final long MIN_DISTANCE_CHANGE_FOR_UPDATES = 10; // 10 meters
 
     // The minimum time between updates in milliseconds
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 60 * 1; // 1 minute
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 60; // 1 minute
 
     // Declaring a Location Manager
     protected LocationManager locationManager;
@@ -53,7 +56,7 @@ public class GPSTracker extends Service implements LocationListener {
                     .getSystemService(LOCATION_SERVICE);
 
             // getting GPS status
-            isGPSEnabled = locationManager
+            isGPSEnabled = Objects.requireNonNull(locationManager)
                     .isProviderEnabled(LocationManager.GPS_PROVIDER);
 
             // getting network status
@@ -89,7 +92,7 @@ public class GPSTracker extends Service implements LocationListener {
                 // if GPS Enabled get lat/long using GPS Services
                 if (isGPSEnabled) {
                     if (location == null) {
-                        locationManager.requestLocationUpdates(
+                        Objects.requireNonNull(locationManager).requestLocationUpdates(
                                 LocationManager.GPS_PROVIDER,
                                 MIN_TIME_BW_UPDATES,
                                 MIN_DISTANCE_CHANGE_FOR_UPDATES, this);

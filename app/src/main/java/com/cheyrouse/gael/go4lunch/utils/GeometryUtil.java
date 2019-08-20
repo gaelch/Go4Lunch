@@ -4,8 +4,9 @@ import android.content.Context;
 import android.util.Log;
 
 import com.cheyrouse.gael.go4lunch.models.Location;
-import com.cheyrouse.gael.go4lunch.service.GPSTracker;
+import com.cheyrouse.gael.go4lunch.services.GPSTracker;
 
+// Class to calculate distance between user and restaurants
 public class GeometryUtil {
 
     private static Location getDistances(Context context) {
@@ -21,8 +22,7 @@ public class GeometryUtil {
         return location;
     }
 
-    public static double calculateDistance(Context context,
-                                     double toLong, double toLat) {
+    public static double calculateDistance(Context context, double toLong, double toLat) {
         double fromLat = getDistances(context).getLat();
         double fromLong = getDistances(context).getLng();
         double d2r = Math.PI / 180;

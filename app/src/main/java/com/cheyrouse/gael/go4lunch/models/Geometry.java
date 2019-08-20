@@ -7,8 +7,6 @@ import java.io.Serializable;
 
 public class Geometry implements Serializable {
 
-
-
         @SerializedName("location")
         @Expose
         private Location location;

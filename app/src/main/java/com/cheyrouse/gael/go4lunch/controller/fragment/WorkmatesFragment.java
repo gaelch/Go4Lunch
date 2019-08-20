@@ -43,7 +43,7 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         // Required empty public constructor
     }
 
-    //Attach the callback tto activity
+    //Attach the listener to activity
     @Override
     public void onAttach(Context context) {
         super.onAttach(context);
@@ -55,6 +55,8 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         }
     }
 
+
+    // New instance
     public static WorkmatesFragment newInstance(List<User> users) {
         // Create new fragment
         WorkmatesFragment frag = new WorkmatesFragment();
@@ -76,6 +78,7 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         return v;
     }
 
+    // Get bundle data
     private void getUsersInBundle() {
         assert getArguments() != null;
         users = (List<User>) getArguments().getSerializable(USERS);
@@ -93,11 +96,13 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }
 
+    // Listener
     @Override
     public void onArticleClicked(User user) {
         mListener.callbackMates(user);
     }
 
+    // Interface
     public interface WorkMateFragmentListener{
         void callbackMates(User user);
     }

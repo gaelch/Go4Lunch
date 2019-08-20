@@ -3,6 +3,7 @@ package com.cheyrouse.gael.go4lunch.utils;
 import java.util.Calendar;
 import java.util.Locale;
 
+// Define date for reset lunch choice
 public class DateUtils {
 
     // get calendar to Alarm Helper reset choice

@@ -15,11 +15,13 @@ import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
+import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
 import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
+import com.cheyrouse.gael.go4lunch.utils.StringHelper;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.Task;
@@ -32,23 +34,33 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
+import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_WIDTH;
-import static com.cheyrouse.gael.go4lunch.service.Go4LunchService.API_KEY;
 
-class RecyclerViewHolder extends RecyclerView.ViewHolder  {
+class RecyclerViewHolder extends RecyclerView.ViewHolder {
 
-    @BindView(R.id.card) CardView constraintLayout;
-    @BindView(R.id.restaurant_name) TextView tvRestaurantName;
-    @BindView(R.id.address) TextView tvAddress;
-    @BindView(R.id.textViewSchedule) TextView tvSchedule;
-    @BindView(R.id.imageViewRestaurant) ImageView imageViewRestaurant;
-    @BindView(R.id.tV_coWorkers) TextView tvCoWorkers;
-    @BindView(R.id.imageViewStars1) ImageView imageViewStars1;
-    @BindView(R.id.imageViewStars2) ImageView imageViewStars2;
-    @BindView(R.id.imageViewStars3) ImageView imageViewStars3;
-    @BindView(R.id.distanceToMe) TextView textViewDistance;
+    @BindView(R.id.card)
+    CardView constraintLayout;
+    @BindView(R.id.restaurant_name)
+    TextView tvRestaurantName;
+    @BindView(R.id.address)
+    TextView tvAddress;
+    @BindView(R.id.textViewSchedule)
+    TextView tvSchedule;
+    @BindView(R.id.imageViewRestaurant)
+    ImageView imageViewRestaurant;
+    @BindView(R.id.tV_coWorkers)
+    TextView tvCoWorkers;
+    @BindView(R.id.imageViewStars1)
+    ImageView imageViewStars1;
+    @BindView(R.id.imageViewStars2)
+    ImageView imageViewStars2;
+    @BindView(R.id.imageViewStars3)
+    ImageView imageViewStars3;
+    @BindView(R.id.distanceToMe)
+    TextView textViewDistance;
 
     private Restaurant restaurant;
 
@@ -59,49 +71,45 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
 
     //Update Items
     @RequiresApi(api = Build.VERSION_CODES.N)
-    void updateWithUssers(Context context, final ResultDetail result, List<User> users, RequestManager glide, final RecyclerViewAdapter.onArticleAdapterListener callback) {
-
-        if(result.getName() != null){
+    void updateWithRestaurants(Context context, final ResultDetail result, List<User> users, RequestManager glide, final RecyclerViewAdapter.onArticleAdapterListener callback) {
+        // Restaurant name
+        if (result.getName() != null) {
             tvRestaurantName.setText(result.getName());
-        }else{
-            if(restaurant != null){
+        } else {
+            if (restaurant != null) {
                 tvRestaurantName.setText(result.getAddressComponents().get(0).getLongName());
             }
         }
-
-        if(result.getFormattedAddress() != null){
+        // Restaurant address
+        if (result.getFormattedAddress() != null) {
             tvAddress.setText(result.getFormattedAddress());
         }
-        if(result.getOpeningHours() != null){
-         //   tvSchedule.setText(result.getOpeningHours().getPeriods().toString());
+        // Opening hours
+        if (result.getOpeningHours() != null) {
+            //   tvSchedule.setText(result.getOpeningHours().getPeriods().toString());
         }
 
-        if (!(result.getPhotos() == null)){
-            if (!(result.getPhotos().isEmpty())){
-                glide.load(BASE_URL+"?maxwidth="+MAX_WIDTH+"&maxheight="+MAX_HEIGHT+"&photoreference="+result
-                        .getPhotos().get(0).getPhotoReference()+"&key="+ API_KEY).apply(new RequestOptions().override(75, 75)).into(imageViewRestaurant);
+        // Photos
+        if (!(result.getPhotos() == null)) {
+            if (!(result.getPhotos().isEmpty())) {
+                glide.load(BASE_URL + "?maxwidth=" + MAX_WIDTH + "&maxheight=" + MAX_HEIGHT + "&photoreference=" + result
+                        .getPhotos().get(0).getPhotoReference() + "&key=" + API_KEY).apply(new RequestOptions().override(75, 75)).into(imageViewRestaurant);
             }
-        }else{
+        } else {
             glide.load(result.getIcon()).apply(RequestOptions.centerCropTransform()).into(imageViewRestaurant);
         }
+        // Distance between user and restaurant
         double distance = GeometryUtil.calculateDistance(context, result.getGeometry().getLocation().getLng(), result.getGeometry().getLocation().getLat());
         int distanceInMeters = (int) distance;
-        if(distanceInMeters > 999){
+        if (distanceInMeters > 999) {
             textViewDistance.setText(GeometryUtil.getString1000Less(distance));
-        }else{
+        } else {
             String distanceString = distanceInMeters + " m";
             textViewDistance.setText(distanceString);
         }
         //pass list mates and see if they choose this restaurant
-
         List<User> usersAreJoining = new ArrayList<>();
-        for (User user : users) {
-            if (user.getChoice() != null) {
-                if (user.getChoice().equals(result.getName())) {
-                    usersAreJoining.add(user);
-                }
-            }
-        }
+        usersAreJoining = ListUtils.getJoiningCoWorkers(users, result);
 
         //get Restaurants from fire store to rating
         restaurant = new Restaurant();
@@ -121,33 +129,16 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder  {
                 Log.e("fail", e.getMessage());
             }
         });
-        if(usersAreJoining.size() != 0){
-            tvCoWorkers.setText(String.valueOf("(" + usersAreJoining.size() + ")"));
-        }else{
-            tvCoWorkers.setText("(0)");
-        }
+        // Number of coWorkers have chosen this restaurant
+        tvCoWorkers.setText(StringHelper.getNumberOfCoworkers(usersAreJoining));
+        // Listener
         this.constraintLayout.setOnClickListener(v -> callback.onRestaurantClicked(result));
     }
 
+
+    // Set number of stars
     private void setStars(Context context, List<User> users, Restaurant restaurant) {
-        if(restaurant != null){
-            if(restaurant.getRate()!= null && restaurant.getRate().size()!=0){
-                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 1) {
-                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                }
-                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 2) {
-                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                    imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                }
-                if (StarsUtils.getRate(restaurant.getRate().size(), users) == 3) {
-                    imageViewStars1.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                    imageViewStars2.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                    imageViewStars3.setImageDrawable(context.getResources().getDrawable(R.drawable.ic_star_rate_white_18dp));
-                }
-            }
-        }
-
-
+        StarsUtils.setStars(context,imageViewStars1, imageViewStars2, imageViewStars3, users, restaurant);
     }
 
 
