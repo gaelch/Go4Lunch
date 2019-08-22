@@ -19,7 +19,6 @@
             android:layout_marginStart="8dp"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="50dp"
-            android:text="Au deux poissons"
             android:lines="1"
             android:textStyle="bold"
             android:textSize="16sp"
@@ -33,7 +32,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="10dp"
             android:layout_marginEnd="20dp"
-            android:text="350m"
             app:layout_constraintEnd_toStartOf="@+id/imageViewRestaurant"
             app:layout_constraintTop_toTopOf="parent" />
 
@@ -45,7 +43,6 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="8dp"
             android:layout_marginBottom="8dp"
-            android:text="12 rue de la montagne sacrée"
             app:layout_constraintBottom_toTopOf="@+id/textViewSchedule"
             app:layout_constraintEnd_toStartOf="@+id/imageView3"
             app:layout_constraintStart_toStartOf="parent"
@@ -59,7 +56,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="8dp"
-            android:text="open until 2:30 pm"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toStartOf="@+id/imageViewStars1"
             app:layout_constraintStart_toStartOf="parent" />

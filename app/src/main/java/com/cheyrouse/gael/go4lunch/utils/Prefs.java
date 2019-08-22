@@ -18,11 +18,13 @@ import java.lang.reflect.Type;
 import java.util.List;
 
 import static android.content.Context.MODE_PRIVATE;
+import static android.provider.MediaStore.Video.VideoColumns.LANGUAGE;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MY_PREFS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USER_PREFS;
 
 public class Prefs {
+    public static final String LANGUAGE_CHOICE = "language";
 
     //This class using SharedPreferences and the Gson library
 
@@ -97,5 +99,16 @@ public class Prefs {
         String json = gson.toJson(resultDetailList);
         editor.putString("results", json);
         editor.apply();
+    }
+
+    public void storeLanguageChoice(String language_choice){
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(LANGUAGE_CHOICE, language_choice);
+        editor.apply();
+    }
+
+    public String getLanguage(){
+        String language = prefs.getString(LANGUAGE_CHOICE, "");
+        return language;
     }
 }

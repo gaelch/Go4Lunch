@@ -1,0 +1,88 @@
+<resources>
+    <string name="app_name">Go4Lunch</string>
+    <string name="Find_a_nice_restaurant">Trouve un super restaurant et invite tes collègues au déjeuner!</string>
+    <string name="sign_in_facebook">Connexion avec Facebook</string>
+    <string name="sign_in_google">Connexion avec Google</string>
+    <string name="sign_in_twitter">Connexion avec Twitter</string>
+    <string name="sign_in_by_email">Connexion par email</string>
+    <string name="logo">logo</string>
+    <string name="connection_succeed">Connection reussie!</string>
+    <string name="error_authentication_canceled">erreur d\'authentication</string>
+    <string name="error_no_internet">erreur pas d\'internet</string>
+    <string name="error_unknown_error">erreur inconnue</string>
+    <!-- Facebook purpose -->
+    <string name="facebook_app_id">305971943412023</string>
+    <string name="fb_login_protocol_scheme">fb305971943412023</string>
+    <!-- Used in NavigationDrawer -->
+    <string name="navigation_drawer_open">Open navigation drawer</string>
+    <string name="navigation_drawer_close">Close navigation drawer</string>
+    <!--Toolbar -->
+    <string name="title_toolbar">Je suis affamé !</string>
+    <!-- BOTTOM NAVIGATION VIEW -->
+    <string name="bottom_navigation_menu_maps_view">Maps View</string>
+    <string name="bottom_navigation_menu_list_view">List View</string>
+    <string name="bottom_navigation_menu_workmates">Workmates</string>
+    <!-- NAVIGATION VIEW MENU ITEMS -->
+    <string name="your_lunch">VOTRE CHOIX</string>
+    <string name="settings">PARAMETRES</string>
+    <string name="logout">DECONNECTION</string>
+
+    <string name="title_activity_maps">Map</string>
+
+    <!-- BOTTOM DETAIL NAVIGATION VIEW -->
+    <string name="bottom_navigation_menu_call">APPELER</string>
+    <string name="bottom_navigation_menu_like">J\'AIME</string>
+    <string name="bottom_navigation_menu_public">SITE WEB</string>
+
+    <!--NOTIFICATION -->
+    <string name="notification_title">Notification Go4Lunch</string>
+    <string name="default_notification_channel_id">0042</string>
+    <string name="no_coworker">"aucun collègue n'a encore choisi ce restaurant"</string>
+    <string name="no_restaurant">"vous n'avez pas encore choisi de restaurant aujourd'hui"</string>
+    <string name="switch_notification_text">Si vous activez les notifications, vous recevrez une notification à midi pour vous rappeler quel restaurant vous avez choisi, son adresse, et qui ira avec vous.</string>
+    <string name="switch_notification">Activer les notifications</string>
+    <string name="cancel">Annuler</string>
+    <string name="you_eat">Ce midi, vous manger, à \u0020</string>
+    <string name="located">\u0020 situé au \u0020</string>
+    <string name="with_you">\u0020 y sera également.</string>
+
+    <!--SEARCH VIEW -->
+    <string name="search_view">Chercher un restaurant</string>
+    <string name="speak_voice">Parler pour rechercher</string>
+    <string name="no_url">Désolé ! aucune url trouvé !</string>
+
+    <!-- EMAIL DIALOG BOX -->
+    <string name="email">Email</string>
+    <string name="password">Mot de passe</string>
+    <string name="user_name">Votre Nom</string>
+    <string name="ok">OK</string>
+    <string name="addAvatar">Voulez vous ajoutez une photo ?</string>
+    <string name="yes">OUI</string>
+
+    <!-- DIALOG BOX -->
+    <string name="eating">\u0020 mange à \u0020</string>
+    <string name="joining">\u0020 y déjeune !</string>
+    <string name="decided">\u0020 n\'est pas encore décidé.</string>
+    <string name="sorry">Désolé mais \u0020</string>
+    <string name="no_url_found">Aucune url trouvé!</string>
+    <string name="no_website">Ce restaurant ne semble pas avoir d\'adresse mail</string>
+    <string name="GPS_is_settings">GPS non activé</string>
+    <string name="settings_menu">Le GPS n\'est pas activé. voulez-vous l\'activer?</string>
+    <string name="notification_enable">Notifications non activé</string>
+    <string name="notification_turn_on">Les Notification ne sont pas activés. Voulez vous les activer?</string>
+
+    <!-- TWITTER KEYS -->
+    <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>
+    <string  name="twitter_consumer_secret" translatable = "false">T6WsvoJvFOJPVcu2Ie0zLyCWd9LkkFfdDaDz1srrvhvHSKIH7O</string>
+
+    <!-- TOAST -->
+    <string name="not_valid">Désolé mais cet email n\'est pas valide</string>
+    <string name="Language_selected">Language sélectionné !</string>
+    <string name="enter_pass">entrez votre mot de passe s\'il vous plait</string>
+    <string name="auth_failed">Echec de l\'authentication. </string>
+    <string name="not_choice_today">désolé mais vous n\'avez pas encore choisi de restaurant aujourd\'hui.</string>
+    <string name="not_phone_permission">Permission non assignée.</string>
+    <string name="liked">j\'aime !</string>
+    <string name="unlike">je n\'aime plus !</string>
+
+</resources>

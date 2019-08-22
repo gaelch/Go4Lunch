@@ -52,6 +52,7 @@ import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
+import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -264,7 +265,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                     Intent intent = new Intent(Intent.ACTION_CALL, Uri.parse("tel:" + resultDetail.getFormattedPhoneNumber()));
                     startActivity(intent);
                 } else {
-                    Toast.makeText(getActivity(), "You don't assign permission.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(), getResources().getString(R.string.not_phone_permission), Toast.LENGTH_SHORT).show();
                     showSettingsAlert();
                 }
                 break;
@@ -288,8 +289,8 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     // Display dialog if restaurant doesn't have url
     private void showBoxInfo() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
-        alertDialog.setTitle("No url found!");
-        alertDialog.setMessage("This restaurant does not seem to have an website");
+        alertDialog.setTitle(getResources().getString(R.string.no_url_found));
+        alertDialog.setMessage(getResources().getString(R.string.no_website));
         alertDialog.setPositiveButton("ok", (dialog, which) -> {
         });
         // Showing Alert Message
@@ -305,17 +306,17 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
+        alertDialog.setTitle(getResources().getString(R.string.GPS_is_settings));
         // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+        alertDialog.setMessage(getResources().getString(R.string.settings_menu));
         // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", (dialog, which) -> {
+        alertDialog.setPositiveButton(getResources().getString(R.string.settings), (dialog, which) -> {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                     Uri.fromParts("package", "com.cheyrouse.gael.go4lunch", null));
             startActivity(intent);
         });
         // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", (dialog, which) -> dialog.cancel());
+        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.cancel());
         // Showing Alert Message
         alertDialog.show();
     }
@@ -453,7 +454,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             RestaurantHelper.createRestaurant(resultDetail.getName(), resultDetail.id, resultDetail.name,
                     resultDetail.getGeometry().getLocation().getLat(), resultDetail.getGeometry().getLocation().getLng());
             RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-            Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getResources().getString(R.string.liked), Toast.LENGTH_SHORT).show();
         }
     }
 
@@ -463,14 +464,14 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             RestaurantHelper.updateRestaurantChoice(userName, choice);
         } else {
             RestaurantHelper.updateRestaurantRate(userId, resultDetail.getName());
-            Toast.makeText(getActivity(), "liked !", Toast.LENGTH_SHORT).show();
+            Toast.makeText(getActivity(), getResources().getString(R.string.liked), Toast.LENGTH_SHORT).show();
         }
     }
 
     // delete like in database
     private void deleteLike(String userId, String restaurantUid) {
         RestaurantHelper.deleteRestaurantRate(userId, restaurantUid);
-        Toast.makeText(getActivity(), "Unliked !", Toast.LENGTH_SHORT).show();
+        Toast.makeText(getActivity(),getResources().getString(R.string.unlike), Toast.LENGTH_SHORT).show();
     }
 
 

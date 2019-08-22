@@ -24,15 +24,12 @@
     <string name="bottom_navigation_menu_workmates">Workmates</string>
     <!-- NAVIGATION VIEW MENU ITEMS -->
     <string name="your_lunch">YOR LUNCH</string>
-    <string name="chat">CHAT</string>
     <string name="settings">SETTINGS</string>
     <string name="logout">LOGOUT</string>
 
     <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">MAPS</string>
     <string name="title_activity_maps">Map</string>
 
-    <string name="is_eating"> is eating </string>
 
     <!-- BOTTOM DETAIL NAVIGATION VIEW -->
     <string name="bottom_navigation_menu_call">CALL</string>
@@ -46,6 +43,10 @@
     <string name="no_restaurant">"you did not choose a restaurant today"</string>
     <string name="switch_notification_text">If you turn on notifications, you will receive a notification every day at noon to remind you which restaurant you have chosen, its address, and who will be with you.</string>
     <string name="switch_notification">Enable notifications</string>
+    <string name="cancel">Cancel</string>
+    <string name="you_eat">This lunch, you eat at \u0020</string>
+    <string name="located">\u0020 located at \u0020</string>
+    <string name="with_you">\u0020 will be there with you.</string>
 
     <!--SEARCH VIEW -->
     <string name="search_view">Search Restaurant</string>
@@ -60,9 +61,30 @@
     <string name="addAvatar">Do you want add picture ?</string>
     <string name="yes">YES</string>
 
+    <!-- DIALOG BOX -->
+    <string name="eating">\u0020 is eating \u0020</string>
+    <string name="joining">\u0020 is joining !</string>
+    <string name="decided">\u0020 hasn\'t decided yet</string>
+    <string name="sorry">Sorry but \u0020</string>
+    <string name="no_url_found">No url found!</string>
+    <string name="no_website">This restaurant does not seem to have an website</string>
+    <string name="GPS_is_settings">GPS is settings</string>
+    <string name="settings_menu">GPS is not enabled. Do you want to go to settings menu?</string>
+    <string name="notification_enable">Notifications enable</string>
+    <string name="notification_turn_on">Notification is not enabled. Do you want to go to settings menu?</string>
+
     <!-- TWITTER KEYS -->
     <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>
     <string  name="twitter_consumer_secret" translatable = "false">T6WsvoJvFOJPVcu2Ie0zLyCWd9LkkFfdDaDz1srrvhvHSKIH7O</string>
 
+    <!-- TOAST -->
+    <string name="not_valid">Sorry but is not a valid email</string>
+    <string name="Language_selected">Language already selected!</string>
+    <string name="enter_pass">enter your password please</string>
+    <string name="auth_failed">Authentication failed. </string>
+    <string name="not_choice_today">sorry but you did not choose a restaurant today.</string>
+    <string name="not_phone_permission">You don\'t assign permission.</string>
+    <string name="liked">liked !</string>
+    <string name="unlike">unlike !</string>
 
 </resources>

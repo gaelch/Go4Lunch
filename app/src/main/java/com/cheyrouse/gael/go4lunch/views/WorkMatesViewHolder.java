@@ -37,10 +37,6 @@ class WorkMatesViewHolder extends RecyclerView.ViewHolder {
     @BindView(R.id.constraint_work_list)
     CardView card;
 
-    private static final String isEating = " is eating ";
-    private static final String isJoining = " is joining ! ";
-    private static final String notDecided = " hasn't decided yet";
-
 
     WorkMatesViewHolder(View itemView) {
         super(itemView);
@@ -50,6 +46,10 @@ class WorkMatesViewHolder extends RecyclerView.ViewHolder {
     //Update Items
     @SuppressLint("SetTextI18n")
     void updateWithUsers(Context context, final User user, RequestManager glide, final WorkMatesAdapter.onUserAdapterListener callback, int i) {
+        String isEating = context.getResources().getString(R.string.eating);
+        String isJoining = context.getResources().getString(R.string.joining);
+        String notDecided = context.getResources().getString(R.string.decided);
+        String sorryBut = context.getResources().getString(R.string.sorry);
         Prefs prefs = Prefs.get(context);
         if (user != null) {
             if (i == 0) {
@@ -83,7 +83,7 @@ class WorkMatesViewHolder extends RecyclerView.ViewHolder {
                 if (Objects.requireNonNull(user).getChoice() != null) {
                     callback.onArticleClicked(user);
                 } else {
-                    Toast.makeText(context, "Sorry but " + user.getUsername() + notDecided, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, sorryBut + user.getUsername() + notDecided, Toast.LENGTH_LONG).show();
                 }
             }
         });

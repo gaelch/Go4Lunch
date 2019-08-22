@@ -464,7 +464,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         if (choiceUser != null && !choiceUser.isEmpty()) {
                             getRestaurantIfExist(choiceUser);
                         } else {
-                            Toast.makeText(HomeActivity.this, "sorry but you did not choose a restaurant today", Toast.LENGTH_LONG).show();
+                            Toast.makeText(HomeActivity.this, getResources().getString(R.string.not_choice_today), Toast.LENGTH_LONG).show();
                         }
                     }
                 } else {

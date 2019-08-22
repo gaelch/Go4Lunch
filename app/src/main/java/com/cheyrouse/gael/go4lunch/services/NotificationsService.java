@@ -85,7 +85,7 @@ public class NotificationsService extends FirebaseMessagingService {
         Intent intent = new Intent(this, MainActivity.class);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_ONE_SHOT);
         if (restaurant != null) {
-            text = "This lunch, you eat at " + restaurant.getName() + " located at " + restaurant.getFormattedAddress() + ", " + coWorkers;
+            text = getResources().getString(R.string.you_eat) + restaurant.getName() + getResources().getString(R.string.located) + restaurant.getFormattedAddress() + ", " + coWorkers;
         }
         // 2 - Create a Style for the Notification
         NotificationCompat.BigTextStyle inboxStyle = new NotificationCompat.BigTextStyle();

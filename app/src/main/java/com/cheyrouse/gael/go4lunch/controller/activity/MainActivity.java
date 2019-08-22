@@ -9,6 +9,8 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -31,13 +33,17 @@ import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
@@ -90,6 +96,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -112,6 +119,7 @@ public class MainActivity extends AppCompatActivity {
     CoordinatorLayout coordinatorLayout;
     @BindView(R.id.button_twitter)
     Button twitterLoginButton;
+    @BindView(R.id.spinner) Spinner spinner;
 
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
@@ -125,6 +133,8 @@ public class MainActivity extends AppCompatActivity {
     private Prefs prefs;
     boolean var = false;
     private View dialogView;
+    private Locale myLocale;
+    private String currentLanguage = "en", currentLang;
 
 
     @RequiresApi(api = Build.VERSION_CODES.M)
@@ -133,14 +143,93 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        prefs = Prefs.get(this);
+        checkIfLanguageIsOk();
         CheckSelfPermissions();
         checkNotificationIsEnable();
         checkIfGpsIsEnable();
-        prefs = Prefs.get(this);
         FacebookSdk.sdkInitialize(getApplicationContext());
         AppEventsLogger.activateApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
         (new AlarmHelper()).configureAlarmToResetChoice(this);
+    }
+
+    private void checkIfLanguageIsOk() {
+        String locale = prefs.getLanguage();
+        if(locale != null && !locale.isEmpty()){
+            setLocale(locale);
+            spinner.setVisibility(View.GONE);
+        }else{
+            configureSpinner();
+        }
+    }
+
+    private void configureSpinner() {
+        spinner.setVisibility(View.VISIBLE);
+        hideButtons();
+        currentLanguage = getIntent().getStringExtra(currentLang);
+        List<String> list = new ArrayList<String>();
+
+        list.add("Select language");
+        list.add("English");
+        list.add("Français");
+
+        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> adapterView, View view, int position, long l) {
+                switch (position) {
+                    case 0:
+                        break;
+                    case 1:
+                        setLocale("en");
+                        prefs.storeLanguageChoice("en");
+                        break;
+                    case 2:
+                        setLocale("fr");
+                        prefs.storeLanguageChoice("fr");
+                        break;
+                }
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> adapterView) {
+            }
+        });
+    }
+
+    private void hideButtons() {
+        buttonEmail.setVisibility(View.GONE);
+        buttonFaceBook.setVisibility(View.GONE);
+        buttonGoogle.setVisibility(View.GONE);
+        twitterLoginButton.setVisibility(View.GONE);
+    }
+
+
+    public void setLocale(String localeName) {
+        currentLanguage = getIntent().getStringExtra(currentLang);
+        if (!localeName.equals(currentLanguage)) {
+            myLocale = new Locale(localeName);
+            Resources res = getResources();
+            DisplayMetrics dm = res.getDisplayMetrics();
+            Configuration conf = res.getConfiguration();
+            conf.locale = myLocale;
+            res.updateConfiguration(conf, dm);
+            Intent refresh = new Intent(this, MainActivity.class);
+            refresh.putExtra(currentLang, localeName);
+            startActivity(refresh);
+        }
+        showButtons();
+    }
+
+    private void showButtons() {
+        buttonEmail.setVisibility(View.VISIBLE);
+        buttonFaceBook.setVisibility(View.VISIBLE);
+        buttonGoogle.setVisibility(View.VISIBLE);
+        twitterLoginButton.setVisibility(View.VISIBLE);
     }
 
     // Verify if Notifications are enable
@@ -148,9 +237,9 @@ public class MainActivity extends AppCompatActivity {
         if (!isNotificationEnabled(this)) {
             //Enable to notification access service.
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
-            alertDialog.setTitle("Notifications enable");
-            alertDialog.setMessage("Notification is not enabled. Do you want to go to settings menu?");
-            alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+            alertDialog.setTitle(getResources().getString(R.string.notification_enable));
+            alertDialog.setMessage(getResources().getString(R.string.notification_turn_on));
+            alertDialog.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     Intent intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
                     //for Android 5-7
@@ -161,7 +250,7 @@ public class MainActivity extends AppCompatActivity {
                     startActivity(intent);
                 }
             });
-            alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            alertDialog.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
                 public void onClick(DialogInterface dialog, int which) {
                     dialog.cancel();
                 }
@@ -307,18 +396,18 @@ public class MainActivity extends AppCompatActivity {
     public void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
         // Setting Dialog Title
-        alertDialog.setTitle("GPS is settings");
+        alertDialog.setTitle(getResources().getString(R.string.GPS_is_settings));
         // Setting Dialog Message
-        alertDialog.setMessage("GPS is not enabled. Do you want to go to settings menu?");
+        alertDialog.setMessage(getResources().getString(R.string.settings_menu));
         // On pressing Settings button
-        alertDialog.setPositiveButton("Settings", new DialogInterface.OnClickListener() {
+        alertDialog.setPositiveButton(getResources().getString(R.string.settings), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
                 startActivity(intent);
             }
         });
         // on pressing cancel button
-        alertDialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
             public void onClick(DialogInterface dialog, int which) {
                 dialog.cancel();
             }
@@ -458,12 +547,12 @@ public class MainActivity extends AppCompatActivity {
         });
         dialogView.findViewById(R.id.button_ok).setOnClickListener(v -> {
             if (!RegexUtil.isValidEmail(email)) {
-                Toast.makeText(getApplicationContext(), "Sorry but is not a valid email", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_valid), Toast.LENGTH_LONG).show();
             }
             if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
                 launchConnection(email, password);
             } else {
-                Toast.makeText(getApplicationContext(), "enter your password please", Toast.LENGTH_LONG).show();
+                Toast.makeText(getApplicationContext(), getResources().getString(R.string.enter_pass), Toast.LENGTH_LONG).show();
             }
         });
         //Now we need an AlertDialog.Builder object
@@ -504,7 +593,7 @@ public class MainActivity extends AppCompatActivity {
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.getException());
-                        Toast.makeText(MainActivity.this, "Authentication failed.",
+                        Toast.makeText(MainActivity.this, getResources().getString(R.string.auth_failed),
                                 Toast.LENGTH_SHORT).show();
                     }
                 });
