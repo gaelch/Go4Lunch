@@ -43,6 +43,7 @@
     <string name="no_restaurant">"you did not choose a restaurant today"</string>
     <string name="switch_notification_text">If you turn on notifications, you will receive a notification every day at noon to remind you which restaurant you have chosen, its address, and who will be with you.</string>
     <string name="switch_notification">Enable notifications</string>
+    <string name="select_language_text">If you change the language, the application will have to restart to apply the modification.</string>
     <string name="cancel">Cancel</string>
     <string name="you_eat">This lunch, you eat at \u0020</string>
     <string name="located">\u0020 located at \u0020</string>
@@ -72,6 +73,12 @@
     <string name="settings_menu">GPS is not enabled. Do you want to go to settings menu?</string>
     <string name="notification_enable">Notifications enable</string>
     <string name="notification_turn_on">Notification is not enabled. Do you want to go to settings menu?</string>
+    <string name="restarting">Restart required.</string>
+    <string name="restarting_now">Want to restart now?</string>
+    <string name="later">Later</string>
+    <string name="select">Select language</string>
+    <string name="en">English</string>
+    <string name="fr">French</string>
 
     <!-- TWITTER KEYS -->
     <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>

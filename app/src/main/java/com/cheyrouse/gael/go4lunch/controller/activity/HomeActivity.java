@@ -93,7 +93,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<User> users;
     private List<Restaurant> restaurantList;
     private List<ResultDetail> resultDetailList;
-    private List<ResultDetail> resultDetails;
     private ResultDetail resultDetail;
     private String location;
     private List<Prediction> resultsPredictions = null;
@@ -325,12 +324,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
     }
-
-    @Override
-    protected void onRestart() {
-        super.onRestart();
-        this.recreate();
-    }
+    
 
     //Switch to menu Drawer items
     @Override
@@ -552,7 +546,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
     public void recreate() {
-        if (resultDetails != null) {
+        if (resultDetailList != null) {
             this.recreate();
         }
     }

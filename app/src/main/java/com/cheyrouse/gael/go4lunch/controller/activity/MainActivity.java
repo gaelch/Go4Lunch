@@ -133,7 +133,6 @@ public class MainActivity extends AppCompatActivity {
     private Prefs prefs;
     boolean var = false;
     private View dialogView;
-    private Locale myLocale;
     private String currentLanguage = "en", currentLang;
 
 
@@ -154,6 +153,7 @@ public class MainActivity extends AppCompatActivity {
         (new AlarmHelper()).configureAlarmToResetChoice(this);
     }
 
+    // Check language prefs and purpose choice if null
     private void checkIfLanguageIsOk() {
         String locale = prefs.getLanguage();
         if(locale != null && !locale.isEmpty()){
@@ -164,15 +164,16 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    // Spinner configuration to select language
     private void configureSpinner() {
         spinner.setVisibility(View.VISIBLE);
         hideButtons();
         currentLanguage = getIntent().getStringExtra(currentLang);
         List<String> list = new ArrayList<String>();
 
-        list.add("Select language");
-        list.add("English");
-        list.add("Français");
+        list.add(getResources().getString(R.string.select));
+        list.add(getResources().getString(R.string.en));
+        list.add(getResources().getString(R.string.fr));
 
         ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
@@ -201,6 +202,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Hide connexion buttons
     private void hideButtons() {
         buttonEmail.setVisibility(View.GONE);
         buttonFaceBook.setVisibility(View.GONE);
@@ -209,10 +211,11 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+    // Set new language to apply
     public void setLocale(String localeName) {
         currentLanguage = getIntent().getStringExtra(currentLang);
         if (!localeName.equals(currentLanguage)) {
-            myLocale = new Locale(localeName);
+            Locale myLocale = new Locale(localeName);
             Resources res = getResources();
             DisplayMetrics dm = res.getDisplayMetrics();
             Configuration conf = res.getConfiguration();
@@ -225,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
         showButtons();
     }
 
+    // Show connexion buttons
     private void showButtons() {
         buttonEmail.setVisibility(View.VISIBLE);
         buttonFaceBook.setVisibility(View.VISIBLE);

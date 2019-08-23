@@ -41,6 +41,7 @@
     <string name="no_restaurant">"vous n'avez pas encore choisi de restaurant aujourd'hui"</string>
     <string name="switch_notification_text">Si vous activez les notifications, vous recevrez une notification à midi pour vous rappeler quel restaurant vous avez choisi, son adresse, et qui ira avec vous.</string>
     <string name="switch_notification">Activer les notifications</string>
+    <string name="select_language_text">Si vous changez la langue, l\'application devra redémarrer pour appliquer la modification.</string>
     <string name="cancel">Annuler</string>
     <string name="you_eat">Ce midi, vous manger, à \u0020</string>
     <string name="located">\u0020 situé au \u0020</string>
@@ -70,6 +71,12 @@
     <string name="settings_menu">Le GPS n\'est pas activé. voulez-vous l\'activer?</string>
     <string name="notification_enable">Notifications non activé</string>
     <string name="notification_turn_on">Les Notification ne sont pas activés. Voulez vous les activer?</string>
+    <string name="restarting">Redémarrage nécessaire.</string>
+    <string name="restarting_now">Voulez-vous redémarrer maintenant?</string>
+    <string name="later">Plus tard</string>
+    <string name="select">Selectionner la langue</string>
+    <string name="en">Anglais</string>
+    <string name="fr">Français</string>
 
     <!-- TWITTER KEYS -->
     <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>

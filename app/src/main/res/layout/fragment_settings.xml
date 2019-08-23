@@ -26,7 +26,7 @@
         android:id="@+id/view2"
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:layout_marginTop="40dp"
+        android:layout_marginTop="30dp"
         android:background="@color/quantum_grey200"
         app:layout_constraintTop_toBottomOf="@+id/textViewNotifications"
         tools:layout_editor_absoluteX="-20dp" />
@@ -56,15 +56,38 @@
         app:layout_constraintTop_toBottomOf="@+id/switch_notifications"
         tools:layout_editor_absoluteX="-20dp" />
 
+    <TextView
+        android:id="@+id/textViewLanguage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:padding="8dp"
+        android:textStyle="italic"
+        android:gravity="center"
+        android:text="@string/select_language_text"
+        android:textColor="@android:color/black"
+        android:textSize="16sp"
+        app:layout_constraintTop_toTopOf="@+id/view3" />
+
+    <View
+        android:id="@+id/view5"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginTop="30dp"
+        android:background="@color/quantum_grey200"
+        app:layout_constraintTop_toBottomOf="@+id/textViewLanguage"
+        tools:layout_editor_absoluteX="-20dp" />
+
     <Spinner
         android:id="@+id/spinner"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginStart="20dp"
+        android:layout_marginEnd="20dp"
         android:layout_marginTop="30dp"
         android:background="@color/white"
         app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintTop_toTopOf="@+id/view3" />
+        app:layout_constraintTop_toTopOf="@+id/view5" />
 
     <View
         android:id="@+id/view4"
