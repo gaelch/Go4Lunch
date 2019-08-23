@@ -1,5 +1,7 @@
 package com.cheyrouse.gael.go4lunch.utils;
 
+import com.cheyrouse.gael.go4lunch.BuildConfig;
+
 // Constants
 public class Constants {
     public static final String BASE_URL = "https://maps.googleapis.com/maps/api/place/photo";
@@ -18,6 +20,6 @@ public class Constants {
     public static final String NOTIFICATION_TAG = "FIREBASEOC";
     public static final String USER = "user";
     public static final String LINE_BREAK = "\n";
-    public static final String API_KEY = "AIzaSyDzaDQWlbBi78NFOUhG7mS8UIgdeyd17GY";
+    public static final String API_KEY = BuildConfig.API_KEY;
 
 }

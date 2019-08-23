@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
 import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.RestauDetailFragment;
+import com.cheyrouse.gael.go4lunch.models.OpeningHours;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
@@ -22,6 +23,7 @@ import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.DateUtils;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
+import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RegexUtil;
 import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
@@ -46,7 +48,7 @@ import static org.mockito.Mockito.when;
 
 public class UtilsUnitTest {
 
-    private Context context;
+    private Context context = mock(Context.class);
 
     @Test
     public void notification_date_is_ok() {
@@ -90,17 +92,6 @@ public class UtilsUnitTest {
     @Test
     public void test_convert_location_in_string(){
         assertEquals("46.3,2.033", StringHelper.convertInString(46.3, 2.033));
-    }
-
-    @Test
-    public void getCoworkers_return_good_person(){
-        List<String> coWorkers = new ArrayList<>();
-        coWorkers.add("Jojo");
-        coWorkers.add("me");
-        User user = new User();
-        user.setUsername("me");
-        String returnedByGetCoworkers = StringHelper.getCoWorkers(coWorkers, user, context);
-        assertEquals("Jojo will be there with you", returnedByGetCoworkers);
     }
 
     @Test
@@ -207,5 +198,25 @@ public class UtilsUnitTest {
         Restaurant restaurant1 = new Restaurant();
         restaurant1.setRestaurantName("Les Zinc");
         ListUtils.makeListResultRestaurantWithResultDetailList(results, restaurants);
+    }
+
+    @Test
+    public void test_if_hour_are_return_good(){
+        assertEquals("22:00", DateUtils.convertStringToHours("2200"));
+    }
+
+    @Test
+    public void test_getOpenHours(){
+        ResultDetail res1 = new ResultDetail();
+        OpeningHours openingHours1 = new OpeningHours();
+        openingHours1.setOpenNow(true);
+        res1.setOpeningHours(openingHours1);
+        ResultDetail res2 = new ResultDetail();
+        assertEquals(2, DateUtils.getOpenHours(res2));
+        ResultDetail res3 = new ResultDetail();
+        OpeningHours openingHours2 = new OpeningHours();
+        openingHours2.setOpenNow(false);
+        res3.setOpeningHours(openingHours2);
+        assertEquals(3, DateUtils.getOpenHours(res3));
     }
 }

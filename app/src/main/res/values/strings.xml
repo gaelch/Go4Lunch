@@ -45,9 +45,14 @@
     <string name="switch_notification">Enable notifications</string>
     <string name="select_language_text">If you change the language, the application will have to restart to apply the modification.</string>
     <string name="cancel">Cancel</string>
-    <string name="you_eat">This lunch, you eat at \u0020</string>
-    <string name="located">\u0020 located at \u0020</string>
-    <string name="with_you">\u0020 will be there with you.</string>
+    <string name="you_eat">This lunch, you eat at\u0020</string>
+    <string name="located">\u0020located at\u0020</string>
+    <string name="with_you">\u0020will be there with you.</string>
+
+    <string name="no_schedul">No schedule</string>
+    <string name="open">Open until\u0020</string>
+    <string name="close">Close\u0020</string>
+    <string name="closing_soon">Closing soon\u0020</string>
 
     <!--SEARCH VIEW -->
     <string name="search_view">Search Restaurant</string>
@@ -63,10 +68,10 @@
     <string name="yes">YES</string>
 
     <!-- DIALOG BOX -->
-    <string name="eating">\u0020 is eating \u0020</string>
-    <string name="joining">\u0020 is joining !</string>
-    <string name="decided">\u0020 hasn\'t decided yet</string>
-    <string name="sorry">Sorry but \u0020</string>
+    <string name="eating">\u0020is eating\u0020</string>
+    <string name="joining">\u0020is joining !</string>
+    <string name="decided">\u0020hasn\'t decided yet</string>
+    <string name="sorry">Sorry but\u0020</string>
     <string name="no_url_found">No url found!</string>
     <string name="no_website">This restaurant does not seem to have an website</string>
     <string name="GPS_is_settings">GPS is settings</string>
@@ -93,5 +98,6 @@
     <string name="not_phone_permission">You don\'t assign permission.</string>
     <string name="liked">liked !</string>
     <string name="unlike">unlike !</string>
+    <string name="image_view">TODO</string>
 
 </resources>

@@ -124,6 +124,7 @@ public class MainActivity extends AppCompatActivity {
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
 
+    private Context mContext;
     private User user;
     private FirebaseAuth firebaseAuth;
     private String email;

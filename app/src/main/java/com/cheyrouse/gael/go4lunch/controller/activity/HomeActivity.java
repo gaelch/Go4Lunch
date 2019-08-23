@@ -70,6 +70,7 @@ import butterknife.ButterKnife;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 
+import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.LINE_BREAK;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
@@ -238,7 +239,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // request results of searchView in Place Autocomplete API
     private void searchQuery(String query) {
         if (query.length() > 2) {
-            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, getString(R.string.google_maps_key)).subscribeWith(new DisposableObserver<Predictions>() {
+            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY).subscribeWith(new DisposableObserver<Predictions>() {
                 @Override
                 public void onNext(Predictions predictions) {
                     resultsPredictions = predictions.getPredictions();
@@ -324,7 +325,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout.addDrawerListener(toggle);
         toggle.syncState();
     }
-    
+
 
     //Switch to menu Drawer items
     @Override

@@ -312,7 +312,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         // On pressing Settings button
         alertDialog.setPositiveButton(getResources().getString(R.string.settings), (dialog, which) -> {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.fromParts("package", "com.cheyrouse.gael.go4lunch", null));
+                    Uri.fromParts("package", "com.cheyrouse.gael.Go4lunch", null));
             startActivity(intent);
         });
         // on pressing cancel button

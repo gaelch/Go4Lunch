@@ -1,5 +1,6 @@
 package com.cheyrouse.gael.go4lunch.services;
 
+import com.cheyrouse.gael.go4lunch.BuildConfig;
 import com.cheyrouse.gael.go4lunch.models.Place;
 import com.cheyrouse.gael.go4lunch.models.PlaceDetails;
 import com.cheyrouse.gael.go4lunch.models.Predictions;

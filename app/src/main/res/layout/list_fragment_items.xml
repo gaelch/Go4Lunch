@@ -68,7 +68,8 @@
             android:layout_marginTop="10dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintTop_toTopOf="parent"
+            android:contentDescription="@string/image_view" />
 
         <ImageView
             android:id="@+id/imageView3"
@@ -80,7 +81,8 @@
             android:src="@drawable/baseline_perm_identity_black_18dp"
             app:layout_constraintBottom_toTopOf="@+id/imageViewStars1"
             app:layout_constraintEnd_toStartOf="@+id/tV_coWorkers"
-            app:layout_constraintTop_toBottomOf="@+id/distanceToMe" />
+            app:layout_constraintTop_toBottomOf="@+id/distanceToMe"
+            android:contentDescription="@string/image_view" />
 
         <TextView
             android:id="@+id/tV_coWorkers"
@@ -99,7 +101,8 @@
             android:tint="@color/quantum_yellow500"
             android:layout_marginBottom="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageViewRestaurant" />
+            app:layout_constraintEnd_toStartOf="@+id/imageViewRestaurant"
+            android:contentDescription="@string/image_view" />
 
         <ImageView
             android:id="@+id/imageViewStars2"
@@ -108,7 +111,8 @@
             android:layout_marginBottom="15dp"
             android:tint="@color/quantum_yellow500"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageViewStars3" />
+            app:layout_constraintEnd_toStartOf="@+id/imageViewStars3"
+            android:contentDescription="@string/image_view" />
 
 
         <ImageView
@@ -118,7 +122,8 @@
             android:tint="@color/quantum_yellow500"
             android:layout_marginBottom="15dp"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/imageViewStars2" />
+            app:layout_constraintEnd_toStartOf="@+id/imageViewStars2"
+            android:contentDescription="@string/image_view" />
 
 </android.support.constraint.ConstraintLayout>
 

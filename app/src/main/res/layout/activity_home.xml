@@ -64,29 +64,19 @@
         android:layout_width="wrap_content"
         android:layout_height="match_parent"
         android:layout_gravity="start"
-        android:background="@color/google_orange"
+        android:background="@color/orange"
         android:fitsSystemWindows="true"
         app:headerLayout="@layout/nav_header"
         app:itemTextColor="@android:color/white"
         app:menu="@menu/menu_drawer" >
 
-
-        <!--<LinearLayout-->
-            <!--android:layout_width="match_parent"-->
-            <!--android:layout_height="wrap_content"-->
-            <!--android:layout_gravity="bottom"-->
-            <!--android:clickable="true"-->
-            <!--android:gravity="center"-->
-            <!--android:orientation="vertical"-->
-            <!--android:focusable="true">-->
-
-            <!--<ImageView-->
-                <!--android:layout_width="match_parent"-->
-                <!--android:layout_height="100dp"-->
-                <!--android:src="@drawable/image_home" />-->
-
-        <!--</LinearLayout>-->
-
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_marginBottom="-1dp"
+                android:src="@drawable/image_lunch"
+                android:layout_gravity="bottom"
+                android:contentDescription="@string/image_view" />
     </android.support.design.widget.NavigationView>
 
 

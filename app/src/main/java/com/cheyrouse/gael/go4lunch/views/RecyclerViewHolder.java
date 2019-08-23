@@ -14,6 +14,7 @@ import android.widget.TextView;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
+import com.cheyrouse.gael.go4lunch.utils.DateUtils;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.RestaurantHelper;
@@ -85,8 +86,15 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder {
             tvAddress.setText(result.getFormattedAddress());
         }
         // Opening hours
-        if (result.getOpeningHours() != null) {
-            //   tvSchedule.setText(result.getOpeningHours().getPeriods().toString());
+        if(DateUtils.getOpenHours(result) == 1){
+            String schedule = context.getResources().getString(R.string.open) + DateUtils.convertStringToHours(result.getOpeningHours().getPeriods().get(0).getClose().getTime());
+            tvSchedule.setText(schedule);
+        }
+        if(DateUtils.getOpenHours(result) == 2){
+            tvSchedule.setText(context.getResources().getString(R.string.no_schedul));
+        }
+        if(DateUtils.getOpenHours(result) == 3){
+            tvSchedule.setText(context.getResources().getString(R.string.close));
         }
 
         // Photos

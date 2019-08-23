@@ -28,6 +28,10 @@
     <string name="logout">DECONNECTION</string>
 
     <string name="title_activity_maps">Map</string>
+    <string name="no_schedul">Pas d\'horaire disponible</string>
+    <string name="open">Ouvert jusqu\'à\u0020</string>
+    <string name="close">Fermé\u0020</string>
+    <string name="closing_soon">Ferme bientôt\u0020</string>
 
     <!-- BOTTOM DETAIL NAVIGATION VIEW -->
     <string name="bottom_navigation_menu_call">APPELER</string>
@@ -43,9 +47,10 @@
     <string name="switch_notification">Activer les notifications</string>
     <string name="select_language_text">Si vous changez la langue, l\'application devra redémarrer pour appliquer la modification.</string>
     <string name="cancel">Annuler</string>
-    <string name="you_eat">Ce midi, vous manger, à \u0020</string>
-    <string name="located">\u0020 situé au \u0020</string>
-    <string name="with_you">\u0020 y sera également.</string>
+    <string name="you_eat">Ce midi, vous manger, à\u0020</string>
+    <string name="located">\u0020situé au\u0020</string>
+    <string name="with_you">\u0020y sera également.</string>
+
 
     <!--SEARCH VIEW -->
     <string name="search_view">Chercher un restaurant</string>
@@ -61,10 +66,10 @@
     <string name="yes">OUI</string>
 
     <!-- DIALOG BOX -->
-    <string name="eating">\u0020 mange à \u0020</string>
-    <string name="joining">\u0020 y déjeune !</string>
-    <string name="decided">\u0020 n\'est pas encore décidé.</string>
-    <string name="sorry">Désolé mais \u0020</string>
+    <string name="eating">\u0020mange à\u0020</string>
+    <string name="joining">\u0020y déjeune !</string>
+    <string name="decided">\u0020n\'est pas encore décidé.</string>
+    <string name="sorry">Désolé mais\u0020</string>
     <string name="no_url_found">Aucune url trouvé!</string>
     <string name="no_website">Ce restaurant ne semble pas avoir d\'adresse mail</string>
     <string name="GPS_is_settings">GPS non activé</string>
@@ -77,6 +82,7 @@
     <string name="select">Selectionner la langue</string>
     <string name="en">Anglais</string>
     <string name="fr">Français</string>
+
 
     <!-- TWITTER KEYS -->
     <string  name="twitter_consumer_key" translatable = "false">PLkNUVeGY9NprxwBDBbmXl1lg</string>
@@ -91,5 +97,6 @@
     <string name="not_phone_permission">Permission non assignée.</string>
     <string name="liked">j\'aime !</string>
     <string name="unlike">je n\'aime plus !</string>
+    <string name="image_view">TODO</string>
 
 </resources>

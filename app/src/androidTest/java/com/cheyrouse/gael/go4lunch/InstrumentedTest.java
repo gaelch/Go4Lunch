@@ -20,6 +20,7 @@ import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.Go4LunchStream;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
+import com.cheyrouse.gael.go4lunch.utils.StringHelper;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.views.RecyclerViewAdapter;
 
@@ -31,6 +32,7 @@ import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import io.reactivex.Observable;
@@ -40,6 +42,7 @@ import io.reactivex.observers.TestObserver;
 import okhttp3.mockwebserver.MockResponse;
 import okhttp3.mockwebserver.MockWebServer;
 
+import static com.cheyrouse.gael.go4lunch.BuildConfig.API_KEY;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
@@ -81,7 +84,7 @@ public class InstrumentedTest extends InstrumentationTestCase {
     public void test_predictions(){
         String query = "L'assierois";
         String location = "44.65, 1.85";
-        Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, context.getResources().getString(R.string.google_maps_key))
+        Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY)
                 .subscribeWith(new DisposableObserver<Predictions>() {
             @Override
             public void onNext(Predictions predictions) {
@@ -123,5 +126,22 @@ public class InstrumentedTest extends InstrumentationTestCase {
         fragments.add(mapsFragment);
         fragments.add(newFragment);
         assertEquals(1, ListUtils.getBackStackToRefreshData(newFragment, fragments));
+    }
+
+    @Test
+    public void getCoworkers_return_good_person(){
+        String lang = Locale.getDefault().getLanguage();
+        List<String> coWorkers = new ArrayList<>();
+        coWorkers.add("Jojo");
+        coWorkers.add("me");
+        User user = new User();
+        user.setUsername("me");
+        String returnedByGetCoworkers = StringHelper.getCoWorkers(coWorkers, user, context);
+        if(!lang.isEmpty() && lang.equals("en")){
+            assertEquals("Jojo will be there with you.", returnedByGetCoworkers);
+        }
+        if(!lang.isEmpty() && lang.equals("fr")){
+            assertEquals("Jojo y sera également.", returnedByGetCoworkers);
+        }
     }
 }

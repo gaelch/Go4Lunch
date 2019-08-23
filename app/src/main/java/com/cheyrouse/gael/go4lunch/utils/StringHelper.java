@@ -28,8 +28,11 @@ public class StringHelper {
                 userList.add(u);
             }
         }
-        String match = String.valueOf(userList).replace("[", "").replace("]", "")
-                + context.getResources().getString(R.string.with_you);
+        String match = "";
+        if(context != null){
+            match = String.valueOf(userList).replace("[", "").replace("]", "")
+                    + context.getResources().getString(R.string.with_you);
+        }
         if (Objects.requireNonNull(userList).size() != 0) {
             return match;
         } else {
