@@ -26,8 +26,6 @@ import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 public class AlarmReceiver extends BroadcastReceiver {
 
-    private Context mContext;
-
     //Receive Alarm and execute request to reset choice
     @SuppressLint("UnsafeProtectedBroadcastReceiver")
     @Override
@@ -40,7 +38,6 @@ public class AlarmReceiver extends BroadcastReceiver {
         }
         prefs.storeChoicePrefs(null);
         prefs.storeUserPrefs(user);
-        mContext = context;
         executeRequestToFireStoreToResetChoice();
     }
 
@@ -49,13 +46,14 @@ public class AlarmReceiver extends BroadcastReceiver {
         getUsersAndRestaurantsFromDataBase();
     }
 
+    @SuppressWarnings("unchecked")
     private void getUsersAndRestaurantsFromDataBase() {
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
             @Override
             public void onComplete(@NonNull Task<QuerySnapshot> task) {
                 if (task.isSuccessful()) {
                     for (DocumentSnapshot doc : Objects.requireNonNull(task.getResult())) {
-                        List<String> users = (List<String>) doc.getData().get("users");
+                        List<String> users = (List<String>) Objects.requireNonNull(doc.getData()).get("users");
                         String uid = Objects.requireNonNull(doc.getData()).get("restaurantName").toString();
                         for (String s : users){
                             Log.e("users restaurant list", s);

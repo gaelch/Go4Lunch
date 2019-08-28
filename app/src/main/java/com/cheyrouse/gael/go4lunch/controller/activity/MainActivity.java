@@ -638,12 +638,12 @@ public class MainActivity extends AppCompatActivity {
         UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                    if (user.getUid().equals(document.getData().get("uid").toString())) {
+                    if (user.geteMail().equals(document.getData().get("eMail").toString())) {
                         var = true;
                     }
                 }
                 if (!var) {
-                    storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture());
+                    storeUserInDataBase(user.getUid(), user.getUid(), user.getUsername(), user.getUrlPicture(), user.geteMail());
                 }
             } else {
                 Log.d(TAG, "Error getting documents: ", task.getException());
@@ -705,7 +705,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     // Store user in Firebase database
-    private void storeUserInDataBase(String uId, String id, String userName, String url) {
-        UserHelper.createUser(uId, id, userName, url);
+    private void storeUserInDataBase(String uId, String id, String userName, String url, String email) {
+        UserHelper.createUser(uId, id, userName, url, email);
     }
 }

@@ -35,8 +35,6 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
     @BindView(R.id.fragment_workMates_recycler_view) RecyclerView recyclerView;
 
     private List<User> users;
-    private WorkMatesAdapter adapter;
-    private FirebaseAuth firebaseAuth;
     private WorkMateFragmentListener mListener;
 
     public WorkmatesFragment() {
@@ -72,13 +70,14 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_workmates, container, false);
         ButterKnife.bind(this, v);
-        firebaseAuth = FirebaseAuth.getInstance();
+        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         getUsersInBundle();
         configureRecyclerView();
         return v;
     }
 
     // Get bundle data
+    @SuppressWarnings("unchecked")
     private void getUsersInBundle() {
         assert getArguments() != null;
         users = (List<User>) getArguments().getSerializable(USERS);
@@ -89,9 +88,9 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
     //configure recyclerView and Tabs
     private void configureRecyclerView() {
         // Create adapter passing in the sample user data
-        this.adapter = new WorkMatesAdapter(getActivity(), users, Glide.with(this),this, 0);
+        WorkMatesAdapter adapter = new WorkMatesAdapter(getActivity(), users, Glide.with(this), this, 0);
         // Attach the adapter to the recyclerView to populate items
-        this.recyclerView.setAdapter(this.adapter);
+        this.recyclerView.setAdapter(adapter);
         // Set layout manager to position the items
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
     }

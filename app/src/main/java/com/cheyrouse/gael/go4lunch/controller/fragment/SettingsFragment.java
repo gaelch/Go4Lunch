@@ -62,7 +62,6 @@ public class SettingsFragment extends Fragment {
         return new SettingsFragment();
     }
 
-
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {

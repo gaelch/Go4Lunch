@@ -61,12 +61,13 @@ public class NotificationsService extends FirebaseMessagingService {
     }
 
     // get restaurant from database to get users in restaurant table
+    @SuppressWarnings("unchecked")
     private void getRestaurantFromDataBase() {
         RestaurantHelper.getRestaurant(restaurant.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
             @Override
             public void onComplete(@NonNull Task<DocumentSnapshot> task) {
                 if (task.isSuccessful()) {
-                    List<String> userList = ((List<String>) task.getResult().get("users"));
+                    List<String> userList = ((List<String>) Objects.requireNonNull(task.getResult()).get("users"));
                     coWorkers = StringHelper.getCoWorkers(Objects.requireNonNull(userList), user, getApplicationContext());
                     sendVisualNotification();
                 }

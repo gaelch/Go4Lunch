@@ -108,7 +108,6 @@ public class Prefs {
     }
 
     public String getLanguage(){
-        String language = prefs.getString(LANGUAGE_CHOICE, "");
-        return language;
+        return prefs.getString(LANGUAGE_CHOICE, "");
     }
 }

@@ -98,7 +98,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     @BindView(R.id.fragment_restau_swipe_container)
     SwipeRefreshLayout swipeRefreshLayout;
 
-    private WorkMatesAdapter adapter;
     private List<User> users;
     private List<User> usersAreJoining;
     private boolean var = false;
@@ -108,7 +107,6 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     private Restaurant restaurant;
     private ResultDetail resultDetail;
     private List<Restaurant> restaurantList;
-    private boolean found = false;
     private boolean isFound = false;
 
 
@@ -152,6 +150,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
 
     // Get restaurant from Firebase database
     @RequiresApi(api = Build.VERSION_CODES.N)
+    @SuppressWarnings("unchecked")
     private void getRestaurantFromFirestore() {
         RestaurantHelper.getRestaurant(resultDetail.getName()).addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
@@ -199,6 +198,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     // Get data in bundle
+    @SuppressWarnings("unchecked")
     private void getTheBundleData() {
         assert getArguments() != null;
         resultDetail = (ResultDetail) getArguments().getSerializable(RESULT);
@@ -232,9 +232,9 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     //configure recyclerView and Tabs
     private void configureRecyclerView() {
         // Create adapter passing in the sample user data
-        this.adapter = new WorkMatesAdapter(getActivity(), usersAreJoining, Glide.with(this), null, 1);
+        WorkMatesAdapter adapter = new WorkMatesAdapter(getActivity(), usersAreJoining, Glide.with(this), null, 1);
         // Attach the adapter to the recyclerView to populate items
-        this.recyclerView.setAdapter(this.adapter);
+        this.recyclerView.setAdapter(adapter);
         // Set layout manager to position the items
         this.recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
     }
@@ -362,9 +362,13 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                 users = new ArrayList<>();
                 String urlPicture = null;
                 String choice = null;
+                String eMail = null;
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                     String uid = document.getData().get("uid").toString();
                     String username = document.getData().get("username").toString();
+                    if (document.getData().get("eMail") != null) {
+                        eMail = document.getData().get("eMail").toString();
+                    }
                     if (document.getData().get("urlPicture") != null) {
                         urlPicture = document.getData().get("urlPicture").toString();
                     } else {
@@ -375,7 +379,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                     } else {
                         choice = null;
                     }
-                    User userToAdd = new User(uid, username, urlPicture);
+                    User userToAdd = new User(uid, username, urlPicture, eMail);
                     userToAdd.setChoice(choice);
                     users.add(userToAdd);
                     getRestaurantJoiningUsers();
@@ -397,7 +401,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
                 isFound = true;
                 List<String> rateList = restaurant.getRate();
                 if (rateList.size() != 0) {
-                    found = ListUtils.findUserInRateList(userId, rateList);
+                    boolean found = ListUtils.findUserInRateList(userId, rateList);
                     if (found) {
                         deleteLike(userId, r.getRestaurantUid());
                     } else {
@@ -416,6 +420,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     // Refresh UI
+    @SuppressWarnings("unchecked")
     private void refreshRestaurantList() {
         restaurantList = new ArrayList<>();
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(task -> {

@@ -427,9 +427,13 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 if (task.isSuccessful()) {
                     users = new ArrayList<>();
                     String urlPicture = null;
+                    String eMail = null;
                     for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
                         String uid = document.getData().get("uid").toString();
                         String username = document.getData().get("username").toString();
+                        if (document.getData().get("eMail") != null) {
+                            eMail = document.getData().get("eMail").toString();
+                        }
                         if (document.getData().get("urlPicture") != null) {
                             urlPicture = document.getData().get("urlPicture").toString();
                         } else {
@@ -440,10 +444,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                         } else {
                             choice = null;
                         }
-                        User userToAdd = new User(uid, username, urlPicture);
+                        User userToAdd = new User(uid, username, urlPicture, eMail);
                         userToAdd.setChoice(choice);
                         users.add(userToAdd);
-                        if(user != null && user.getUsername() != null) {
+                        if (user != null && user.getUsername() != null) {
                             if (userToAdd.getUsername().equals(user.getUsername())) {
                                 choiceUser = userToAdd.getChoice();
                             }
@@ -478,6 +482,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     }
 
     // Get restaurants from database to make list
+    @SuppressWarnings("unchecked")
     private void getRestaurantsFromDataBase(List<Result> results) {
         restaurantList = new ArrayList<>();
         RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {

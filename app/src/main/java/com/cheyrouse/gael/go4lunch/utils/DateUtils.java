@@ -38,7 +38,11 @@ public class DateUtils {
     public static int getOpenHours(ResultDetail result) {
         int i = 0;
         if (result.getOpeningHours() != null && result.getOpeningHours().getOpenNow()) {
-            i = 1;
+            if(result.getOpeningHours().getPeriods() != null && result.getOpeningHours().getPeriods().get(0).getClose() != null){
+                i = 1;
+            }else{
+                i = 2;
+            }
         } else {
             if (result.getOpeningHours() == null) {
                 i = 2;

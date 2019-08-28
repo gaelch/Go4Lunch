@@ -19,8 +19,8 @@ public class UserHelper {
 
     // --- CREATE ---
 
-    public static void createUser(String uid, String userUid, String username, String urlPicture) {
-        User userToCreate = new User(userUid, username, urlPicture);
+    public static void createUser(String uid, String userUid, String username, String urlPicture, String email) {
+        User userToCreate = new User(userUid, username, urlPicture, email);
         UserHelper.getUsersCollection().document(uid).set(userToCreate);
     }
 

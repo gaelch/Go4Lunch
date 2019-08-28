@@ -66,7 +66,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     private Location locationCt;
     private List<ResultDetail> results;
     private List<Restaurant> restaurantList;
-    private Marker marker;
 
 
     public MapsFragment() {
@@ -115,6 +114,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     // Get data in bundle
+    @SuppressWarnings("unchecked")
     private void getTheBundle() {
         assert getArguments() != null;
         results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
@@ -144,6 +144,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             LatLng latLng = new LatLng(r.getGeometry().getLocation().getLat(), r.getGeometry().getLocation().getLng());
             String title = r.getName();
             boolean match = false;
+            Marker marker;
             for (Restaurant restaurant : restaurantList) {
                 if (restaurant.getRestaurantName().equals(r.getName())) {
                     if (restaurant.getUsers() != null && restaurant.getUsers().size() > 0) {

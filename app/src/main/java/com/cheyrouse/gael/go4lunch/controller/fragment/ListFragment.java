@@ -83,6 +83,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
     }
 
     // get the data Bundle
+    @SuppressWarnings("unchecked")
     private void getTheBundle() {
         assert getArguments() != null;
         List<ResultDetail> results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
