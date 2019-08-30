@@ -5,6 +5,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -37,11 +38,11 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
 
         String url = getIntent().getStringExtra(WEB_SITE_EXTRA);
 
+        onConfigureWebView();
+
         updateUI(url);
 
         ConfigureToolbar();
-
-        onConfigureWebView();
 
         onPageFinished();
 

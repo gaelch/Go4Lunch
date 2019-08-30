@@ -5,11 +5,16 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.media.RingtoneManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
 import android.support.v4.app.NotificationCompat;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.view.View;
+
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
@@ -23,7 +28,9 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import static com.cheyrouse.gael.go4lunch.utils.Constants.NOTIFICATION_ID;
@@ -36,6 +43,7 @@ public class NotificationsService extends FirebaseMessagingService {
     private String coWorkers;
     private String text;
     private User user;
+    private Prefs prefs;
 
     // On receive
     @Override
@@ -43,13 +51,34 @@ public class NotificationsService extends FirebaseMessagingService {
         if (remoteMessage.getNotification() != null) {
             message = remoteMessage.getNotification().getBody();
             // 8 - Show notification after received message
-            this.getData();
+            prefs = Prefs.get(getApplicationContext());
+            this.checkIfLanguageIsOk();
         }
+    }
+
+
+    // Check language prefs and purpose choice if null
+    private void checkIfLanguageIsOk() {
+        String locale = prefs.getLanguage();
+        if (locale != null && !locale.isEmpty()) {
+            setLocale(locale);
+        } else {
+            getData();
+        }
+    }
+
+    public void setLocale(String localeName) {
+        Locale myLocale = new Locale(localeName);
+        Resources res = getResources();
+        DisplayMetrics dm = res.getDisplayMetrics();
+        Configuration conf = res.getConfiguration();
+        conf.locale = myLocale;
+        res.updateConfiguration(conf, dm);
+        getData();
     }
 
     // Get data to send notification
     private void getData() {
-        Prefs prefs = Prefs.get(getApplicationContext());
         user = prefs.getPrefsUser();
         restaurant = prefs.getChoice();
         if (restaurant == null) {
@@ -63,21 +92,13 @@ public class NotificationsService extends FirebaseMessagingService {
     // get restaurant from database to get users in restaurant table
     @SuppressWarnings("unchecked")
     private void getRestaurantFromDataBase() {
-        RestaurantHelper.getRestaurant(restaurant.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    List<String> userList = ((List<String>) Objects.requireNonNull(task.getResult()).get("users"));
-                    coWorkers = StringHelper.getCoWorkers(Objects.requireNonNull(userList), user, getApplicationContext());
-                    sendVisualNotification();
-                }
+        RestaurantHelper.getRestaurant(restaurant.getName()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<String> userList = ((List<String>) Objects.requireNonNull(task.getResult()).get("users"));
+                coWorkers = StringHelper.getCoWorkers(Objects.requireNonNull(userList), user, getApplicationContext());
+                sendVisualNotification();
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e("fail", e.getMessage());
-            }
-        });
+        }).addOnFailureListener(e -> Log.e("fail", e.getMessage()));
     }
 
     // Send Notification

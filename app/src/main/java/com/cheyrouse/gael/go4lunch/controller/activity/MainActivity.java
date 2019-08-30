@@ -224,6 +224,7 @@ public class MainActivity extends AppCompatActivity {
             res.updateConfiguration(conf, dm);
             Intent refresh = new Intent(this, MainActivity.class);
             refresh.putExtra(currentLang, localeName);
+            refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_NO_HISTORY);
             startActivity(refresh);
         }
         showButtons();

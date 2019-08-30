@@ -188,6 +188,7 @@ public class SettingsFragment extends Fragment {
                 case SIGN_OUT_TASK:
                     Intent refresh = new Intent(getActivity(), MainActivity.class);
                     refresh.putExtra(currentLang, localeName);
+                    refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                     startActivity(refresh);
                     break;
                 default:
