@@ -329,9 +329,9 @@ public class MainActivity extends AppCompatActivity {
             permissions.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
         } //if
         if (!permissions.isEmpty()) {
-            String[] ListedemandeDroit = {};
-            ListedemandeDroit = permissions.toArray(ListedemandeDroit);
-            ActivityCompat.requestPermissions(this, permissions.toArray(ListedemandeDroit), 1);
+            String[] askPermissionsList = {};
+            askPermissionsList = permissions.toArray(askPermissionsList);
+            ActivityCompat.requestPermissions(this, permissions.toArray(askPermissionsList), 1);
         } //if
     }
 

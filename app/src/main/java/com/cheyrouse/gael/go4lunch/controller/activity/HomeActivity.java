@@ -127,7 +127,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void gpsGetLocation() {
         GPSTracker gps = new GPSTracker(this);
         if (gps.canGetLocation()) {
-            Log.e("testGpsTrue", "true");
             double latitude = gps.getLatitude(); // returns latitude
             double longitude = gps.getLongitude(); // returns longitude
             location = StringHelper.convertInString(latitude, longitude);
@@ -140,7 +139,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         Disposable disposable = Go4LunchStream.streamFetchRestaurants(location).subscribeWith(new DisposableObserver<Place>() {
             @Override
             public void onNext(Place result) {
-                Log.e("testResponse", String.valueOf(result.getResults().size()));
                 results = result.getResults();
             }
 
@@ -150,7 +148,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
             @Override
             public void onComplete() {
-                Log.e("Test", "TopStories is charged");
                 buildListPlaceDetail();
                 getRestaurantsFromDataBase(results);
             }
@@ -165,7 +162,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onNext(PlaceDetails detailsResults) {
                     resultDetail = detailsResults.getResult();
-                    Log.e("testResponseDetail", String.valueOf(detailsResults));
                 }
 
                 @Override
@@ -177,7 +173,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 public void onComplete() {
                     resultDetailList.add(resultDetail);
                     prefs.storeListResults(resultDetailList);
-                    Log.e("Test", "detail is charged");
                 }
             });
         }
@@ -214,7 +209,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
             }
         });
         searchView.setOnCloseListener(() -> {
-            Log.e("test close searchView", "close");
             hideSoftKeyboard(HomeActivity.this);
             return true;
         });
@@ -243,7 +237,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 @Override
                 public void onNext(Predictions predictions) {
                     resultsPredictions = predictions.getPredictions();
-                    Log.e("test result search", String.valueOf(resultsPredictions.size()));
                 }
 
                 @Override

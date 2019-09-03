@@ -12,7 +12,6 @@ import java.util.Calendar;
 public class AlarmHelper {
 
     //Configuration of Alarm Helper to reset restaurant choice
-   @RequiresApi(api = Build.VERSION_CODES.M)
    public void configureAlarmToResetChoice(Context context) {
         AlarmManager alarmManager;
         PendingIntent pendingIntent;
@@ -24,7 +23,12 @@ public class AlarmHelper {
         intent = new Intent(context, AlarmReceiver.class);
         pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         if (alarmManager != null) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), /*AlarmManager.INTERVAL_DAY,*/ pendingIntent);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
+            } else{
+                alarmManager.setExact(AlarmManager.RTC_WAKEUP, AlarmManager.INTERVAL_DAY, pendingIntent);
+            }
         }
     }
 }

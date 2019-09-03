@@ -9,6 +9,7 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.webkit.WebViewClient;
 import android.widget.TextView;
 
 import com.cheyrouse.gael.go4lunch.R;
@@ -69,6 +70,7 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
         //Configure the webview for the use of javascript
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
+        webView.setWebViewClient(new WebViewClient());
         // Allows opening of windows
         webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
         //Allow storage DOM (Document Object Model)

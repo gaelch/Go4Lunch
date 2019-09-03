@@ -26,13 +26,12 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:background="@color/tw__light_gray"
+            android:backgroundTint="@color/white"
             android:src="@drawable/ic_my_location_black_18dp"
             android:layout_marginEnd="20dp"
             android:layout_marginBottom="70dp"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent" />
-
-
 
 </android.support.constraint.ConstraintLayout>
 </FrameLayout>

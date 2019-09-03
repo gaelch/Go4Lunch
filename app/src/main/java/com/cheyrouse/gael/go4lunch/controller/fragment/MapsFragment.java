@@ -25,7 +25,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.services.GPSTracker;
@@ -36,6 +35,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.BitmapDescriptor;
 import com.google.android.gms.maps.model.BitmapDescriptorFactory;
+import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
@@ -120,7 +120,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         results = (List<ResultDetail>) getArguments().getSerializable(RESULT);
         restaurantList = (List<Restaurant>) getArguments().getSerializable(RESTAURANTS);
     }
-
 
     // Handle Map
     @Override
@@ -215,9 +214,14 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
              latLng = new LatLng(locationCt.getLatitude(),
                     locationCt.getLongitude());
         }
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
-        // Zoom in the Google Map
-        mMap.animateCamera(CameraUpdateFactory.zoomTo(13));
+        CameraPosition cameraPosition = new CameraPosition.Builder()
+                .target(new LatLng(latLng.latitude, latLng.longitude))
+                .zoom(13)
+                .build();
+
+        if (mMap != null) {
+            mMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition));
+        }
     }
 
     // show dialog if GPS is not enable
@@ -256,6 +260,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         }
         return false;
     }
+
 
     // Interface implemented by Home Activity
     public interface MapsFragmentListener {
