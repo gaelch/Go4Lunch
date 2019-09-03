@@ -20,7 +20,7 @@ import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 public interface Go4LunchService {
 
     //Requests HTTP
-    @GET("nearbysearch/json?radius=5500&type=restaurant&key="+ API_KEY)
+    @GET("nearbysearch/json?radius=700&type=restaurant&key="+ API_KEY)
     Observable<Place> getMapPlace(@Query(value = "location", encoded = true) String location);
 
     @GET("details/json?key="+ API_KEY)

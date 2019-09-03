@@ -233,7 +233,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // request results of searchView in Place Autocomplete API
     private void searchQuery(String query) {
         if (query.length() > 2) {
-            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY).subscribeWith(new DisposableObserver<Predictions>() {
+            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 700, API_KEY).subscribeWith(new DisposableObserver<Predictions>() {
                 @Override
                 public void onNext(Predictions predictions) {
                     resultsPredictions = predictions.getPredictions();
