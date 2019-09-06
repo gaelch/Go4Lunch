@@ -1,20 +1,7 @@
 package com.cheyrouse.gael.go4lunch;
 
-import android.app.Activity;
-import android.app.Application;
-import android.app.Instrumentation;
 import android.content.Context;
-import android.content.pm.InstrumentationInfo;
-import android.support.v4.app.Fragment;
-import android.test.ActivityTestCase;
-import android.test.ApplicationTestCase;
-import android.test.InstrumentationTestCase;
-import android.util.Log;
 import android.widget.ImageView;
-
-import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
-import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
-import com.cheyrouse.gael.go4lunch.controller.fragment.RestauDetailFragment;
 import com.cheyrouse.gael.go4lunch.models.OpeningHours;
 import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.Result;
@@ -23,29 +10,21 @@ import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.DateUtils;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
-import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RegexUtil;
 import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
-import com.cheyrouse.gael.go4lunch.utils.UserHelper;
-
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnit;
-import org.mockito.junit.MockitoRule;
+import org.junit.runners.JUnit4;
 
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 import java.util.Locale;
-
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-
+@RunWith(JUnit4.class)
 public class UtilsUnitTest {
 
     private Context context = mock(Context.class);
@@ -68,11 +47,6 @@ public class UtilsUnitTest {
     @Test
     public void location_get_string_is_correct(){
         assertEquals("1.0 km", GeometryUtil.getString1000Less(1000));
-    }
-
-    @Test
-    public void email_is_correct(){
-        assertTrue(RegexUtil.isValidEmail("name@email.com"));
     }
 
     @Test

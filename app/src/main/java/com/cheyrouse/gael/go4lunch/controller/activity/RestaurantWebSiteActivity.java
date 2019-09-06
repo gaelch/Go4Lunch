@@ -5,19 +5,13 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
-import android.view.KeyEvent;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
-import android.widget.TextView;
-
 import com.cheyrouse.gael.go4lunch.R;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-import io.reactivex.disposables.Disposable;
-
 import static com.cheyrouse.gael.go4lunch.controller.fragment.RestauDetailFragment.WEB_SITE_EXTRA;
 
 public class RestaurantWebSiteActivity extends AppCompatActivity {
@@ -25,9 +19,6 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
     Toolbar toolbar;
     @BindView(R.id.webview)
     WebView webView;
-
-
-    private Disposable disposable;
 
 
     @SuppressLint("RestrictedApi")

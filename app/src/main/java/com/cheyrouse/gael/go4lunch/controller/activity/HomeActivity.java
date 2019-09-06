@@ -28,7 +28,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
@@ -59,17 +58,14 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
 import com.google.firebase.firestore.QuerySnapshot;
-import com.squareup.picasso.Picasso;
-
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
-
 import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.LINE_BREAK;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
@@ -99,7 +95,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private List<Prediction> resultsPredictions = null;
     private Prefs prefs;
     private MapsFragment mapsFragment;
-    String choiceUser = null;
+    private String choiceUser = null;
+    private Disposable disposable;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -120,7 +117,6 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void getPrefs() {
         prefs = Prefs.get(this);
         user = prefs.getPrefsUser();
-
     }
 
     // Get current user location
@@ -136,7 +132,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     // Request to Place API to find restaurant list
     private void executeRequestToPlaceApi(String location) {
-        Disposable disposable = Go4LunchStream.streamFetchRestaurants(location).subscribeWith(new DisposableObserver<Place>() {
+        disposable = Go4LunchStream.streamFetchRestaurants(location).subscribeWith(new DisposableObserver<Place>() {
             @Override
             public void onNext(Place result) {
                 results = result.getResults();
@@ -158,7 +154,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     private void buildListPlaceDetail() {
         resultDetailList = new ArrayList<>();
         for (Result result : results) {
-            Disposable disposable = Go4LunchStream.streamFetchRestaurantsDetails(result.getPlaceId()).subscribeWith(new DisposableObserver<PlaceDetails>() {
+            disposable = Go4LunchStream.streamFetchRestaurantsDetails(result.getPlaceId()).subscribeWith(new DisposableObserver<PlaceDetails>() {
                 @Override
                 public void onNext(PlaceDetails detailsResults) {
                     resultDetail = detailsResults.getResult();
@@ -176,6 +172,16 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 }
             });
         }
+    }
+
+    // Dispose disposable
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if(disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+
     }
 
     // To set he toolbar
@@ -233,7 +239,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // request results of searchView in Place Autocomplete API
     private void searchQuery(String query) {
         if (query.length() > 2) {
-            Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 700, API_KEY).subscribeWith(new DisposableObserver<Predictions>() {
+            disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY).subscribeWith(new DisposableObserver<Predictions>() {
                 @Override
                 public void onNext(Predictions predictions) {
                     resultsPredictions = predictions.getPredictions();
@@ -301,15 +307,19 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
                 Prefs prefs = Prefs.get(this);
                 Uri selectedImage = prefs.getPicture(user.getUsername());
                 if (selectedImage != null) {
-                    Picasso.get().load(selectedImage).into((ImageView) hView.findViewById(R.id.imageViewNavDraw));
+                    Glide.with(this).load( selectedImage)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into((ImageView) hView.findViewById(R.id.imageViewNavDraw));
                 } else {
                     imageView.setBackgroundColor(this.getResources().getColor(R.color.green));
-                    Glide.with(this).load(imageView.getResources().getDrawable(R.drawable.baseline_perm_identity_black_18dp)).apply(RequestOptions.circleCropTransform()).into(imageView);
+                    Glide.with(this).load(imageView.getResources()
+                            .getDrawable(R.drawable.baseline_perm_identity_black_18dp))
+                            .apply(RequestOptions.circleCropTransform())
+                            .into(imageView);
                 }
             }
         }
     }
-
 
     //Configure Drawer layout
     private void configureDrawerLayout() {

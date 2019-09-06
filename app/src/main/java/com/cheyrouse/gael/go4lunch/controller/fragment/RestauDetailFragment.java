@@ -400,7 +400,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
             if (r.getRestaurantName().equals(restaurant.getRestaurantName())) {
                 isFound = true;
                 List<String> rateList = restaurant.getRate();
-                if (rateList.size() != 0) {
+                if (rateList != null && rateList.size() != 0) {
                     boolean found = ListUtils.findUserInRateList(userId, rateList);
                     if (found) {
                         deleteLike(userId, r.getRestaurantUid());

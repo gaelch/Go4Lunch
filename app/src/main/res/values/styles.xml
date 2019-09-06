@@ -53,34 +53,34 @@
         <item name="listPreferredItemPaddingRight">8dp</item>
     </style>
 
-    <style name="MaterialSearchViewStyle">
-        <!-- Background for the search bar -->
-        <item name="searchBackground">@color/white</item>
+    <!--<style name="MaterialSearchViewStyle">-->
+        <!--&lt;!&ndash; Background for the search bar &ndash;&gt;-->
+        <!--<item name="searchBackground">@color/white</item>-->
 
-        <!-- Change voice icon -->
-        <item name="searchVoiceIcon">@drawable/ic_action_voice_search</item>
+        <!--&lt;!&ndash; Change voice icon &ndash;&gt;-->
+        <!--<item name="searchVoiceIcon">@drawable/ic_action_voice_search</item>-->
 
-        <!-- Change clear text icon -->
-        <item name="searchCloseIcon">@drawable/ic_action_navigation_close</item>
+        <!--&lt;!&ndash; Change clear text icon &ndash;&gt;-->
+        <!--<item name="searchCloseIcon">@drawable/ic_action_navigation_close</item>-->
 
-        <!-- Change up icon -->
-        <item name="searchBackIcon">@drawable/ic_action_navigation_arrow_back</item>
+        <!--&lt;!&ndash; Change up icon &ndash;&gt;-->
+        <!--<item name="searchBackIcon">@drawable/ic_action_navigation_arrow_back</item>-->
 
-        <!-- Change icon for the suggestions -->
-        <item name="searchSuggestionIcon">@drawable/ic_suggestion</item>
+        <!--&lt;!&ndash; Change icon for the suggestions &ndash;&gt;-->
+        <!--<item name="searchSuggestionIcon">@drawable/ic_suggestion</item>-->
 
-        <!-- Change background for the suggestions list view -->
-        <item name="searchSuggestionBackground">@android:color/white</item>
+        <!--&lt;!&ndash; Change background for the suggestions list view &ndash;&gt;-->
+        <!--<item name="searchSuggestionBackground">@android:color/white</item>-->
 
-        <!-- Change text color for edit text. This will also be the color of the cursor -->
-        <item name="android:textColor">@color/blue_facebook</item>
+        <!--&lt;!&ndash; Change text color for edit text. This will also be the color of the cursor &ndash;&gt;-->
+        <!--<item name="android:textColor">@color/blue_facebook</item>-->
 
-        <!-- Change hint text color for edit text -->
-        <item name="android:textColorHint">@color/grey</item>
+        <!--&lt;!&ndash; Change hint text color for edit text &ndash;&gt;-->
+        <!--<item name="android:textColorHint">@color/grey</item>-->
 
-        <!-- Hint for edit text -->
-        <item name="android:hint">@string/search_hint</item>
-    </style>
+        <!--&lt;!&ndash; Hint for edit text &ndash;&gt;-->
+        <!--<item name="android:hint">@string/search_hint</item>-->
+    <!--</style>-->
 
 
 </resources>

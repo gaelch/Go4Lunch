@@ -2,27 +2,20 @@ package com.cheyrouse.gael.go4lunch.views;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.os.Environment;
-import android.provider.MediaStore;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
-
+import com.bumptech.glide.Glide;
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
-import com.squareup.picasso.Picasso;
-
 import java.io.File;
-import java.io.IOException;
 import java.util.Objects;
 
 import butterknife.BindView;
@@ -71,7 +64,9 @@ class WorkMatesViewHolder extends RecyclerView.ViewHolder {
             } else {
                 Uri selectedImage = prefs.getPicture(user.getUsername());
                 if (selectedImage != null) {
-                    Picasso.get().load(selectedImage).into((imageView));
+                    Glide.with(context).load(selectedImage)
+                            .apply(RequestOptions.circleCropTransform())
+                            .into((imageView));
                 } else {
                     imageView.setBackgroundColor(context.getResources().getColor(R.color.green));
                     glide.load(imageView.getResources().getDrawable(R.drawable.baseline_perm_identity_black_18dp)).apply(RequestOptions.circleCropTransform()).into(imageView);

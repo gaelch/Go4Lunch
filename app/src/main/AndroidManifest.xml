@@ -50,11 +50,6 @@
             tools:ignore="InnerclassSeparator" />
 
         <meta-data
-            android:name="io.fabric.ApiKey"
-            android:value="4476c0e90883a2ef582fc037f3ff08666ee986e6"
-            />
-
-        <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/api_key" />
         <!-- NOTIFICATION SERVICE -->

@@ -1,27 +1,19 @@
 package com.cheyrouse.gael.go4lunch.controller.activity;
 
 import android.Manifest;
-import android.app.Activity;
 import android.app.AlertDialog;
-import android.app.NotificationChannel;
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Environment;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
-import android.support.annotation.Nullable;
 import android.support.annotation.RequiresApi;
 import android.support.design.widget.CoordinatorLayout;
 import android.support.design.widget.Snackbar;
@@ -31,7 +23,6 @@ import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
-import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -45,67 +36,32 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.Toast;
-
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.utils.AlarmHelper;
-import com.cheyrouse.gael.go4lunch.utils.Constants;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.RegexUtil;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
-import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.User;
-import com.facebook.FacebookSdk;
-import com.facebook.appevents.AppEventsLogger;
 import com.cheyrouse.gael.go4lunch.R;
 import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.ErrorCodes;
 import com.firebase.ui.auth.IdpResponse;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.ActionCodeSettings;
-import com.google.firebase.auth.AuthCredential;
-import com.google.firebase.auth.AuthResult;
-import com.google.firebase.auth.EmailAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.OAuthProvider;
 import com.google.firebase.auth.UserInfo;
-import com.google.firebase.firestore.CollectionReference;
-import com.google.firebase.firestore.DocumentReference;
-import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import com.squareup.picasso.Picasso;
-import com.twitter.sdk.android.core.Callback;
-import com.twitter.sdk.android.core.DefaultLogger;
-import com.twitter.sdk.android.core.Result;
-import com.twitter.sdk.android.core.Twitter;
-import com.twitter.sdk.android.core.TwitterApiClient;
-import com.twitter.sdk.android.core.TwitterAuthConfig;
-import com.twitter.sdk.android.core.TwitterConfig;
-import com.twitter.sdk.android.core.TwitterException;
-import com.twitter.sdk.android.core.TwitterSession;
-import com.twitter.sdk.android.core.identity.TwitterLoginButton;
-
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RC_SIGN_IN;
-import static com.cheyrouse.gael.go4lunch.utils.Constants.USER;
-import static com.facebook.login.widget.ProfilePictureView.TAG;
+
 
 public class MainActivity extends AppCompatActivity {
 
@@ -124,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
     private static int RESULT_LOAD_IMAGE = 1;
     private static final int REQUEST = 112;
 
-    private Context mContext;
     private User user;
     private FirebaseAuth firebaseAuth;
     private String email;
@@ -148,8 +103,6 @@ public class MainActivity extends AppCompatActivity {
         CheckSelfPermissions();
         checkNotificationIsEnable();
         checkIfGpsIsEnable();
-        FacebookSdk.sdkInitialize(getApplicationContext());
-        AppEventsLogger.activateApp(this);
         firebaseAuth = FirebaseAuth.getInstance();
         (new AlarmHelper()).configureAlarmToResetChoice(this);
     }
@@ -289,50 +242,29 @@ public class MainActivity extends AppCompatActivity {
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void CheckSelfPermissions() {
         List<String> permissions = new ArrayList<String>();
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.WAKE_LOCK) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.WAKE_LOCK);
-        } //if
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.INTERNET) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.INTERNET);
-        } //if
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
-        } //if
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.READ_PHONE_STATE);
-        } //if
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.VIBRATE) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.VIBRATE);
-        } //if
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NETWORK_STATE) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.ACCESS_NETWORK_STATE);
-        } //if
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.ACCESS_COARSE_LOCATION);
-        } //if
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.ACCESS_FINE_LOCATION);
-        } //if
+        }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.CALL_PHONE);
         }
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.RECORD_AUDIO) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.RECORD_AUDIO);
         }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_ALARM) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.SET_ALARM);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.SET_TIME) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.SET_TIME);
-        }
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_NOTIFICATION_POLICY) != PackageManager.PERMISSION_GRANTED) {
-            permissions.add(Manifest.permission.ACCESS_NOTIFICATION_POLICY);
-        } //if
         if (!permissions.isEmpty()) {
             String[] askPermissionsList = {};
             askPermissionsList = permissions.toArray(askPermissionsList);
             ActivityCompat.requestPermissions(this, permissions.toArray(askPermissionsList), 1);
-        } //if
+        }
     }
 
     // result for image
@@ -343,7 +275,9 @@ public class MainActivity extends AppCompatActivity {
             Uri selectedImage = data.getData();
             //Load image from picked Uri
             assert selectedImage != null;
-            Glide.with(this).load(selectedImage.toString()).into((ImageView) dialogView.findViewById(R.id.imageAvatar));
+            Glide.with(this).load(selectedImage)
+                    .apply(RequestOptions.circleCropTransform())
+                    .into(((ImageView) dialogView.findViewById(R.id.imageAvatar)));
             prefs.storePicture(selectedImage, userName);
         } else {
             // 4 - Handle SignIn Activity response on activity result
@@ -500,7 +434,9 @@ public class MainActivity extends AppCompatActivity {
             userName = user.getUsername();
             Uri selectedImage = prefs.getPicture(user.getUsername());
             if (selectedImage != null) {
-                Picasso.get().load(selectedImage).into((ImageView) dialogView.findViewById(R.id.imageAvatar));
+                Glide.with(this).load( selectedImage)
+                        .apply(RequestOptions.circleCropTransform())
+                        .into((ImageView) dialogView.findViewById(R.id.imageAvatar));
             }
         }
         editTextMail.addTextChangedListener(new TextWatcher() {
@@ -552,10 +488,10 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(i, RESULT_LOAD_IMAGE);
         });
         dialogView.findViewById(R.id.button_ok).setOnClickListener(v -> {
-            if (!RegexUtil.isValidEmail(email)) {
+            if (!RegexUtil.checkForEmail(email)) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_valid), Toast.LENGTH_LONG).show();
             }
-            if (RegexUtil.isValidEmail(email) && password != null && password.length() > 1) {
+            if (RegexUtil.checkForEmail(email) && password != null && password.length() > 1) {
                 launchConnection(email, password);
             } else {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.enter_pass), Toast.LENGTH_LONG).show();

@@ -1,14 +1,11 @@
 package com.cheyrouse.gael.go4lunch;
 
-import android.content.Context;
 import android.os.Build;
 import android.support.annotation.RequiresApi;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.v4.app.Fragment;
-import android.test.InstrumentationTestCase;
 import android.util.Log;
-
 import com.bumptech.glide.RequestManager;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
 import com.cheyrouse.gael.go4lunch.controller.fragment.MapsFragment;
@@ -23,28 +20,16 @@ import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.views.RecyclerViewAdapter;
-
-import org.junit.Before;
-import org.junit.BeforeClass;
-import org.junit.ClassRule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
-import io.reactivex.Observable;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
-import io.reactivex.observers.TestObserver;
-import okhttp3.mockwebserver.MockResponse;
-import okhttp3.mockwebserver.MockWebServer;
-
 import static com.cheyrouse.gael.go4lunch.BuildConfig.API_KEY;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.Assert.*;
 import static org.junit.Assert.assertEquals;
 
 /**
@@ -53,22 +38,16 @@ import static org.junit.Assert.assertEquals;
  * @see <a href="http://d.android.com/tools/testing">Testing documentation</a>
  */
 @RunWith(AndroidJUnit4.class)
-public class InstrumentedTest extends InstrumentationTestCase {
+public class InstrumentedTest {
 
     private String userName;
-    private Context context;
     private List<Prediction> resultsPredictions;
+    private Disposable disposable;
 
-    @Before
-        public void setUp() throws Exception {
-            super.setUp();
-            injectInstrumentation(InstrumentationRegistry.getInstrumentation());
-            context = getInstrumentation().getTargetContext();
-        }
 
     @Test
     public void test_database()  {
-        Prefs prefs = Prefs.get(context);
+        Prefs prefs = Prefs.get(InstrumentationRegistry.getTargetContext());
         User user = prefs.getPrefsUser();
         if(user != null){
             UserHelper.getUser(user.getUid()).addOnCompleteListener(task -> {
@@ -84,7 +63,7 @@ public class InstrumentedTest extends InstrumentationTestCase {
     public void test_predictions(){
         String query = "L'assierois";
         String location = "44.65, 1.85";
-        Disposable disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY)
+        disposable = Go4LunchStream.getPlacesAutoComplete(query, location, 5500, API_KEY)
                 .subscribeWith(new DisposableObserver<Predictions>() {
             @Override
             public void onNext(Predictions predictions) {
@@ -100,6 +79,7 @@ public class InstrumentedTest extends InstrumentationTestCase {
                 assertThat("The result list is not empty", !resultsPredictions.isEmpty());
             }
         });
+        disposable.dispose();
     }
 
     @Test
@@ -114,7 +94,7 @@ public class InstrumentedTest extends InstrumentationTestCase {
         resultDetails.add(res1);
         resultDetails.add(res2);
         resultDetails.add(res3);
-        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(context, resultDetails, userList, glide, listAdapterListener);
+        RecyclerViewAdapter recyclerViewAdapter = new RecyclerViewAdapter(InstrumentationRegistry.getTargetContext(), resultDetails, userList, glide, listAdapterListener);
         assertEquals(3, recyclerViewAdapter.getItemCount());
     }
 
@@ -136,7 +116,7 @@ public class InstrumentedTest extends InstrumentationTestCase {
         coWorkers.add("me");
         User user = new User();
         user.setUsername("me");
-        String returnedByGetCoworkers = StringHelper.getCoWorkers(coWorkers, user, context);
+        String returnedByGetCoworkers = StringHelper.getCoWorkers(coWorkers, user, InstrumentationRegistry.getTargetContext());
         if(!lang.isEmpty() && lang.equals("en")){
             assertEquals("Jojo will be there with you.", returnedByGetCoworkers);
         }
@@ -144,4 +124,6 @@ public class InstrumentedTest extends InstrumentationTestCase {
             assertEquals("Jojo y sera également.", returnedByGetCoworkers);
         }
     }
+
+
 }
