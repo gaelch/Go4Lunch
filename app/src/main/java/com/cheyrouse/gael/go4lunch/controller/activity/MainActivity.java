@@ -3,7 +3,6 @@ package com.cheyrouse.gael.go4lunch.controller.activity;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
@@ -13,14 +12,14 @@ import android.net.Uri;
 import android.os.Build;
 import android.provider.MediaStore;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.CoordinatorLayout;
-import android.support.design.widget.Snackbar;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.NotificationManagerCompat;
-import android.support.v4.content.ContextCompat;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.coordinatorlayout.widget.CoordinatorLayout;
+import com.google.android.material.snackbar.Snackbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationManagerCompat;
+import androidx.core.content.ContextCompat;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -40,7 +39,7 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.utils.AlarmHelper;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
-import com.cheyrouse.gael.go4lunch.utils.RegexUtil;
+import com.cheyrouse.gael.go4lunch.utils.CheckEmail;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.R;
@@ -123,13 +122,13 @@ public class MainActivity extends AppCompatActivity {
         spinner.setVisibility(View.VISIBLE);
         hideButtons();
         currentLanguage = getIntent().getStringExtra(currentLang);
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         list.add(getResources().getString(R.string.select));
         list.add(getResources().getString(R.string.en));
         list.add(getResources().getString(R.string.fr));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, android.R.layout.simple_spinner_item, list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -198,22 +197,16 @@ public class MainActivity extends AppCompatActivity {
             AlertDialog.Builder alertDialog = new AlertDialog.Builder(this);
             alertDialog.setTitle(getResources().getString(R.string.notification_enable));
             alertDialog.setMessage(getResources().getString(R.string.notification_turn_on));
-            alertDialog.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    Intent intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
-                    //for Android 5-7
-                    intent.putExtra("app_package", getPackageName());
-                    intent.putExtra("app_uid", getApplicationInfo().uid);
-                    // for Android 8 and above
-                    intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
-                    startActivity(intent);
-                }
+            alertDialog.setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> {
+                Intent intent = new Intent("android.settings.APP_NOTIFICATION_SETTINGS");
+                //for Android 5-7
+                intent.putExtra("app_package", getPackageName());
+                intent.putExtra("app_uid", getApplicationInfo().uid);
+                // for Android 8 and above
+                intent.putExtra("android.provider.extra.APP_PACKAGE", getPackageName());
+                startActivity(intent);
             });
-            alertDialog.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-                public void onClick(DialogInterface dialog, int which) {
-                    dialog.cancel();
-                }
-            });
+            alertDialog.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.cancel());
             alertDialog.show();
         }
     }
@@ -241,7 +234,7 @@ public class MainActivity extends AppCompatActivity {
     // Check permissions to activate them
     @RequiresApi(api = Build.VERSION_CODES.M)
     private void CheckSelfPermissions() {
-        List<String> permissions = new ArrayList<String>();
+        List<String> permissions = new ArrayList<>();
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
             permissions.add(Manifest.permission.WRITE_EXTERNAL_STORAGE);
         }
@@ -295,7 +288,7 @@ public class MainActivity extends AppCompatActivity {
     // --------------------
 
     // Show Snack Bar with a message
-    private void showSnackBar(CoordinatorLayout coordinatorLayout, String message) throws InterruptedException {
+    private void showSnackBar(CoordinatorLayout coordinatorLayout, String message) {
         Snackbar.make(coordinatorLayout, message, Snackbar.LENGTH_LONG).show();
     }
 
@@ -340,18 +333,12 @@ public class MainActivity extends AppCompatActivity {
         // Setting Dialog Message
         alertDialog.setMessage(getResources().getString(R.string.settings_menu));
         // On pressing Settings button
-        alertDialog.setPositiveButton(getResources().getString(R.string.settings), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
+        alertDialog.setPositiveButton(getResources().getString(R.string.settings), (dialog, which) -> {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
         });
         // on pressing cancel button
-        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.cancel());
         // Showing Alert Message
         alertDialog.show();
     }
@@ -488,10 +475,10 @@ public class MainActivity extends AppCompatActivity {
             startActivityForResult(i, RESULT_LOAD_IMAGE);
         });
         dialogView.findViewById(R.id.button_ok).setOnClickListener(v -> {
-            if (!RegexUtil.checkForEmail(email)) {
+            if (!CheckEmail.checkForEmail(email)) {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.not_valid), Toast.LENGTH_LONG).show();
             }
-            if (RegexUtil.checkForEmail(email) && password != null && password.length() > 1) {
+            if (CheckEmail.checkForEmail(email) && password != null && password.length() > 1) {
                 launchConnection(email, password);
             } else {
                 Toast.makeText(getApplicationContext(), getResources().getString(R.string.enter_pass), Toast.LENGTH_LONG).show();
@@ -575,7 +562,7 @@ public class MainActivity extends AppCompatActivity {
         UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                    if (user.geteMail().equals(document.getData().get("eMail").toString())) {
+                    if (user.geteMail().equals(Objects.requireNonNull(document.getData().get("eMail")).toString())) {
                         var = true;
                     }
                 }

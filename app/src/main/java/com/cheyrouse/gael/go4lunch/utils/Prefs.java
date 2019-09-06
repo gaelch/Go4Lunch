@@ -2,29 +2,18 @@ package com.cheyrouse.gael.go4lunch.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
-import android.preference.PreferenceManager;
-import android.util.Base64;
-
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
-import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
-
-import java.io.ByteArrayOutputStream;
-import java.lang.reflect.Type;
 import java.util.List;
-
 import static android.content.Context.MODE_PRIVATE;
-import static android.provider.MediaStore.Video.VideoColumns.LANGUAGE;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MY_PREFS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USER_PREFS;
 
 public class Prefs {
-    public static final String LANGUAGE_CHOICE = "language";
+    private static final String LANGUAGE_CHOICE = "language";
 
     //This class using SharedPreferences and the Gson library
 
@@ -86,6 +75,7 @@ public class Prefs {
 
     public Uri getPicture(String userName){
         String imageUriString = prefs.getString(userName, "");
+        assert imageUriString != null;
         if(!imageUriString.isEmpty()){
             return Uri.parse(imageUriString);
         }else {

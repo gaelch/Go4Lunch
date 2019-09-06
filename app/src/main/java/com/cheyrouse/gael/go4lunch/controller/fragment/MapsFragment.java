@@ -4,7 +4,6 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 import android.Manifest;
 import android.app.AlertDialog;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -17,10 +16,10 @@ import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -39,18 +38,15 @@ import com.google.android.gms.maps.model.CameraPosition;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
-
 import java.io.Serializable;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.support.constraint.Constraints.TAG;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.RESTAURANTS;
-import static com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment.RESULT;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
 import static com.facebook.FacebookSdk.getApplicationContext;
+import static com.firebase.ui.auth.ui.email.CheckEmailFragment.TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -85,7 +81,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
 
     //Attach the listener to activity
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof MapsFragmentListener) {
             //Listener to pass userLogin to th activityMain
@@ -104,7 +100,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment map = (SupportMapFragment) getChildFragmentManager().findFragmentById(R.id.map);
         getTheBundle();
-        map.getMapAsync(this);
+        Objects.requireNonNull(map).getMapAsync(this);
         configureButtonLocation();
         return v;
     }
@@ -143,13 +139,12 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
             LatLng latLng = new LatLng(r.getGeometry().getLocation().getLat(), r.getGeometry().getLocation().getLng());
             String title = r.getName();
             boolean match = false;
-            Marker marker;
             for (Restaurant restaurant : restaurantList) {
                 if (restaurant.getRestaurantName().equals(r.getName())) {
                     if (restaurant.getUsers() != null && restaurant.getUsers().size() > 0) {
-                        marker = mMap.addMarker(createMarkersGreen(latLng.latitude, latLng.longitude, title));
+                        mMap.addMarker(createMarkersGreen(latLng.latitude, latLng.longitude, title));
                     } else {
-                        marker = mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
+                       mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
                     }
                 }
                 if(restaurant.getRestaurantName().equals(r.getName())){
@@ -157,7 +152,7 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
                 }
             }
             if(!match){
-                marker = mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
+                mMap.addMarker(createMarkers(latLng.latitude, latLng.longitude, title));
             }
 
         }
@@ -225,25 +220,19 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
     }
 
     // show dialog if GPS is not enable
-    public void showSettingsAlert() {
+    private void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         // Setting Dialog Title
         alertDialog.setTitle(getResources().getString(R.string.GPS_is_settings));
         // Setting Dialog Message
         alertDialog.setMessage(getResources().getString(R.string.settings_menu));
         // On pressing Settings button
-        alertDialog.setPositiveButton(getResources().getString(R.string.settings), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
+        alertDialog.setPositiveButton(getResources().getString(R.string.settings), (dialog, which) -> {
+            Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+            startActivity(intent);
         });
         // on pressing cancel button
-        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        alertDialog.setNegativeButton(getResources().getString(R.string.cancel), (dialog, which) -> dialog.cancel());
         // Showing Alert Message
         alertDialog.show();
     }
@@ -260,7 +249,6 @@ public class MapsFragment extends Fragment implements OnMapReadyCallback, Google
         }
         return false;
     }
-
 
     // Interface implemented by Home Activity
     public interface MapsFragmentListener {

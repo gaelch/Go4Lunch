@@ -36,6 +36,7 @@ public class StringHelper {
         if (Objects.requireNonNull(userList).size() != 0) {
             return match;
         } else {
+            assert context != null;
             return context.getResources().getString(R.string.no_coworker);
         }
     }
@@ -43,7 +44,7 @@ public class StringHelper {
     // Get number of CoWorkers
     public static String getNumberOfCoworkers(List<User> usersAreJoining){
         if(usersAreJoining.size() != 0){
-            return String.valueOf("(" + usersAreJoining.size() + ")");
+            return "(" + usersAreJoining.size() + ")";
         }else {
             return "(0)";
         }

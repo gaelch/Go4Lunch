@@ -2,15 +2,13 @@ package com.cheyrouse.gael.go4lunch.views;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v7.widget.CardView;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.RequiresApi;
+import androidx.cardview.widget.CardView;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
-
 import com.bumptech.glide.RequestManager;
 import com.bumptech.glide.request.RequestOptions;
 import com.cheyrouse.gael.go4lunch.R;
@@ -23,18 +21,10 @@ import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.firestore.DocumentSnapshot;
-
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
@@ -116,27 +106,19 @@ class RecyclerViewHolder extends RecyclerView.ViewHolder {
             textViewDistance.setText(distanceString);
         }
         //pass list mates and see if they choose this restaurant
-        List<User> usersAreJoining = new ArrayList<>();
+        List<User> usersAreJoining;
         usersAreJoining = ListUtils.getJoiningCoWorkers(users, result);
 
         //get Restaurants from fire store to rating
         restaurant = new Restaurant();
-        RestaurantHelper.getRestaurant(result.getName()).addOnCompleteListener(new OnCompleteListener<DocumentSnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<DocumentSnapshot> task) {
-                if (task.isSuccessful()) {
-                    restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
-                    restaurant.setRate((List<String>) task.getResult().get("rate"));
-                    restaurant.setUsers((List<String>) task.getResult().get("users"));
-                    setStars(context, users, restaurant);
-                }
+        RestaurantHelper.getRestaurant(result.getName()).addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                restaurant.setRestaurantName((String) Objects.requireNonNull(task.getResult()).get("restaurantName"));
+                restaurant.setRate((List<String>) task.getResult().get("rate"));
+                restaurant.setUsers((List<String>) task.getResult().get("users"));
+                setStars(context, users, restaurant);
             }
-        }).addOnFailureListener(new OnFailureListener() {
-            @Override
-            public void onFailure(@NonNull Exception e) {
-                Log.e("fail", e.getMessage());
-            }
-        });
+        }).addOnFailureListener(e -> Log.e("fail", e.getMessage()));
         // Number of coWorkers have chosen this restaurant
         tvCoWorkers.setText(StringHelper.getNumberOfCoworkers(usersAreJoining));
         // Listener

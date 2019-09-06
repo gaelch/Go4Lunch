@@ -10,7 +10,6 @@ import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.DateUtils;
 import com.cheyrouse.gael.go4lunch.utils.GeometryUtil;
 import com.cheyrouse.gael.go4lunch.utils.ListUtils;
-import com.cheyrouse.gael.go4lunch.utils.RegexUtil;
 import com.cheyrouse.gael.go4lunch.utils.StarsUtils;
 import com.cheyrouse.gael.go4lunch.utils.StringHelper;
 import org.junit.Test;

@@ -1,6 +1,6 @@
 package com.cheyrouse.gael.go4lunch.utils;
 
-import android.support.v4.app.Fragment;
+import androidx.fragment.app.Fragment;
 import android.util.Log;
 
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
@@ -19,7 +19,7 @@ import java.util.List;
 public class ListUtils {
 
     // To change predictions to resultDetails objects
-    public static List<ResultDetail> transforPredictionToResultDetail(List<ResultDetail> resultDetailList, List<Prediction> resultsPredictions){
+    public static List<ResultDetail> transformPredictionToResultDetail(List<ResultDetail> resultDetailList, List<Prediction> resultsPredictions){
         List<ResultDetail> newResults = new ArrayList<>();
         if (resultDetailList.size() > 0) {
             if (resultsPredictions != null && resultsPredictions.size() > 0) {

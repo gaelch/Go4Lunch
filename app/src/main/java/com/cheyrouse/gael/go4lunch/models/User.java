@@ -1,6 +1,6 @@
 package com.cheyrouse.gael.go4lunch.models;
 
-import android.support.annotation.Nullable;
+import androidx.annotation.Nullable;
 
 import java.io.Serializable;
 

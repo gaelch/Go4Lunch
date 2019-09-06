@@ -3,27 +3,22 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import com.bumptech.glide.Glide;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.WorkMatesAdapter;
-import com.google.firebase.auth.FirebaseAuth;
-
 import java.io.Serializable;
 import java.util.List;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
 import static com.firebase.ui.auth.ui.email.CheckEmailFragment.TAG;
 
@@ -43,7 +38,7 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
 
     //Attach the listener to activity
     @Override
-    public void onAttach(Context context) {
+    public void onAttach(@NonNull Context context) {
         super.onAttach(context);
         if (context instanceof WorkMateFragmentListener) {
             //Listener to pass userLogin to th activityMain
@@ -70,7 +65,6 @@ public class WorkmatesFragment extends Fragment implements WorkMatesAdapter.onUs
         // Inflate the layout for this fragment
         View v = inflater.inflate(R.layout.fragment_workmates, container, false);
         ButterKnife.bind(this, v);
-        FirebaseAuth firebaseAuth = FirebaseAuth.getInstance();
         getUsersInBundle();
         configureRecyclerView();
         return v;

@@ -1,10 +1,10 @@
 package com.cheyrouse.gael.go4lunch;
 
 import android.os.Build;
-import android.support.annotation.RequiresApi;
-import android.support.test.InstrumentationRegistry;
-import android.support.test.runner.AndroidJUnit4;
-import android.support.v4.app.Fragment;
+import androidx.annotation.RequiresApi;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.runner.AndroidJUnit4;
+import androidx.fragment.app.Fragment;
 import android.util.Log;
 import com.bumptech.glide.RequestManager;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;

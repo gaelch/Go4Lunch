@@ -1,10 +1,10 @@
 package com.cheyrouse.gael.go4lunch.controller.activity;
 
 import android.annotation.SuppressLint;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
@@ -58,7 +58,7 @@ public class RestaurantWebSiteActivity extends AppCompatActivity {
     //To configure WebView
     @SuppressLint("SetJavaScriptEnabled")
     private void onConfigureWebView() {
-        //Configure the webview for the use of javascript
+        //Configure the webView for the use of javascript
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webView.setWebViewClient(new WebViewClient());

@@ -1,9 +1,6 @@
 package com.cheyrouse.gael.go4lunch.utils;
 
-import android.content.Context;
-import android.widget.TextView;
 
-import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 
 import java.util.Calendar;

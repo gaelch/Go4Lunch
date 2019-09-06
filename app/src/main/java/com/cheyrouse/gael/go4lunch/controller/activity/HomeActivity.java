@@ -7,19 +7,19 @@ import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.NavigationView;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
-import android.support.v4.app.FragmentTransaction;
-import android.support.v4.view.GravityCompat;
-import android.support.v4.widget.DrawerLayout;
-import android.support.v7.app.ActionBarDrawerToggle;
-import android.support.v7.app.AppCompatActivity;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.navigation.NavigationView;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentManager;
+import androidx.fragment.app.FragmentTransaction;
+import androidx.core.view.GravityCompat;
+import androidx.drawerlayout.widget.DrawerLayout;
+import androidx.appcompat.app.ActionBarDrawerToggle;
+import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.widget.Toolbar;
+import androidx.appcompat.widget.Toolbar;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -52,13 +52,10 @@ import com.cheyrouse.gael.go4lunch.models.Result;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.firebase.ui.auth.AuthUI;
-import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
-import java.io.File;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -68,7 +65,6 @@ import io.reactivex.disposables.Disposable;
 import io.reactivex.observers.DisposableObserver;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.LINE_BREAK;
-import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
 import static com.facebook.login.widget.ProfilePictureView.TAG;
 
 
@@ -80,7 +76,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @BindView(R.id.activity_home_bottom_navigation)
     BottomNavigationView bottomNavigationView;
     @BindView(R.id.search_view)
-    android.support.v7.widget.SearchView searchView;
+    androidx.appcompat.widget.SearchView searchView;
 
 
     private DrawerLayout drawerLayout;
@@ -197,12 +193,12 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         getMenuInflater().inflate(R.menu.menu_toolbar, menu);
         MenuItem item = menu.findItem(R.id.menu_activity_home_search);
         SearchManager searchManager = (SearchManager) this.getSystemService(Context.SEARCH_SERVICE);
-        searchView = new android.support.v7.widget.SearchView(Objects.requireNonNull(this.getSupportActionBar()).getThemedContext());
+        searchView = new androidx.appcompat.widget.SearchView(Objects.requireNonNull(this.getSupportActionBar()).getThemedContext());
         item.setShowAsAction(MenuItem.SHOW_AS_ACTION_COLLAPSE_ACTION_VIEW | MenuItem.SHOW_AS_ACTION_IF_ROOM);
         item.setActionView(searchView);
         searchView.setQueryHint(getResources().getString(R.string.search_view));
         searchView.setSearchableInfo(Objects.requireNonNull(searchManager).getSearchableInfo(this.getComponentName()));
-        searchView.setOnQueryTextListener(new android.support.v7.widget.SearchView.OnQueryTextListener() {
+        searchView.setOnQueryTextListener(new androidx.appcompat.widget.SearchView.OnQueryTextListener() {
             @Override
             public boolean onQueryTextSubmit(String query) {
                 return false;
@@ -224,6 +220,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // Intent to search with voice
     @Override
     protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
         setIntent(intent);
         handleIntent(intent);
     }
@@ -262,7 +259,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // Update view with results of Place Autocomplete
     @RequiresApi(api = Build.VERSION_CODES.O)
     private void updateUI() {
-        List<ResultDetail> newResults = ListUtils.transforPredictionToResultDetail(resultDetailList, resultsPredictions);
+        List<ResultDetail> newResults = ListUtils.transformPredictionToResultDetail(resultDetailList, resultsPredictions);
         if (newResults.size() > 0) {
             FragmentManager fm = getSupportFragmentManager();
             List<Fragment> fragments = fm.getFragments();
@@ -371,15 +368,9 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     // SignOut from Firebase
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted() {
         return aVoid -> {
-            switch (SIGN_OUT_TASK) {
-                case SIGN_OUT_TASK:
-                    finish();
-                    Intent logoutIntent = new Intent(HomeActivity.this, MainActivity.class);
-                    startActivity(logoutIntent);
-                    break;
-                default:
-                    break;
-            }
+            finish();
+            Intent logoutIntent = new Intent(HomeActivity.this, MainActivity.class);
+            startActivity(logoutIntent);
         };
     }
 
@@ -424,56 +415,53 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
     // Get users in database to make list or refresh list
     private void getUsersInDatabase(int i) {
-        UserHelper.getUsersCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    users = new ArrayList<>();
-                    String urlPicture = null;
-                    String eMail = null;
-                    for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                        String uid = document.getData().get("uid").toString();
-                        String username = document.getData().get("username").toString();
-                        if (document.getData().get("eMail") != null) {
-                            eMail = document.getData().get("eMail").toString();
-                        }
-                        if (document.getData().get("urlPicture") != null) {
-                            urlPicture = document.getData().get("urlPicture").toString();
-                        } else {
-                            urlPicture = null;
-                        }
-                        if (document.getData().get("choice") != null) {
-                            choice = document.getData().get("choice").toString();
-                        } else {
-                            choice = null;
-                        }
-                        User userToAdd = new User(uid, username, urlPicture, eMail);
-                        userToAdd.setChoice(choice);
-                        users.add(userToAdd);
-                        if (user != null && user.getUsername() != null) {
-                            if (userToAdd.getUsername().equals(user.getUsername())) {
-                                choiceUser = userToAdd.getChoice();
-                            }
+        UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                users = new ArrayList<>();
+                String urlPicture = null;
+                String eMail = null;
+                for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
+                    String uid = Objects.requireNonNull(document.getData().get("uid")).toString();
+                    String username = Objects.requireNonNull(document.getData().get("username")).toString();
+                    if (document.getData().get("eMail") != null) {
+                        eMail = Objects.requireNonNull(document.getData().get("eMail")).toString();
+                    }
+                    if (document.getData().get("urlPicture") != null) {
+                        urlPicture = Objects.requireNonNull(document.getData().get("urlPicture")).toString();
+                    } else {
+                        urlPicture = null;
+                    }
+                    if (document.getData().get("choice") != null) {
+                        choice = Objects.requireNonNull(document.getData().get("choice")).toString();
+                    } else {
+                        choice = null;
+                    }
+                    User userToAdd = new User(uid, username, urlPicture, eMail);
+                    userToAdd.setChoice(choice);
+                    users.add(userToAdd);
+                    if (user != null && user.getUsername() != null) {
+                        if (userToAdd.getUsername().equals(user.getUsername())) {
+                            choiceUser = userToAdd.getChoice();
                         }
                     }
-                    if (i == 1) {
-                        getFragmentManagerToLaunch(ListFragment.newInstance(resultDetailList, users));
-                    }
-                    if (i == 2) {
-                        getFragmentManagerToLaunch(WorkmatesFragment.newInstance(users));
-                    }
-                    if (i == 3) {
-                        if (choiceUser != null && !choiceUser.isEmpty()) {
-                            getRestaurantIfExist(choiceUser);
-                        } else {
-                            Toast.makeText(HomeActivity.this, getResources().getString(R.string.not_choice_today), Toast.LENGTH_LONG).show();
-                        }
-                    }
-                } else {
-                    Log.d(TAG, "Error getting documents: ", task.getException());
                 }
-                Log.e("listMates", String.valueOf(users.size()));
+                if (i == 1) {
+                    getFragmentManagerToLaunch(ListFragment.newInstance(resultDetailList, users));
+                }
+                if (i == 2) {
+                    getFragmentManagerToLaunch(WorkmatesFragment.newInstance(users));
+                }
+                if (i == 3) {
+                    if (choiceUser != null && !choiceUser.isEmpty()) {
+                        getRestaurantIfExist(choiceUser);
+                    } else {
+                        Toast.makeText(HomeActivity.this, getResources().getString(R.string.not_choice_today), Toast.LENGTH_LONG).show();
+                    }
+                }
+            } else {
+                Log.d(TAG, "Error getting documents: ", task.getException());
             }
+            Log.e("listMates", String.valueOf(users.size()));
         });
     }
 
@@ -488,47 +476,44 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     @SuppressWarnings("unchecked")
     private void getRestaurantsFromDataBase(List<Result> results) {
         restaurantList = new ArrayList<>();
-        RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(new OnCompleteListener<QuerySnapshot>() {
-            @Override
-            public void onComplete(@NonNull Task<QuerySnapshot> task) {
-                if (task.isSuccessful()) {
-                    List<Restaurant> restaurants = new ArrayList<>();
-                    for (DocumentSnapshot doc : Objects.requireNonNull(task.getResult())) {
-                        Restaurant r = doc.toObject(Restaurant.class);
-                        Objects.requireNonNull(r).setRestaurantUid(doc.getId());
-                        r.setRestaurantName(doc.getString("restaurantName"));
-                        r.setRate((List<String>) doc.get("rate"));
-                        r.setUsers((List<String>) doc.get("users"));
-                        if (doc.getDouble("lat") != null) {
-                            r.setLat(doc.getDouble("lat"));
-                        } else {
-                            r.setLat(0);
-                        }
-                        if (doc.getDouble("lng") != null) {
-                            r.setLng(doc.getDouble("lng"));
-                        } else {
-                            r.setLng(0);
-                        }
-                        restaurants.add(r);
-                    }
-                    if (results != null) {
-                        restaurantList = ListUtils.makeListResultRestaurantWithResultList(results, restaurants);
+        RestaurantHelper.getRestaurantsCollection().get().addOnCompleteListener(task -> {
+            if (task.isSuccessful()) {
+                List<Restaurant> restaurants = new ArrayList<>();
+                for (DocumentSnapshot doc : Objects.requireNonNull(task.getResult())) {
+                    Restaurant r = doc.toObject(Restaurant.class);
+                    Objects.requireNonNull(r).setRestaurantUid(doc.getId());
+                    r.setRestaurantName(doc.getString("restaurantName"));
+                    r.setRate((List<String>) doc.get("rate"));
+                    r.setUsers((List<String>) doc.get("users"));
+                    if (doc.getDouble("lat") != null) {
+                        r.setLat(doc.getDouble("lat"));
                     } else {
-                        restaurantList = ListUtils.makeListResultRestaurantWithResultDetailList(resultDetailList, restaurants);
+                        r.setLat(0);
                     }
-
-                    if (results != null) {
-                        mapsFragment = MapsFragment.newInstance(resultDetailList, restaurantList);
-                        getFragmentManagerToLaunch(mapsFragment);
+                    if (doc.getDouble("lng") != null) {
+                        r.setLng(doc.getDouble("lng"));
                     } else {
-                        showDetailRestaurantFragment(resultDetail, users, user);
-                        hideSoftKeyboard(HomeActivity.this);
+                        r.setLng(0);
                     }
-                    //do something with list of pojos retrieved
-
-                } else {
-                    Log.e("error", "Error getting documents: ", task.getException());
+                    restaurants.add(r);
                 }
+                if (results != null) {
+                    restaurantList = ListUtils.makeListResultRestaurantWithResultList(results, restaurants);
+                } else {
+                    restaurantList = ListUtils.makeListResultRestaurantWithResultDetailList(resultDetailList, restaurants);
+                }
+
+                if (results != null) {
+                    mapsFragment = MapsFragment.newInstance(resultDetailList, restaurantList);
+                    getFragmentManagerToLaunch(mapsFragment);
+                } else {
+                    showDetailRestaurantFragment(resultDetail, users, user);
+                    hideSoftKeyboard(HomeActivity.this);
+                }
+                //do something with list of pojos retrieved
+
+            } else {
+                Log.e("error", "Error getting documents: ", task.getException());
             }
         });
     }

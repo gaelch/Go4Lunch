@@ -4,8 +4,6 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
@@ -13,15 +11,15 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.design.widget.BottomNavigationView;
-import android.support.design.widget.FloatingActionButton;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.app.Fragment;
-import android.support.v4.widget.SwipeRefreshLayout;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import androidx.core.app.ActivityCompat;
+import androidx.fragment.app.Fragment;
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -44,23 +42,16 @@ import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.views.WorkMatesAdapter;
 import com.facebook.login.widget.ProfilePictureView;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.firestore.DocumentSnapshot;
 import com.google.firebase.firestore.QueryDocumentSnapshot;
-import com.google.firebase.firestore.QuerySnapshot;
 
 import java.io.Serializable;
-import java.security.interfaces.RSAKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
-
-import static android.support.constraint.Constraints.TAG;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.API_KEY;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.BASE_URL;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.MAX_HEIGHT;
@@ -303,7 +294,7 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
     }
 
     // If GPS is disable
-    public void showSettingsAlert() {
+    private void showSettingsAlert() {
         AlertDialog.Builder alertDialog = new AlertDialog.Builder(getActivity());
         // Setting Dialog Title
         alertDialog.setTitle(getResources().getString(R.string.GPS_is_settings));
@@ -360,22 +351,22 @@ public class RestauDetailFragment extends Fragment implements FloatingActionButt
         UserHelper.getUsersCollection().get().addOnCompleteListener(task -> {
             if (task.isSuccessful()) {
                 users = new ArrayList<>();
-                String urlPicture = null;
-                String choice = null;
+                String urlPicture;
+                String choice;
                 String eMail = null;
                 for (QueryDocumentSnapshot document : Objects.requireNonNull(task.getResult())) {
-                    String uid = document.getData().get("uid").toString();
-                    String username = document.getData().get("username").toString();
+                    String uid = Objects.requireNonNull(document.getData().get("uid")).toString();
+                    String username = Objects.requireNonNull(document.getData().get("username")).toString();
                     if (document.getData().get("eMail") != null) {
-                        eMail = document.getData().get("eMail").toString();
+                        eMail = Objects.requireNonNull(document.getData().get("eMail")).toString();
                     }
                     if (document.getData().get("urlPicture") != null) {
-                        urlPicture = document.getData().get("urlPicture").toString();
+                        urlPicture = Objects.requireNonNull(document.getData().get("urlPicture")).toString();
                     } else {
                         urlPicture = null;
                     }
                     if (document.getData().get("choice") != null) {
-                        choice = document.getData().get("choice").toString();
+                        choice = Objects.requireNonNull(document.getData().get("choice")).toString();
                     } else {
                         choice = null;
                     }

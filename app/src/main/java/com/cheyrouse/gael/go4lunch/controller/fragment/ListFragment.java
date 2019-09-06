@@ -3,10 +3,10 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -23,8 +23,9 @@ import java.util.Objects;
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static android.support.constraint.Constraints.TAG;
+import static com.cheyrouse.gael.go4lunch.utils.Constants.RESULT;
 import static com.cheyrouse.gael.go4lunch.utils.Constants.USERS;
+import static com.firebase.ui.auth.ui.email.CheckEmailFragment.TAG;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -33,7 +34,7 @@ public class ListFragment extends Fragment implements RecyclerViewAdapter.onArti
 
     @BindView(R.id.fragment_list_recycler_view) RecyclerView recyclerView;
 
-    public static final String RESULT = "result";
+
 
     private ListFragmentListener mListener;
     private RecyclerViewAdapter adapter;

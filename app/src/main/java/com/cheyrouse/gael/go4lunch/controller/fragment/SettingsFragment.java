@@ -2,14 +2,12 @@ package com.cheyrouse.gael.go4lunch.controller.fragment;
 
 
 import android.app.AlertDialog;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.os.Bundle;
-import android.provider.Settings;
-import android.support.annotation.NonNull;
-import android.support.v4.app.Fragment;
+import androidx.annotation.NonNull;
+import androidx.fragment.app.Fragment;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -19,25 +17,20 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Spinner;
 import android.widget.Switch;
-
 import com.cheyrouse.gael.go4lunch.R;
-import com.cheyrouse.gael.go4lunch.controller.activity.HomeActivity;
 import com.cheyrouse.gael.go4lunch.controller.activity.MainActivity;
 import com.cheyrouse.gael.go4lunch.models.User;
 import com.cheyrouse.gael.go4lunch.utils.Prefs;
 import com.cheyrouse.gael.go4lunch.utils.UserHelper;
 import com.firebase.ui.auth.AuthUI;
 import com.google.android.gms.tasks.OnSuccessListener;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
-
 import butterknife.BindView;
 import butterknife.ButterKnife;
 
-import static com.cheyrouse.gael.go4lunch.utils.Constants.SIGN_OUT_TASK;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -76,13 +69,14 @@ public class SettingsFragment extends Fragment {
 
     // Spinner to language choice
     private void configureSpinner() {
-        List<String> list = new ArrayList<String>();
+        List<String> list = new ArrayList<>();
 
         list.add(getResources().getString(R.string.select));
         list.add(getResources().getString(R.string.en));
         list.add(getResources().getString(R.string.fr));
 
-        ArrayAdapter<String> adapter = new ArrayAdapter<String>(Objects.requireNonNull(getActivity()), android.R.layout.simple_spinner_item, list);
+        ArrayAdapter<String> adapter = new ArrayAdapter<
+                >(Objects.requireNonNull(getActivity()), android.R.layout.simple_spinner_item, list);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);
 
@@ -109,7 +103,7 @@ public class SettingsFragment extends Fragment {
     }
 
     // Apply choice
-    public void setLocale(String localeName) {
+    private void setLocale(String localeName) {
         Locale myLocale = new Locale(localeName);
         Resources res = getResources();
         DisplayMetrics dm = res.getDisplayMetrics();
@@ -127,17 +121,9 @@ public class SettingsFragment extends Fragment {
         // Setting Dialog Message
         alertDialog.setMessage(getResources().getString(R.string.restarting_now));
         // On pressing Settings button
-        alertDialog.setPositiveButton(getResources().getString(R.string.yes), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-               signOutUserFromFirebase(localeName);
-            }
-        });
+        alertDialog.setPositiveButton(getResources().getString(R.string.yes), (dialog, which) -> signOutUserFromFirebase(localeName));
         // on pressing cancel button
-        alertDialog.setNegativeButton(getResources().getString(R.string.later), new DialogInterface.OnClickListener() {
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
+        alertDialog.setNegativeButton(getResources().getString(R.string.later), (dialog, which) -> dialog.cancel());
         // Showing Alert Message
         alertDialog.show();
     }
@@ -184,16 +170,10 @@ public class SettingsFragment extends Fragment {
     // SignOut from Firebase
     private OnSuccessListener<Void> updateUIAfterRESTRequestsCompleted(String localeName) {
         return aVoid -> {
-            switch (SIGN_OUT_TASK) {
-                case SIGN_OUT_TASK:
-                    Intent refresh = new Intent(getActivity(), MainActivity.class);
-                    refresh.putExtra(currentLang, localeName);
-                    refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-                    startActivity(refresh);
-                    break;
-                default:
-                    break;
-            }
+            Intent refresh = new Intent(getActivity(), MainActivity.class);
+            refresh.putExtra(currentLang, localeName);
+            refresh.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(refresh);
         };
     }
 

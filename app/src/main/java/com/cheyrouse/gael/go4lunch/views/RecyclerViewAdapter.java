@@ -4,16 +4,15 @@ package com.cheyrouse.gael.go4lunch.views;
 
 import android.content.Context;
 import android.os.Build;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresApi;
-import android.support.v7.widget.RecyclerView;
+import androidx.annotation.NonNull;
+import androidx.annotation.RequiresApi;
+import androidx.recyclerview.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import com.bumptech.glide.RequestManager;
 import com.cheyrouse.gael.go4lunch.R;
 import com.cheyrouse.gael.go4lunch.controller.fragment.ListFragment;
-import com.cheyrouse.gael.go4lunch.models.Restaurant;
 import com.cheyrouse.gael.go4lunch.models.ResultDetail;
 import com.cheyrouse.gael.go4lunch.models.User;
 
@@ -29,7 +28,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     private List<User> userList;
     private RequestManager glide;
     private Context context;
-    private List<Restaurant> restaurants;
 
     // CONSTRUCTOR
     public RecyclerViewAdapter(Context context, List<ResultDetail> resultList, List<User> userList, RequestManager glide, ListFragment listAdapterListener) {
@@ -51,7 +49,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
         return new RecyclerViewHolder(view);
     }
 
-    // UPDATE VIEW HOLDER WITH A TOPSTORIES
+    // UPDATE VIEW HOLDER WITH RESTAURANTS
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     public void onBindViewHolder(@NonNull RecyclerViewHolder viewHolder, int position) {
